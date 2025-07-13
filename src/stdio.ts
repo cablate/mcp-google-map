@@ -1,20 +1,12 @@
-#!/usr/bin/env node
-
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { DIRECTIONS_TOOL, DISTANCE_MATRIX_TOOL, ELEVATION_TOOL, GEOCODE_TOOL, GET_PLACE_DETAILS_TOOL, REVERSE_GEOCODE_TOOL, SEARCH_NEARBY_TOOL } from "./maps-tools/mapsTools.js";
 import { PlacesSearcher } from "./maps-tools/searchPlaces.js";
-import express, { Request, Response } from 'express';
-import { StreamableHTTPServerTransport } from './StreamableHttp.js';
-import { createMcpPostHandler, createMcpGetHandler, createMcpDeleteHandler } from './handlers.js';
-import { runStdioServer } from './stdio.js';
-
 
 const tools = [SEARCH_NEARBY_TOOL, GET_PLACE_DETAILS_TOOL, GEOCODE_TOOL, REVERSE_GEOCODE_TOOL, DISTANCE_MATRIX_TOOL, DIRECTIONS_TOOL, ELEVATION_TOOL];
 const placesSearcher = new PlacesSearcher();
 
-// Move tool registration and server setup into a function
 function getServer() {
   const server = new Server(
     {
@@ -33,7 +25,7 @@ function getServer() {
     tools,
   }));
 
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
     try {
       const { name, arguments: args } = request.params;
 
@@ -253,51 +245,14 @@ function getServer() {
   return server;
 }
 
-// Parse command-line arguments
-const useHttp = process.argv.includes('--http');
-const PORT = process.env.MCP_PORT ? parseInt(process.env.MCP_PORT, 10) : 3000;
-
-if (useHttp) {
-  // HTTP mode
-  const app = express();
-  app.use(express.json());
-  app.use(cors({ origin: '*', exposedHeaders: ["Mcp-Session-Id"] }));
-
-  // Map to store transports by session ID
-  const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
-
-  // MCP POST endpoint
-  app.post('/mcp', createMcpPostHandler(transports, getServer));
-
-  // GET handler for SSE
-  app.get('/mcp', createMcpGetHandler(transports, getServer));
-
-  // DELETE handler for session termination
-  app.delete('/mcp', createMcpDeleteHandler(transports));
-
-  app.listen(PORT, (error?: any) => {
-    if (error) {
-      console.error('Failed to start server:', error);
-      process.exit(1);
-    }
-    console.log(`MCP Streamable HTTP Server listening on port ${PORT}`);
-  });
-
-  process.on('SIGINT', async () => {
-    console.log('Shutting down server...');
-    for (const sessionId in transports) {
-      try {
-        console.log(`Closing transport for session ${sessionId}`);
-        await transports[sessionId].close();
-        delete transports[sessionId];
-      } catch (error) {
-        console.error(`Error closing transport for session ${sessionId}:`, error);
-      }
-    }
-    console.log('Server shutdown complete');
-    process.exit(0);
-  });
-} else {
-  // Stdio mode (default)
-  runStdioServer();
-}
+export async function runStdioServer() {
+  try {
+    const server = getServer();
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    console.error("MCP Maps Server started (stdio mode)");
+  } catch (error) {
+    console.error("Server startup failed:", error);
+    process.exit(1);
+  }
+} 
