@@ -6,9 +6,17 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { createMCPServer } from "./server.js";
 import { randomUUID } from "crypto";
+import { runStdioServer } from "./stdio.js";
 
 const SESSION_ID_HEADER_NAME = "mcp-session-id";
 const PORT = process.env.MCP_PORT ? parseInt(process.env.MCP_PORT, 10) : 3000;
+
+// Parse command line arguments
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const transport = args.find((arg: string) => arg.startsWith('--transport='))?.split('=')[1] || 'stdio';
+  return { transport };
+}
 
 class MCPServer {
   server: Server;
@@ -89,43 +97,67 @@ class MCPServer {
   }
 }
 
-const app = express();
-app.use(express.json());
-app.use(cors({ origin: "*", exposedHeaders: [SESSION_ID_HEADER_NAME] }));
+async function runHttpServer() {
+  const app = express();
+  app.use(express.json());
+  app.use(cors({ origin: "*", exposedHeaders: [SESSION_ID_HEADER_NAME] }));
 
-const mcpServer = createMCPServer();
-const mcpHttpServer = new MCPServer(mcpServer);
+  const mcpServer = createMCPServer();
+  const mcpHttpServer = new MCPServer(mcpServer);
 
-app.post("/mcp", async (req: Request, res: Response) => {
-  await mcpHttpServer.handlePostRequest(req, res);
-});
+  app.post("/mcp", async (req: Request, res: Response) => {
+    await mcpHttpServer.handlePostRequest(req, res);
+  });
 
-app.get("/mcp", async (req: Request, res: Response) => {
-  await mcpHttpServer.handleGetRequest(req, res);
-});
+  app.get("/mcp", async (req: Request, res: Response) => {
+    await mcpHttpServer.handleGetRequest(req, res);
+  });
 
-app.delete("/mcp", async (req: Request, res: Response) => {
-  await mcpHttpServer.handleDeleteRequest(req, res);
-});
+  app.delete("/mcp", async (req: Request, res: Response) => {
+    await mcpHttpServer.handleDeleteRequest(req, res);
+  });
 
-app.listen(PORT, (error?: any) => {
-  if (error) {
-    console.error("Failed to start server:", error);
+  app.listen(PORT, (error?: any) => {
+    if (error) {
+      console.error("Failed to start server:", error);
+      process.exit(1);
+    }
+    console.log(`MCP Streamable HTTP Server listening on port ${PORT}`);
+  });
+
+  process.on("SIGINT", async () => {
+    console.log("Shutting down server...");
+    for (const sessionId in mcpHttpServer.transports) {
+      try {
+        await mcpHttpServer.transports[sessionId].close();
+        delete mcpHttpServer.transports[sessionId];
+      } catch (error) {
+        console.error(`Error closing transport for session ${sessionId}:`, error);
+      }
+    }
+    console.log("Server shutdown complete");
+    process.exit(0);
+  });
+}
+
+// Main entry point
+async function main() {
+  const { transport } = parseArgs();
+  
+  console.log(`Starting MCP Maps Server with transport: ${transport}`);
+  
+  if (transport === 'stdio') {
+    await runStdioServer();
+  } else if (transport === 'http') {
+    await runHttpServer();
+  } else {
+    console.error(`Unknown transport: ${transport}. Supported transports: stdio, http`);
     process.exit(1);
   }
-  console.log(`MCP Streamable HTTP Server listening on port ${PORT}`);
-});
+}
 
-process.on("SIGINT", async () => {
-  console.log("Shutting down server...");
-  for (const sessionId in mcpHttpServer.transports) {
-    try {
-      await mcpHttpServer.transports[sessionId].close();
-      delete mcpHttpServer.transports[sessionId];
-    } catch (error) {
-      console.error(`Error closing transport for session ${sessionId}:`, error);
-    }
-  }
-  console.log("Server shutdown complete");
-  process.exit(0);
+// Run the main function
+main().catch((error) => {
+  console.error("Fatal error:", error);
+  process.exit(1);
 });
