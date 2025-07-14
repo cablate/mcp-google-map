@@ -1,303 +1,131 @@
 #!/usr/bin/env node
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { DIRECTIONS_TOOL, DISTANCE_MATRIX_TOOL, ELEVATION_TOOL, GEOCODE_TOOL, GET_PLACE_DETAILS_TOOL, REVERSE_GEOCODE_TOOL, SEARCH_NEARBY_TOOL } from "./maps-tools/mapsTools.js";
-import { PlacesSearcher } from "./maps-tools/searchPlaces.js";
-import express, { Request, Response } from 'express';
-import { StreamableHTTPServerTransport } from './StreamableHttp.js';
-import { createMcpPostHandler, createMcpGetHandler, createMcpDeleteHandler } from './handlers.js';
-import { runStdioServer } from './stdio.js';
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express, { Request, Response } from "express";
+import cors from "cors";
+import { createMCPServer } from "./server.js";
+import { randomUUID } from "crypto";
 
-
-const tools = [SEARCH_NEARBY_TOOL, GET_PLACE_DETAILS_TOOL, GEOCODE_TOOL, REVERSE_GEOCODE_TOOL, DISTANCE_MATRIX_TOOL, DIRECTIONS_TOOL, ELEVATION_TOOL];
-const placesSearcher = new PlacesSearcher();
-
-// Move tool registration and server setup into a function
-function getServer() {
-  const server = new Server(
-    {
-      name: "mcp-server/maps_executor",
-      version: "0.0.1",
-    },
-    {
-      capabilities: {
-        description: "An MCP server providing Google Maps integration!",
-        tools: {},
-      },
-    }
-  );
-
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools,
-  }));
-
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    try {
-      const { name, arguments: args } = request.params;
-
-      if (!args) {
-        throw new Error("No parameters provided");
-      }
-
-      if (name === "search_nearby") {
-        const { center, keyword, radius, openNow, minRating } = args as {
-          center: { value: string; isCoordinates: boolean };
-          keyword?: string;
-          radius?: number;
-          openNow?: boolean;
-          minRating?: number;
-        };
-
-        const result = await placesSearcher.searchNearby({
-          center,
-          keyword,
-          radius,
-          openNow,
-          minRating,
-        });
-
-        if (!result.success) {
-          return {
-            content: [{ type: "text", text: result.error || "搜尋失敗" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: `location: ${JSON.stringify(result.location, null, 2)}\n` + JSON.stringify(result.data, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      }
-
-      if (name === "get_place_details") {
-        const { placeId } = args as {
-          placeId: string;
-        };
-
-        const result = await placesSearcher.getPlaceDetails(placeId);
-
-        if (!result.success) {
-          return {
-            content: [{ type: "text", text: result.error || "獲取詳細資訊失敗" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      }
-
-      if (name === "maps_geocode") {
-        const { address } = args as {
-          address: string;
-        };
-
-        const result = await placesSearcher.geocode(address);
-
-        if (!result.success) {
-          return {
-            content: [{ type: "text", text: result.error || "地址轉換座標失敗" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      }
-
-      if (name === "maps_reverse_geocode") {
-        const { latitude, longitude } = args as {
-          latitude: number;
-          longitude: number;
-        };
-
-        const result = await placesSearcher.reverseGeocode(latitude, longitude);
-
-        if (!result.success) {
-          return {
-            content: [{ type: "text", text: result.error || "座標轉換地址失敗" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      }
-
-      if (name === "maps_distance_matrix") {
-        const { origins, destinations, mode } = args as {
-          origins: string[];
-          destinations: string[];
-          mode?: "driving" | "walking" | "bicycling" | "transit";
-        };
-
-        const result = await placesSearcher.calculateDistanceMatrix(origins, destinations, mode || "driving");
-
-        if (!result.success) {
-          return {
-            content: [{ type: "text", text: result.error || "計算距離矩陣失敗" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      }
-
-      if (name === "maps_directions") {
-        const { origin, destination, mode, arrival_time, departure_time } = args as {
-          origin: string;
-          destination: string;
-          mode?: "driving" | "walking" | "bicycling" | "transit";
-          departure_time?: string;
-          arrival_time?: string;
-        };
-
-        const result = await placesSearcher.getDirections(origin, destination, mode, departure_time, arrival_time);
-
-        if (!result.success) {
-          return {
-            content: [{ type: "text", text: result.error || "獲取路線指引失敗" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      }
-
-      if (name === "maps_elevation") {
-        const { locations } = args as {
-          locations: Array<{ latitude: number; longitude: number }>;
-        };
-
-        const result = await placesSearcher.getElevation(locations);
-
-        if (!result.success) {
-          return {
-            content: [{ type: "text", text: result.error || "獲取海拔數據失敗" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      }
-
-      return {
-        content: [{ type: "text", text: `錯誤：未知的工具 ${name}` }],
-        isError: true,
-      };
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `錯誤：${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-        isError: true,
-      };
-    }
-  });
-
-  return server;
-}
-
-// Parse command-line arguments
-const useHttp = process.argv.includes('--http');
+const SESSION_ID_HEADER_NAME = "mcp-session-id";
 const PORT = process.env.MCP_PORT ? parseInt(process.env.MCP_PORT, 10) : 3000;
 
-if (useHttp) {
-  // HTTP mode
-  const app = express();
-  app.use(express.json());
-  app.use(cors({ origin: '*', exposedHeaders: ["Mcp-Session-Id"] }));
+class MCPServer {
+  server: Server;
+  transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
-  // Map to store transports by session ID
-  const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
+  constructor(server: Server) {
+    this.server = server;
+  }
 
-  // MCP POST endpoint
-  app.post('/mcp', createMcpPostHandler(transports, getServer));
-
-  // GET handler for SSE
-  app.get('/mcp', createMcpGetHandler(transports, getServer));
-
-  // DELETE handler for session termination
-  app.delete('/mcp', createMcpDeleteHandler(transports));
-
-  app.listen(PORT, (error?: any) => {
-    if (error) {
-      console.error('Failed to start server:', error);
-      process.exit(1);
+  async handleGetRequest(req: Request, res: Response) {
+    const sessionId = req.headers[SESSION_ID_HEADER_NAME] as string | undefined;
+    if (!sessionId || !this.transports[sessionId]) {
+      res.status(400).json({ error: "Bad Request: invalid session ID or method." });
+      return;
     }
-    console.log(`MCP Streamable HTTP Server listening on port ${PORT}`);
-  });
+    const transport = this.transports[sessionId];
+    await transport.handleRequest(req, res);
+    return;
+  }
 
-  process.on('SIGINT', async () => {
-    console.log('Shutting down server...');
-    for (const sessionId in transports) {
-      try {
-        console.log(`Closing transport for session ${sessionId}`);
-        await transports[sessionId].close();
-        delete transports[sessionId];
-      } catch (error) {
-        console.error(`Error closing transport for session ${sessionId}:`, error);
+  async handlePostRequest(req: Request, res: Response) {
+    const sessionId = req.headers[SESSION_ID_HEADER_NAME] as string | undefined;
+    console.log('POST /mcp - sessionId:', sessionId, 'method:', req.body?.method, 'body keys:', Object.keys(req.body || {}));
+    console.log('Available transports:', Object.keys(this.transports));
+    let transport: StreamableHTTPServerTransport;
+    try {
+      if (!sessionId && req.body && req.body.method === "initialize") {
+        console.log('Creating new transport for initialization');
+        const newSessionId = randomUUID();
+        transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: () => newSessionId,
+        });
+        await this.server.connect(transport);
+        // Set the session ID header before handling the request
+        res.setHeader(SESSION_ID_HEADER_NAME, newSessionId);
+        await transport.handleRequest(req, res, req.body);
+        // Store the transport with our generated session ID
+        this.transports[newSessionId] = transport;
+        console.log('Stored transport with sessionId:', newSessionId);
+        return;
+      }
+      if (sessionId && this.transports[sessionId]) {
+        console.log('Using existing transport for sessionId:', sessionId, 'method:', req.body?.method);
+        transport = this.transports[sessionId];
+        await transport.handleRequest(req, res, req.body);
+        return;
+      }
+      if (sessionId && !this.transports[sessionId]) {
+        console.log('Session ID provided but transport not found:', sessionId);
+        console.log('Available session IDs:', Object.keys(this.transports));
+      }
+      console.log('Invalid request - no sessionId and not initialize method');
+      res.status(400).json({ error: "Bad Request: invalid session ID or method." });
+      return;
+    } catch (error) {
+      console.error("Error handling MCP request:", error);
+      res.status(500).json({ error: "Internal server error." });
+      return;
+    }
+  }
+
+  async handleDeleteRequest(req: Request, res: Response) {
+    const sessionId = req.headers[SESSION_ID_HEADER_NAME] as string | undefined;
+    if (!sessionId || !this.transports[sessionId]) {
+      res.status(400).send("Invalid or missing session ID");
+      return;
+    }
+    try {
+      const transport = this.transports[sessionId];
+      await transport.handleRequest(req, res);
+      delete this.transports[sessionId];
+    } catch (error) {
+      console.error("Error handling session termination:", error);
+      if (!res.headersSent) {
+        res.status(500).send("Error processing session termination");
       }
     }
-    console.log('Server shutdown complete');
-    process.exit(0);
-  });
-} else {
-  // Stdio mode (default)
-  runStdioServer();
+  }
 }
+
+const app = express();
+app.use(express.json());
+app.use(cors({ origin: "*", exposedHeaders: [SESSION_ID_HEADER_NAME] }));
+
+const mcpServer = createMCPServer();
+const mcpHttpServer = new MCPServer(mcpServer);
+
+app.post("/mcp", async (req: Request, res: Response) => {
+  await mcpHttpServer.handlePostRequest(req, res);
+});
+
+app.get("/mcp", async (req: Request, res: Response) => {
+  await mcpHttpServer.handleGetRequest(req, res);
+});
+
+app.delete("/mcp", async (req: Request, res: Response) => {
+  await mcpHttpServer.handleDeleteRequest(req, res);
+});
+
+app.listen(PORT, (error?: any) => {
+  if (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+  console.log(`MCP Streamable HTTP Server listening on port ${PORT}`);
+});
+
+process.on("SIGINT", async () => {
+  console.log("Shutting down server...");
+  for (const sessionId in mcpHttpServer.transports) {
+    try {
+      await mcpHttpServer.transports[sessionId].close();
+      delete mcpHttpServer.transports[sessionId];
+    } catch (error) {
+      console.error(`Error closing transport for session ${sessionId}:`, error);
+    }
+  }
+  console.log("Server shutdown complete");
+  process.exit(0);
+});
