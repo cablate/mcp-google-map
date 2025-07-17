@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/cablate-mcp-google-map-badge.png)](https://mseep.ai/app/cablate-mcp-google-map)
+
 # MCP Google Map Server
 
 A powerful Model Context Protocol (MCP) server providing comprehensive Google Maps API integration with LLM processing capabilities.
