@@ -203,3 +203,7 @@ If you have any questions or suggestions, feel free to reach out:
 - Initial release with basic Google Maps integration
 - Support for location search, geocoding, and directions
 - Compatible with MCP protocol
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cablate/mcp-google-map&type=Date)](https://www.star-history.com/#cablate/mcp-google-map&Date)
