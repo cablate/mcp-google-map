@@ -12,6 +12,5 @@ export default defineConfig({
   outExtension: ({ format }) => ({
     js: ".js",
   }),
-  noExternal: [/(.*)/],
   onSuccess: isDev ? "node dist/cli.js" : undefined,
 });

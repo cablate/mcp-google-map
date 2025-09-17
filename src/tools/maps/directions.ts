@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PlacesSearcher } from "../../services/PlacesSearcher.js";
+import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_directions";
 const DESCRIPTION = "Get detailed turn-by-turn navigation directions between two locations with route information";
@@ -14,13 +15,11 @@ const SCHEMA = {
 
 export type DirectionsParams = z.infer<z.ZodObject<typeof SCHEMA>>;
 
-let placesSearcher: PlacesSearcher | null = null;
-
-async function ACTION(params: DirectionsParams): Promise<{ content: any[]; isError?: boolean }> {
+async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean }> {
   try {
-    if (!placesSearcher) {
-      placesSearcher = new PlacesSearcher();
-    }
+    // Create a new PlacesSearcher instance with the current request's API key
+    const apiKey = getCurrentApiKey();
+    const placesSearcher = new PlacesSearcher(apiKey);
     const result = await placesSearcher.getDirections(
       params.origin,
       params.destination,

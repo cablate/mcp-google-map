@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PlacesSearcher } from "../../services/PlacesSearcher.js";
+import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_elevation";
 const DESCRIPTION = "Get elevation data (height above sea level) for specific geographic locations";
@@ -13,13 +14,11 @@ const SCHEMA = {
 
 export type ElevationParams = z.infer<z.ZodObject<typeof SCHEMA>>;
 
-let placesSearcher: PlacesSearcher | null = null;
-
-async function ACTION(params: ElevationParams): Promise<{ content: any[]; isError?: boolean }> {
+async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean }> {
   try {
-    if (!placesSearcher) {
-      placesSearcher = new PlacesSearcher();
-    }
+    // Create a new PlacesSearcher instance with the current request's API key
+    const apiKey = getCurrentApiKey();
+    const placesSearcher = new PlacesSearcher(apiKey);
     const result = await placesSearcher.getElevation(params.locations);
 
     if (!result.success) {

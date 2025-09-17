@@ -39,10 +39,13 @@ interface GeocodeResult {
 export class GoogleMapsTools {
   private client: Client;
   private readonly defaultLanguage: Language = Language.en;
+  private apiKey: string;
 
-  constructor() {
+  constructor(apiKey?: string) {
     this.client = new Client({});
-    if (!process.env.GOOGLE_MAPS_API_KEY) {
+    // Use provided API key, or fall back to environment variable
+    this.apiKey = apiKey || process.env.GOOGLE_MAPS_API_KEY || "";
+    if (!this.apiKey) {
       throw new Error("Google Maps API Key is required");
     }
   }
@@ -54,7 +57,7 @@ export class GoogleMapsTools {
       keyword: params.keyword,
       opennow: params.openNow,
       language: this.defaultLanguage,
-      key: process.env.GOOGLE_MAPS_API_KEY || "",
+      key: this.apiKey,
     };
 
     try {
@@ -82,7 +85,7 @@ export class GoogleMapsTools {
           place_id: placeId,
           fields: ["name", "rating", "formatted_address", "opening_hours", "reviews", "geometry", "formatted_phone_number", "website", "price_level", "photos"],
           language: this.defaultLanguage,
-          key: process.env.GOOGLE_MAPS_API_KEY || "",
+          key: this.apiKey,
         },
       });
       return response.data.result;
@@ -97,7 +100,7 @@ export class GoogleMapsTools {
       const response = await this.client.geocode({
         params: {
           address: address,
-          key: process.env.GOOGLE_MAPS_API_KEY || "",
+          key: this.apiKey,
           language: this.defaultLanguage,
         },
       });
@@ -166,7 +169,7 @@ export class GoogleMapsTools {
         params: {
           latlng: { lat: latitude, lng: longitude },
           language: this.defaultLanguage,
-          key: process.env.GOOGLE_MAPS_API_KEY || "",
+          key: this.apiKey,
         },
       });
 
@@ -203,7 +206,7 @@ export class GoogleMapsTools {
           destinations: destinations,
           mode: mode as TravelMode,
           language: this.defaultLanguage,
-          key: process.env.GOOGLE_MAPS_API_KEY || "",
+          key: this.apiKey,
         },
       });
 
@@ -289,7 +292,7 @@ export class GoogleMapsTools {
           destination: destination,
           mode: mode as TravelMode,
           language: this.defaultLanguage,
-          key: process.env.GOOGLE_MAPS_API_KEY || "",
+          key: this.apiKey,
           arrival_time: apiArrivalTime,
           departure_time: apiDepartureTime,
         },
@@ -356,7 +359,7 @@ export class GoogleMapsTools {
       const response = await this.client.elevation({
         params: {
           locations: formattedLocations,
-          key: process.env.GOOGLE_MAPS_API_KEY || "",
+          key: this.apiKey,
         },
       });
 

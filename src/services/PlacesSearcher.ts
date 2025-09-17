@@ -67,8 +67,8 @@ interface ElevationResponse {
 export class PlacesSearcher {
   private mapsTools: GoogleMapsTools;
 
-  constructor() {
-    this.mapsTools = new GoogleMapsTools();
+  constructor(apiKey?: string) {
+    this.mapsTools = new GoogleMapsTools(apiKey);
   }
 
   async searchNearby(params: { center: { value: string; isCoordinates: boolean }; keyword?: string; radius?: number; openNow?: boolean; minRating?: number }): Promise<SearchNearbyResponse> {

@@ -1,6 +1,6 @@
 {
   "name": "@cablate/mcp-google-map",
-  "version": "0.0.15",
+  "version": "0.0.17",
   "description": "Google Maps MCP server with streamable HTTP transport support for location services, geocoding, and navigation",
   "type": "module",
   "main": "dist/index.js",

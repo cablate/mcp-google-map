@@ -16,6 +16,7 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 ## ✅ Testing Status
 
 **This MCP server has been tested and verified to work correctly with:**
+
 - Claude Desktop
 - Dive Desktop
 - MCP protocol implementations
@@ -27,14 +28,17 @@ All tools and features are confirmed functional through real-world testing.
 ### 🗺️ Google Maps Integration
 
 - **Location Search**
+
   - Search for places near a specific location with customizable radius and filters
   - Get detailed place information including ratings, opening hours, and contact details
 
 - **Geocoding Services**
+
   - Convert addresses to coordinates (geocoding)
   - Convert coordinates to addresses (reverse geocoding)
 
 - **Distance & Directions**
+
   - Calculate distances and travel times between multiple origins and destinations
   - Get detailed turn-by-turn directions between two points
   - Support for different travel modes (driving, walking, bicycling, transit)
@@ -71,6 +75,7 @@ mcp-google-map -p 3000 -k "your_api_key_here"
 > ⚠️ **Warning**: Cannot be used directly in MCP Server Settings with stdio mode
 
 **Step 1: Launch HTTP Server in Terminal**
+
 ```bash
 # Run in a separate terminal
 npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
@@ -80,6 +85,7 @@ GOOGLE_MAPS_API_KEY=YOUR_API_KEY npx @cablate/mcp-google-map
 ```
 
 **Step 2: Configure MCP Client to Use HTTP**
+
 ```json
 {
   "mcp-google-map": {
@@ -107,19 +113,37 @@ GOOGLE_MAPS_API_KEY=YOUR_API_KEY npx @cablate/mcp-google-map
 - **Transport**: HTTP (not stdio)
 - **Tools**: 8 Google Maps tools available
 
-### Environment Variables
+### API Key Configuration
 
-Create a `.env` file in your working directory:
+API keys can be provided in three ways (priority order):
 
-```env
-# Required
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+1. **HTTP Headers** (Highest priority)
 
-# Optional
-MCP_SERVER_PORT=3000
-```
+   ```json
+   // MCP Client config
+   {
+     "mcp-google-map": {
+       "transport": "streamableHttp",
+       "url": "http://localhost:3000/mcp",
+       // if your MCP Client support 'headers'
+       "headers": {
+         "X-Google-Maps-API-Key": "YOUR_API_KEY" 
+       }
+     }
+   }
+   ```
 
-**Note**: Command line options take precedence over environment variables.
+2. **Command Line**
+
+   ```bash
+   mcp-google-map --apikey YOUR_API_KEY
+   ```
+
+3. **Environment Variable** (.env file or command line)
+   ```env
+   GOOGLE_MAPS_API_KEY=your_api_key_here
+   MCP_SERVER_PORT=3000
+   ```
 
 ## Available Tools
 
@@ -171,7 +195,6 @@ src/
 ├── core/
 │   └── BaseMcpServer.ts     # Base MCP server with streamable HTTP
 └── tools/
-    ├── echo.ts              # Echo service tool
     └── maps/                # Google Maps tools
         ├── toolclass.ts     # Google Maps API client
         ├── searchPlaces.ts  # Maps service layer
@@ -224,17 +247,20 @@ If you have any questions or suggestions, feel free to reach out:
 
 ## Changelog
 
-### v0.0.5
+### v0.0.17 (Latest)
+
+- **Added HTTP Header Authentication**: Support for passing API keys via `X-Google-Maps-API-Key` header in MCP Client config
+- **Fixed Concurrent User Issues**: Each session now uses its own API key without conflicts
+- **Fixed npx Execution**: Resolved module bundling issues
+- **Improved Documentation**: Clearer setup instructions
+
+### v0.0.14
+
 - Added streamable HTTP transport support
 - Improved CLI interface with emoji indicators
 - Enhanced error handling and logging
 - Added comprehensive tool descriptions for LLM integration
 - Updated to latest MCP SDK version
-
-### v0.0.4
-- Initial release with basic Google Maps integration
-- Support for location search, geocoding, and directions
-- Compatible with MCP protocol
 
 ## Star History
 

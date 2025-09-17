@@ -6,6 +6,8 @@ import express, { Request, Response } from "express";
 import { Server } from "http";
 import { randomUUID } from "node:crypto";
 import { Logger } from "../index.js";
+import { ApiKeyManager } from "../utils/apiKeyManager.js";
+import { runWithContext } from "../utils/requestContext.js";
 
 const VERSION = "0.0.1";
 
@@ -17,9 +19,14 @@ export interface ToolConfig {
   action: (params: any) => Promise<any>; // Adjust type for params and return
 }
 
+export interface SessionContext {
+  apiKey?: string;
+  transport: StreamableHTTPServerTransport;
+}
+
 export class BaseMcpServer {
   protected readonly server: McpServer;
-  private transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
+  private sessions: { [sessionId: string]: SessionContext } = {};
   private httpServer: Server | null = null;
   private serverName: string;
 
@@ -69,17 +76,27 @@ export class BaseMcpServer {
     // Handle POST requests for client-to-server communication
     app.post("/mcp", async (req: Request, res: Response) => {
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
-      let transport: StreamableHTTPServerTransport;
+      let context: SessionContext;
 
-      if (sessionId && this.transports[sessionId]) {
-        // Reuse existing transport
-        transport = this.transports[sessionId];
+      // Extract API key from headers if provided
+      const apiKeyManager = ApiKeyManager.getInstance();
+      const requestApiKey = apiKeyManager.getApiKey(req);
+
+      Logger.log(`${this.serverName} Get API KEY: ${requestApiKey}`)
+
+      if (sessionId && this.sessions[sessionId]) {
+        // Reuse existing session
+        context = this.sessions[sessionId];
+        // Update API key if provided in this request
+        if (requestApiKey) {
+          context.apiKey = requestApiKey;
+        }
       } else if (!sessionId && isInitializeRequest(req.body)) {
         // New initialization request
-        transport = new StreamableHTTPServerTransport({
+        const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
           onsessioninitialized: (sessionId) => {
-            this.transports[sessionId] = transport;
+            this.sessions[sessionId] = context;
             Logger.log(`[${this.serverName}] New session initialized: ${sessionId}`);
           },
           // DNS rebinding protection is disabled by default for backwards compatibility
@@ -88,10 +105,16 @@ export class BaseMcpServer {
           // allowedHosts: ['127.0.0.1'],
         });
 
+        // Create session context
+        context = {
+          transport,
+          apiKey: requestApiKey
+        };
+
         // Clean up transport when closed
         transport.onclose = () => {
           if (transport.sessionId) {
-            delete this.transports[transport.sessionId];
+            delete this.sessions[transport.sessionId];
             Logger.log(`[${this.serverName}] Session closed: ${transport.sessionId}`);
           }
         };
@@ -110,20 +133,39 @@ export class BaseMcpServer {
         return;
       }
 
-      // Handle the request
-      await transport.handleRequest(req, res, req.body);
+      // Run the request handler with the API key in context
+      await runWithContext(
+        { apiKey: context.apiKey, sessionId },
+        async () => {
+          await context.transport.handleRequest(req, res, req.body);
+        }
+      );
     });
 
     // Reusable handler for GET and DELETE requests
     const handleSessionRequest = async (req: Request, res: Response) => {
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
-      if (!sessionId || !this.transports[sessionId]) {
+      if (!sessionId || !this.sessions[sessionId]) {
         res.status(400).send("Invalid or missing session ID");
         return;
       }
 
-      const transport = this.transports[sessionId];
-      await transport.handleRequest(req, res);
+      const context = this.sessions[sessionId];
+
+      // Check for updated API key in headers
+      const apiKeyManager = ApiKeyManager.getInstance();
+      const requestApiKey = apiKeyManager.getApiKey(req);
+      if (requestApiKey) {
+        context.apiKey = requestApiKey;
+      }
+
+      // Run the request handler with the API key in context
+      await runWithContext(
+        { apiKey: context.apiKey, sessionId },
+        async () => {
+          await context.transport.handleRequest(req, res);
+        }
+      );
     };
 
     // Handle GET requests for server-to-client notifications via SSE
@@ -154,14 +196,14 @@ export class BaseMcpServer {
         }
         Logger.log(`[${this.serverName}] HTTP server stopped.`);
         this.httpServer = null;
-        const closingTransports = Object.values(this.transports).map((transport) => {
-          // Clean up transport
-          if (transport.sessionId) {
-            delete this.transports[transport.sessionId];
+        const closingSessions = Object.values(this.sessions).map((context) => {
+          // Clean up session
+          if (context.transport.sessionId) {
+            delete this.sessions[context.transport.sessionId];
           }
           return Promise.resolve();
         });
-        Promise.all(closingTransports)
+        Promise.all(closingSessions)
           .then(() => {
             Logger.log(`[${this.serverName}] All transports closed.`);
             resolve();

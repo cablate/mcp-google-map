@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PlacesSearcher } from "../../services/PlacesSearcher.js";
+import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_reverse_geocode";
 const DESCRIPTION = "Convert geographic coordinates (latitude and longitude) to a human-readable address";
@@ -11,13 +12,11 @@ const SCHEMA = {
 
 export type ReverseGeocodeParams = z.infer<z.ZodObject<typeof SCHEMA>>;
 
-let placesSearcher: PlacesSearcher | null = null;
-
-async function ACTION(params: ReverseGeocodeParams): Promise<{ content: any[]; isError?: boolean }> {
+async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean }> {
   try {
-    if (!placesSearcher) {
-      placesSearcher = new PlacesSearcher();
-    }
+    // Create a new PlacesSearcher instance with the current request's API key
+    const apiKey = getCurrentApiKey();
+    const placesSearcher = new PlacesSearcher(apiKey);
     const result = await placesSearcher.reverseGeocode(params.latitude, params.longitude);
 
     if (!result.success) {

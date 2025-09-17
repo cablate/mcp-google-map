@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PlacesSearcher } from "../../services/PlacesSearcher.js";
+import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "search_nearby";
 const DESCRIPTION = "Search for nearby places based on location, with optional filtering by keywords, distance, rating, and operating hours";
@@ -17,13 +18,11 @@ const SCHEMA = {
 
 export type SearchNearbyParams = z.infer<z.ZodObject<typeof SCHEMA>>;
 
-let placesSearcher: PlacesSearcher | null = null;
-
 async function ACTION(params: SearchNearbyParams): Promise<{ content: any[]; isError?: boolean }> {
   try {
-    if (!placesSearcher) {
-      placesSearcher = new PlacesSearcher();
-    }
+    // Create a new PlacesSearcher instance with the current request's API key
+    const apiKey = getCurrentApiKey();
+    const placesSearcher = new PlacesSearcher(apiKey);
     const result = await placesSearcher.searchNearby(params);
 
     if (!result.success) {
