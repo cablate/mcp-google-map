@@ -247,7 +247,11 @@ If you have any questions or suggestions, feel free to reach out:
 
 ## Changelog
 
-### v0.0.17 (Latest)
+### v0.0.18 (Latest)
+
+- **Error response improvements**: Now all error messages are in English with more detailed information (previously in Chinese)
+
+### v0.0.17
 
 - **Added HTTP Header Authentication**: Support for passing API keys via `X-Google-Maps-API-Key` header in MCP Client config
 - **Fixed Concurrent User Issues**: Each session now uses its own API key without conflicts

@@ -30,7 +30,7 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
 
     if (!result.success) {
       return {
-        content: [{ type: "text", text: result.error || "獲取路線指引失敗" }],
+        content: [{ type: "text", text: result.error || "Failed to get directions" }],
         isError: true,
       };
     }
@@ -48,7 +48,7 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
     const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
     return {
       isError: true,
-      content: [{ type: "text", text: `獲取路線指引錯誤: ${errorMessage}` }],
+      content: [{ type: "text", text: `Error getting directions: ${errorMessage}` }],
     };
   }
 }

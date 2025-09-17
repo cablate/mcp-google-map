@@ -20,7 +20,7 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
 
     if (!result.success) {
       return {
-        content: [{ type: "text", text: result.error || "地址轉換座標失敗" }],
+        content: [{ type: "text", text: result.error || "Failed to geocode address" }],
         isError: true,
       };
     }
@@ -38,7 +38,7 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
     const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
     return {
       isError: true,
-      content: [{ type: "text", text: `地址轉換座標錯誤: ${errorMessage}` }],
+      content: [{ type: "text", text: `Error geocoding address: ${errorMessage}` }],
     };
   }
 }

@@ -23,7 +23,7 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
 
     if (!result.success) {
       return {
-        content: [{ type: "text", text: result.error || "獲取海拔數據失敗" }],
+        content: [{ type: "text", text: result.error || "Failed to get elevation data" }],
         isError: true,
       };
     }
@@ -41,7 +41,7 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
     const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
     return {
       isError: true,
-      content: [{ type: "text", text: `獲取海拔數據錯誤: ${errorMessage}` }],
+      content: [{ type: "text", text: `Error getting elevation data: ${errorMessage}` }],
     };
   }
 }
