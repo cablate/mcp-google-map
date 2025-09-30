@@ -1,4 +1,5 @@
 import { GoogleMapsTools } from "./toolclass.js";
+import { NewPlacesService } from "./NewPlacesService.js";
 
 interface SearchNearbyResponse {
   success: boolean;
@@ -66,9 +67,11 @@ interface ElevationResponse {
 
 export class PlacesSearcher {
   private mapsTools: GoogleMapsTools;
+  private newPlacesService: NewPlacesService;
 
   constructor(apiKey?: string) {
     this.mapsTools = new GoogleMapsTools(apiKey);
+    this.newPlacesService = new NewPlacesService(apiKey);
   }
 
   async searchNearby(params: { center: { value: string; isCoordinates: boolean }; keyword?: string; radius?: number; openNow?: boolean; minRating?: number }): Promise<SearchNearbyResponse> {
@@ -105,7 +108,8 @@ export class PlacesSearcher {
 
   async getPlaceDetails(placeId: string): Promise<PlaceDetailsResponse> {
     try {
-      const details = await this.mapsTools.getPlaceDetails(placeId);
+      // Use the new Places API service instead of the legacy one
+      const details = await this.newPlacesService.getPlaceDetails(placeId);
 
       return {
         success: true,

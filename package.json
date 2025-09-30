@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",
+    "@googlemaps/places": "^2.1.0",
     "@modelcontextprotocol/sdk": "^1.11.0",
     "@types/yargs": "^17.0.33",
     "cross-env": "^7.0.3",
