@@ -108,7 +108,6 @@ export class PlacesSearcher {
 
   async getPlaceDetails(placeId: string): Promise<PlaceDetailsResponse> {
     try {
-      // Use the new Places API service instead of the legacy one
       const details = await this.newPlacesService.getPlaceDetails(placeId);
 
       return {
