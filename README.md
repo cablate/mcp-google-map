@@ -25,6 +25,10 @@ All tools and features are confirmed functional through real-world testing.
 
 ## Features
 
+### 🆕 Latest Updates
+
+- **New Places API Integration**: Updated to use Google's new Places API (New) instead of the legacy API to resolve HTTP 403 errors and ensure continued functionality.
+
 ### 🗺️ Google Maps Integration
 
 - **Location Search**
