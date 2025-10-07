@@ -9,7 +9,7 @@ const SCHEMA = {
   center: z.object({
     value: z.string().describe("Address, landmark name, or coordinates (coordinate format: lat,lng)"),
     isCoordinates: z.boolean().default(false).describe("Whether the value is coordinates"),
-  }).describe("Search center point").example({"value": "49.3268778,-123.0585982", "isCoordinates": true}),
+  }).describe("Search center point (e.g. value: 49.3268778,-123.0585982, isCoordinates: true)"),
   keyword: z.string().optional().describe("Search keyword (e.g., restaurant, cafe, hotel)"),
   radius: z.number().default(1000).describe("Search radius in meters"),
   openNow: z.boolean().default(false).describe("Only show places that are currently open"),
