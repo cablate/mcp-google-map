@@ -122,7 +122,7 @@ export class PlacesSearcher {
           phone: details.formatted_phone_number,
           website: details.website,
           price_level: details.price_level,
-          reviews: details.reviews?.map((review) => ({
+          reviews: details.reviews?.map((review: any) => ({
             rating: review.rating,
             text: review.text,
             time: review.time,
