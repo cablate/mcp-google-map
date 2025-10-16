@@ -1,6 +1,6 @@
 {
   "name": "@cablate/mcp-google-map",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Google Maps MCP server with streamable HTTP transport support for location services, geocoding, and navigation",
   "type": "module",
   "main": "dist/index.js",
@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",
+    "@googlemaps/places": "^2.1.0",
     "@modelcontextprotocol/sdk": "^1.11.0",
     "@types/yargs": "^17.0.33",
     "cross-env": "^7.0.3",

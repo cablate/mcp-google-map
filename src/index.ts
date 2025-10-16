@@ -6,3 +6,6 @@ export const Logger = {
     console.error("[ERROR]", ...args);
   },
 };
+
+export { PlacesSearcher } from "./services/PlacesSearcher.js";
+export { NewPlacesService } from "./services/NewPlacesService.js";

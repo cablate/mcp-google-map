@@ -25,6 +25,11 @@ All tools and features are confirmed functional through real-world testing.
 
 ## Features
 
+### 🆕 Latest Updates
+
+ - ℹ️  **Reminder: enable Places API (New) in https://console.cloud.google.com before using the new Place features.**
+
+
 ### 🗺️ Google Maps Integration
 
 - **Location Search**
@@ -247,7 +252,11 @@ If you have any questions or suggestions, feel free to reach out:
 
 ## Changelog
 
-### v0.0.18 (Latest)
+### v0.0.19 (Latest)
+
+- **New Places API Integration**: Updated to use Google's new Places API (New) instead of the legacy API to resolve HTTP 403 errors and ensure continued functionality.
+
+### v0.0.18
 
 - **Error response improvements**: Now all error messages are in English with more detailed information (previously in Chinese)
 
