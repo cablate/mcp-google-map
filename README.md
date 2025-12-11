@@ -8,26 +8,11 @@
 
 ---
 
-> **📢 重要通知 | Important Notice**
+> **📢 Important Notice**
 >
-> **Google 官方 MCP 支援已推出** | **Google Official MCP Support Available**
+> Google officially announced MCP support for Google Maps on December 10, 2025, introducing **[Maps Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services)** - a fully-managed MCP server for geospatial data and routing.
 >
-> Google 已於 2025 年 12 月 10 日宣布推出官方的 Google Maps MCP 服務（Maps Grounding Lite），提供 AI 代理程式存取可信賴的地理空間資料，包括地點資訊、天氣預報和路線規劃等功能。
->
-> Google officially announced MCP support for Google Maps on December 10, 2025, introducing **Maps Grounding Lite** - a fully-managed MCP server that provides AI agents with access to trusted geospatial data, including place information, weather forecasts, and routing details.
->
-> **官方資源 | Official Resources:**
-> - 📖 [Google Cloud 官方公告 | Official Announcement](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services)
-> - 🛠️ [Google Maps Platform MCP Toolkit](https://developers.google.com/maps/ai/mcp)
-> - 📚 [入門教學 | Getting Started Tutorial](https://medium.com/google-cloud/tutorial-getting-started-with-google-mcp-services-60b23b22a0e7)
->
-> **關鍵特點 | Key Features:**
-> - ✅ 完全託管的 HTTP 端點（無需本地代理）| Fully-managed HTTPS endpoints (no local proxy needed)
-> - ✅ 即時更新的地點與路線資訊 | Real-time place and routing information
-> - ✅ 企業級安全性與配額管理 | Enterprise security and quota management
-> - ✅ 目前為公開預覽版，預計於 2026 年初正式發布 | Currently in public preview, GA expected early 2026
->
-> **本專案仍持續維護** | **This project remains actively maintained** as a community-driven alternative with different features and deployment options.
+> This community project remains actively maintained as an alternative with different features and deployment options.
 
 ---
 
