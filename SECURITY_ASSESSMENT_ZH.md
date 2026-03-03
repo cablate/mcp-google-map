@@ -21,7 +21,7 @@ For enterprise security reviews, the current implementation can be summarized as
 | 13 | MCP Server Settings / Version Verification | Use pinned package versions/tags/commit SHAs in your deployment pipeline for controlled upgrades. |
 | 14 | Verify connected MCP servers during prompt input | This is controlled by the MCP client/host application, not by this server. This repository exposes one MCP endpoint (`/mcp`) and does not manage other connected servers. |
 | 15 | Account/DB/container/SQL management | Not applicable: this server does not include DB connectors or SQL execution features. |
-| 16 | Logging, Monitoring, Log Query | Basic stdout/stderr logging is provided. Centralized log retention/query/alerting is not built in and should be implemented by the host platform (for example, container logs + SIEM). |
+| 16 | Logging, Monitoring, Log Query | Basic stdout/stderr logging is provided. Centralized log retention/query/alerting is not built-in and should be implemented by the host platform (for example, container logs + SIEM). |
 | 17 | Post-Approval Malicious Update Risk | Mitigate by pinning exact package versions, reviewing changelogs/commits before upgrade, and using internal artifact approval/signing workflows. |
 | 18 | Outdated Dependencies | Dependencies are managed in `package.json`/`package-lock.json`. Operators should run routine dependency scanning (for example, `npm audit`, SCA in CI) and patch regularly. |
 | 19 | Environmental Damage due to Auto-Approval | Current tools call Google Maps APIs and do not provide local file/system mutation operations; risk mainly depends on client-side auto-approval policy and surrounding toolchain composition. |
