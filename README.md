@@ -242,7 +242,7 @@ src/
 
 For enterprise security reviews, see the standalone document:
 
-- [Security Assessment Clarifications (23 items)](./SECURITY_ASSESSMENT_ZH.md)
+- [Security Assessment Clarifications (23 items)](./SECURITY_ASSESSMENT.md)
 
 ## License
 
