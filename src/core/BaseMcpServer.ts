@@ -82,7 +82,7 @@ export class BaseMcpServer {
       const apiKeyManager = ApiKeyManager.getInstance();
       const requestApiKey = apiKeyManager.getApiKey(req);
 
-      Logger.log(`${this.serverName} Get API KEY: ${requestApiKey}`)
+      Logger.log(`${this.serverName} API key received from request context`);
 
       if (sessionId && this.sessions[sessionId]) {
         // Reuse existing session
