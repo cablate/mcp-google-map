@@ -29,29 +29,23 @@ export class BaseMcpServer {
   private sessions: { [sessionId: string]: SessionContext } = {};
   private httpServer: Server | null = null;
   private serverName: string;
+  private tools: ToolConfig[];
 
   constructor(name: string, tools: ToolConfig[]) {
     this.serverName = name;
-    this.server = new McpServer(
-      {
-        name: this.serverName,
-        version: VERSION,
-      },
-      {
-        capabilities: {
-          logging: {},
-          tools: {},
-        },
-      }
-    );
-
-    this.registerTools(tools);
+    this.tools = tools;
+    this.server = this.createMcpServer();
   }
 
-  private registerTools(tools: ToolConfig[]): void {
-    tools.forEach((tool) => {
-      this.server.tool(tool.name, tool.description, tool.schema, async (params: any) => tool.action(params));
+  private createMcpServer(): McpServer {
+    const server = new McpServer(
+      { name: this.serverName, version: VERSION },
+      { capabilities: { logging: {}, tools: {} } }
+    );
+    this.tools.forEach((tool) => {
+      server.tool(tool.name, tool.description, tool.schema, async (params: any) => tool.action(params));
     });
+    return server;
   }
 
   async connect(transport: Transport): Promise<void> {
@@ -119,7 +113,8 @@ export class BaseMcpServer {
           }
         };
 
-        await this.server.connect(transport);
+        const sessionServer = this.createMcpServer();
+        await sessionServer.connect(transport);
       } else {
         // Invalid request
         res.status(400).json({
