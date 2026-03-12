@@ -1,10 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import { isInitializeRequest, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import express, { Request, Response } from "express";
 import { Server } from "http";
 import { randomUUID } from "node:crypto";
+import { z } from "zod";
 import { Logger } from "../index.js";
 import { ApiKeyManager } from "../utils/apiKeyManager.js";
 import { runWithContext } from "../utils/requestContext.js";
@@ -15,8 +16,9 @@ const VERSION = "0.0.1";
 export interface ToolConfig {
   name: string;
   description: string;
-  schema: any; // Adjust type as per actual SDK (e.g., ZodSchema)
-  action: (params: any) => Promise<any>; // Adjust type for params and return
+  schema: Record<string, z.ZodTypeAny>;
+  annotations?: ToolAnnotations;
+  action: (params: any) => Promise<any>;
 }
 
 export interface SessionContext {
@@ -43,7 +45,15 @@ export class BaseMcpServer {
       { capabilities: { logging: {}, tools: {} } }
     );
     this.tools.forEach((tool) => {
-      server.tool(tool.name, tool.description, tool.schema, async (params: any) => tool.action(params));
+      server.registerTool(
+        tool.name,
+        {
+          description: tool.description,
+          inputSchema: z.object(tool.schema),
+          annotations: tool.annotations,
+        },
+        async (params: any) => tool.action(params)
+      );
     });
     return server;
   }
