@@ -3,8 +3,10 @@
  *
  * Validates:
  *  1. Server starts and accepts an initialize request
- *  2. A single session can call tools/list and maps_geocode
- *  3. Multiple concurrent sessions work independently
+ *  2. tools/list returns all tools with annotations and inputSchema
+ *  3. Geocode tool call works
+ *  4. Multiple tool calls (reverse geocode, elevation, distance matrix)
+ *  5. Multiple concurrent sessions work independently
  *
  * Prerequisites:
  *  - GOOGLE_MAPS_API_KEY env var (or pass via --apikey)
@@ -210,6 +212,25 @@ async function testListTools(session: McpSession): Promise<void> {
   for (const name of expectedTools) {
     assert(toolNames.includes(name), `Tool "${name}" registered`);
   }
+
+  // Verify annotations on all tools
+  for (const tool of tools) {
+    if (expectedTools.includes(tool.name)) {
+      const a = tool.annotations;
+      assert(a !== undefined, `Tool "${tool.name}" has annotations`);
+      if (a) {
+        assert(a.readOnlyHint === true, `Tool "${tool.name}" is readOnlyHint`);
+        assert(a.destructiveHint === false, `Tool "${tool.name}" is not destructiveHint`);
+      }
+    }
+  }
+
+  // Verify tools have inputSchema
+  for (const tool of tools) {
+    if (expectedTools.includes(tool.name)) {
+      assert(tool.inputSchema !== undefined, `Tool "${tool.name}" has inputSchema`);
+    }
+  }
 }
 
 async function testGeocode(session: McpSession): Promise<void> {
@@ -243,8 +264,71 @@ async function testGeocode(session: McpSession): Promise<void> {
   }
 }
 
+async function testToolCalls(session: McpSession): Promise<void> {
+  console.log("\n🧪 Test 4: Multiple tool calls");
+
+  if (!API_KEY) {
+    console.log("  ⏭️  Skipped (no GOOGLE_MAPS_API_KEY)");
+    return;
+  }
+
+  // Test reverse geocode (Tokyo Tower coordinates)
+  const reverseResult = await sendRequest(session, "tools/call", {
+    name: "maps_reverse_geocode",
+    arguments: { latitude: 35.6586, longitude: 139.7454 },
+  });
+  const reverseContent = reverseResult?.result?.content ?? [];
+  assert(reverseContent.length > 0, "Reverse geocode returns content");
+  if (reverseContent.length > 0) {
+    let valid = false;
+    try {
+      const parsed = JSON.parse(reverseContent[0].text);
+      valid = parsed?.formatted_address !== undefined;
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(valid, "Reverse geocode returns formatted_address");
+  }
+
+  // Test elevation
+  const elevResult = await sendRequest(session, "tools/call", {
+    name: "maps_elevation",
+    arguments: { locations: [{ latitude: 35.6586, longitude: 139.7454 }] },
+  });
+  const elevContent = elevResult?.result?.content ?? [];
+  assert(elevContent.length > 0, "Elevation returns content");
+  if (elevContent.length > 0) {
+    let valid = false;
+    try {
+      const parsed = JSON.parse(elevContent[0].text);
+      valid = Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0]?.elevation === "number";
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(valid, "Elevation returns numeric elevation data");
+  }
+
+  // Test distance matrix
+  const distResult = await sendRequest(session, "tools/call", {
+    name: "maps_distance_matrix",
+    arguments: { origins: ["Tokyo Tower"], destinations: ["Shibuya Station"], mode: "driving" },
+  });
+  const distContent = distResult?.result?.content ?? [];
+  assert(distContent.length > 0, "Distance matrix returns content");
+  if (distContent.length > 0) {
+    let valid = false;
+    try {
+      const parsed = JSON.parse(distContent[0].text);
+      valid = parsed?.distances !== undefined && parsed?.durations !== undefined;
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(valid, "Distance matrix returns distances and durations");
+  }
+}
+
 async function testMultiSession(): Promise<void> {
-  console.log("\n🧪 Test 4: Multiple concurrent sessions");
+  console.log("\n🧪 Test 5: Multiple concurrent sessions");
 
   // Create 3 independent sessions
   const sessions = await Promise.all(
@@ -334,6 +418,7 @@ async function main() {
     const session = await testInitialize();
     await testListTools(session);
     await testGeocode(session);
+    await testToolCalls(session);
     await testMultiSession();
   } catch (err) {
     console.error("\n💥 Fatal error:", err);
