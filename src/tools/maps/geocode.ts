@@ -3,7 +3,8 @@ import { PlacesSearcher } from "../../services/PlacesSearcher.js";
 import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_geocode";
-const DESCRIPTION = "Convert addresses or place names to geographic coordinates (latitude and longitude)";
+const DESCRIPTION =
+  "Convert an address, city name, or landmark into GPS coordinates (latitude/longitude). Use when you need coordinates for a location described in text — for example, to provide a center point for search_nearby or a starting point for maps_directions.";
 
 const SCHEMA = {
   address: z.string().describe("Address or place name to convert to coordinates"),

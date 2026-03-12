@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_distance_matrix";
 const DESCRIPTION =
-  "Calculate travel distances and durations between multiple origins and destinations for different travel modes";
+  "Calculate travel distances and durations between multiple origins and destinations in a single request. Use for comparing travel options — e.g., 'which hotel is closest to the office?' or batch distance calculations. Supports driving, walking, bicycling, and transit modes.";
 
 const SCHEMA = {
   origins: z.array(z.string()).describe("List of origin addresses or coordinates"),

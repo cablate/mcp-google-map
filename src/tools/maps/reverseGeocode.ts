@@ -3,7 +3,8 @@ import { PlacesSearcher } from "../../services/PlacesSearcher.js";
 import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_reverse_geocode";
-const DESCRIPTION = "Convert geographic coordinates (latitude and longitude) to a human-readable address";
+const DESCRIPTION =
+  "Convert GPS coordinates (latitude/longitude) into a human-readable street address. Use when you have coordinates from another tool's output or a user's shared location and need the actual address.";
 
 const SCHEMA = {
   latitude: z.number().describe("Latitude coordinate"),

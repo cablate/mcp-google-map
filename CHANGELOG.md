@@ -2,11 +2,6 @@
 
 ## 0.0.21
 
-- feat: tool annotations + actionable error messages + CHANGELOG (#31)
-
-
-## 0.0.21
-
 - Migrated from deprecated `server.tool()` to `server.registerTool()` API for MCP SDK v1.27+ compatibility
 - Added MCP Tool Annotations to all tools — clients can now auto-approve read-only, non-destructive API queries without user confirmation
 - Improved Google Maps API error messages with actionable guidance (e.g. HTTP 403 now suggests enabling the Places API, HTTP 429 links to quota settings)

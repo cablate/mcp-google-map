@@ -196,7 +196,7 @@ async function testListTools(session: McpSession): Promise<void> {
   const result = await sendRequest(session, "tools/list");
   const tools: any[] = result?.result?.tools ?? [];
 
-  assert(tools.length >= 7, `Has at least 7 tools (got ${tools.length})`);
+  assert(tools.length >= 8, `Has at least 8 tools (got ${tools.length})`);
 
   const toolNames = tools.map((t: any) => t.name);
   const expectedTools = [
@@ -207,6 +207,7 @@ async function testListTools(session: McpSession): Promise<void> {
     "maps_distance_matrix",
     "maps_directions",
     "maps_elevation",
+    "maps_search_places",
   ];
 
   for (const name of expectedTools) {
@@ -308,6 +309,58 @@ async function testToolCalls(session: McpSession): Promise<void> {
     assert(valid, "Elevation returns numeric elevation data");
   }
 
+  // Test search_nearby (uses Places API New)
+  const nearbyResult = await sendRequest(session, "tools/call", {
+    name: "search_nearby",
+    arguments: {
+      center: { value: "35.6586,139.7454", isCoordinates: true },
+      keyword: "restaurant",
+      radius: 500,
+    },
+  });
+  const nearbyContent = nearbyResult?.result?.content ?? [];
+  assert(nearbyContent.length > 0, "Search nearby returns content");
+  if (nearbyContent.length > 0) {
+    const text = nearbyContent[0]?.text ?? "";
+    let valid = false;
+    try {
+      // Response format: "location: {...}\n[...]"
+      const lines = text.split("\n");
+      // Find the JSON array part (skip the "location: ..." prefix line)
+      const jsonStart = text.indexOf("[");
+      if (jsonStart !== -1) {
+        const parsed = JSON.parse(text.substring(jsonStart));
+        valid = Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.name !== undefined;
+      }
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(
+      valid,
+      "Search nearby returns place results with name field",
+      valid ? undefined : `got: ${text.slice(0, 300)}`
+    );
+  }
+
+  // Test maps_search_places (text search via Places API New)
+  const searchResult = await sendRequest(session, "tools/call", {
+    name: "maps_search_places",
+    arguments: { query: "ramen near Tokyo Tower" },
+  });
+  const searchContent = searchResult?.result?.content ?? [];
+  assert(searchContent.length > 0, "Search places returns content");
+  if (searchContent.length > 0) {
+    const text = searchContent[0]?.text ?? "";
+    let valid = false;
+    try {
+      const parsed = JSON.parse(text);
+      valid = Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.name !== undefined;
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(valid, "Search places returns results with name field", valid ? undefined : `got: ${text.slice(0, 300)}`);
+  }
+
   // Test distance matrix
   const distResult = await sendRequest(session, "tools/call", {
     name: "maps_distance_matrix",
@@ -360,7 +413,7 @@ async function testMultiSession(): Promise<void> {
 
   for (const { result, index } of toolResults) {
     const tools = result?.result?.tools ?? [];
-    assert(tools.length >= 7, `Session ${index}: tools/list returns ${tools.length} tools`);
+    assert(tools.length >= 8, `Session ${index}: tools/list returns ${tools.length} tools`);
   }
 
   // If API key available, run geocode on all sessions concurrently

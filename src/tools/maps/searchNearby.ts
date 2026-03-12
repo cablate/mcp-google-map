@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "search_nearby";
 const DESCRIPTION =
-  "Search for nearby places based on location, with optional filtering by keywords, distance, rating, and operating hours";
+  "Find places near a specific location by type (e.g., restaurants, cafes, hotels). Use when the user wants to discover what's around a given address or coordinates, such as 'find coffee shops near Times Square' or 'what hotels are near the airport'. Supports filtering by place type, search radius, minimum rating, and whether currently open.";
 
 const SCHEMA = {
   center: z
@@ -13,7 +13,10 @@ const SCHEMA = {
       isCoordinates: z.boolean().default(false).describe("Whether the value is coordinates"),
     })
     .describe("Search center point (e.g. value: 49.3268778,-123.0585982, isCoordinates: true)"),
-  keyword: z.string().optional().describe("Search keyword (e.g., restaurant, cafe, hotel)"),
+  keyword: z
+    .string()
+    .optional()
+    .describe("Place type to search for (e.g., restaurant, cafe, hotel, gas_station, hospital)"),
   radius: z.number().default(1000).describe("Search radius in meters"),
   openNow: z.boolean().default(false).describe("Only show places that are currently open"),
   minRating: z.number().min(0).max(5).optional().describe("Minimum rating requirement (0-5)"),

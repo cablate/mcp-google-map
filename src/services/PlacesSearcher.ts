@@ -1,7 +1,7 @@
 import { GoogleMapsTools } from "./toolclass.js";
 import { NewPlacesService } from "./NewPlacesService.js";
 
-interface SearchNearbyResponse {
+interface SearchResponse {
   success: boolean;
   error?: string;
   data?: any[];
@@ -80,21 +80,27 @@ export class PlacesSearcher {
     radius?: number;
     openNow?: boolean;
     minRating?: number;
-  }): Promise<SearchNearbyResponse> {
+  }): Promise<SearchResponse> {
     try {
       const location = await this.mapsTools.getLocation(params.center);
-      const places = await this.mapsTools.searchNearbyPlaces({
+      const places = await this.newPlacesService.searchNearby({
         location,
         keyword: params.keyword,
         radius: params.radius,
-        openNow: params.openNow,
-        minRating: params.minRating,
       });
+
+      let filteredPlaces = places;
+      if (params.openNow) {
+        filteredPlaces = filteredPlaces.filter((p: any) => p.opening_hours?.open_now === true);
+      }
+      if (params.minRating) {
+        filteredPlaces = filteredPlaces.filter((p: any) => (p.rating || 0) >= (params.minRating || 0));
+      }
 
       return {
         location: location,
         success: true,
-        data: places.map((place) => ({
+        data: filteredPlaces.map((place: any) => ({
           name: place.name,
           place_id: place.place_id,
           address: place.formatted_address,
@@ -108,6 +114,48 @@ export class PlacesSearcher {
       return {
         success: false,
         error: error instanceof Error ? error.message : "An error occurred during search",
+      };
+    }
+  }
+
+  async searchText(params: {
+    query: string;
+    locationBias?: { latitude: number; longitude: number; radius?: number };
+    openNow?: boolean;
+    minRating?: number;
+    includedType?: string;
+  }): Promise<SearchResponse> {
+    try {
+      const places = await this.newPlacesService.searchText({
+        textQuery: params.query,
+        locationBias: params.locationBias
+          ? {
+              lat: params.locationBias.latitude,
+              lng: params.locationBias.longitude,
+              radius: params.locationBias.radius,
+            }
+          : undefined,
+        openNow: params.openNow,
+        minRating: params.minRating,
+        includedType: params.includedType,
+      });
+
+      return {
+        success: true,
+        data: places.map((place: any) => ({
+          name: place.name,
+          place_id: place.place_id,
+          address: place.formatted_address,
+          location: place.geometry.location,
+          rating: place.rating,
+          total_ratings: place.user_ratings_total,
+          open_now: place.opening_hours?.open_now,
+        })),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "An error occurred during text search",
       };
     }
   }

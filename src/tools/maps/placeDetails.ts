@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "get_place_details";
 const DESCRIPTION =
-  "Get detailed information about a specific place including contact details, reviews, ratings, and operating hours";
+  "Get comprehensive details for a specific place using its Google Maps place_id. Use after search_nearby or maps_search_places to get full information including reviews, phone number, website, opening hours, and photos. Returns everything needed to evaluate or contact a business.";
 
 const SCHEMA = {
   placeId: z.string().describe("Google Maps place ID"),
