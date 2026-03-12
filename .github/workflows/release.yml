@@ -13,6 +13,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -31,6 +33,31 @@ jobs:
       - name: Bump version
         run: npm version patch --no-git-tag-version
 
+      - name: Update CHANGELOG
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          # Collect commit messages since last tag
+          if [ -n "$PREV_TAG" ]; then
+            COMMITS=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --no-merges | grep -v "^- chore: release")
+          else
+            COMMITS=$(git log --pretty=format:"- %s" --no-merges -10 | grep -v "^- chore: release")
+          fi
+
+          # Prepend new version to CHANGELOG.md
+          HEADER="## ${VERSION}"
+          TMPFILE=$(mktemp)
+          echo "# Changelog" > "$TMPFILE"
+          echo "" >> "$TMPFILE"
+          echo "$HEADER" >> "$TMPFILE"
+          echo "" >> "$TMPFILE"
+          echo "$COMMITS" >> "$TMPFILE"
+          echo "" >> "$TMPFILE"
+          # Append existing content (skip the first "# Changelog" line)
+          tail -n +2 CHANGELOG.md >> "$TMPFILE"
+          mv "$TMPFILE" CHANGELOG.md
+
       - name: Publish to npm
         run: npm publish --access public
         env:
@@ -41,8 +68,21 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
+          git add package.json package-lock.json CHANGELOG.md
           git commit -m "chore: release v${VERSION}"
           git tag "v${VERSION}"
           git push
           git push --tags
+
+      - name: Create GitHub Release
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            NOTES=$(git log ${PREV_TAG}..v${VERSION} --pretty=format:"- %s" --no-merges | grep -v "^- chore: release")
+          else
+            NOTES="Initial release"
+          fi
+          gh release create "v${VERSION}" --title "v${VERSION}" --notes "$NOTES"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
