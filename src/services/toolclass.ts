@@ -100,7 +100,18 @@ export class GoogleMapsTools {
       const response = await this.client.placeDetails({
         params: {
           place_id: placeId,
-          fields: ["name", "rating", "formatted_address", "opening_hours", "reviews", "geometry", "formatted_phone_number", "website", "price_level", "photos"],
+          fields: [
+            "name",
+            "rating",
+            "formatted_address",
+            "opening_hours",
+            "reviews",
+            "geometry",
+            "formatted_phone_number",
+            "website",
+            "price_level",
+            "photos",
+          ],
           language: this.defaultLanguage,
           key: this.apiKey,
         },
@@ -143,7 +154,9 @@ export class GoogleMapsTools {
   private parseCoordinates(coordString: string): GeocodeResult {
     const coords = coordString.split(",").map((c) => parseFloat(c.trim()));
     if (coords.length !== 2 || isNaN(coords[0]) || isNaN(coords[1])) {
-      throw new Error(`Invalid coordinate format: "${coordString}". Please use "latitude,longitude" format (e.g., "25.033,121.564"`);
+      throw new Error(
+        `Invalid coordinate format: "${coordString}". Please use "latitude,longitude" format (e.g., "25.033,121.564"`
+      );
     }
     return { lat: coords[0], lng: coords[1] };
   }
@@ -202,7 +215,9 @@ export class GoogleMapsTools {
       };
     } catch (error: any) {
       Logger.error("Error in reverseGeocode:", error);
-      throw new Error(`Failed to reverse geocode coordinates (${latitude}, ${longitude}): ${extractErrorMessage(error)}`);
+      throw new Error(
+        `Failed to reverse geocode coordinates (${latitude}, ${longitude}): ${extractErrorMessage(error)}`
+      );
     }
   }
 
@@ -318,7 +333,9 @@ export class GoogleMapsTools {
       const result = response.data;
 
       if (result.status !== "OK") {
-        throw new Error(`Failed to get directions with status: ${result.status} (arrival_time: ${apiArrivalTime}, departure_time: ${apiDepartureTime}`);
+        throw new Error(
+          `Failed to get directions with status: ${result.status} (arrival_time: ${apiArrivalTime}, departure_time: ${apiDepartureTime}`
+        );
       }
 
       if (result.routes.length === 0) {
@@ -366,7 +383,9 @@ export class GoogleMapsTools {
     }
   }
 
-  async getElevation(locations: Array<{ latitude: number; longitude: number }>): Promise<Array<{ elevation: number; location: { lat: number; lng: number } }>> {
+  async getElevation(
+    locations: Array<{ latitude: number; longitude: number }>
+  ): Promise<Array<{ elevation: number; location: { lat: number; lng: number } }>> {
     try {
       const formattedLocations = locations.map((loc) => ({
         lat: loc.latitude,
@@ -392,7 +411,9 @@ export class GoogleMapsTools {
       }));
     } catch (error: any) {
       Logger.error("Error in getElevation:", error);
-      throw new Error(`Failed to get elevation data for ${locations.length} location(s): ${extractErrorMessage(error)}`);
+      throw new Error(
+        `Failed to get elevation data for ${locations.length} location(s): ${extractErrorMessage(error)}`
+      );
     }
   }
 }

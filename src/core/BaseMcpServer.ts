@@ -102,7 +102,7 @@ export class BaseMcpServer {
         // Create session context
         context = {
           transport,
-          apiKey: requestApiKey
+          apiKey: requestApiKey,
         };
 
         // Clean up transport when closed
@@ -129,12 +129,9 @@ export class BaseMcpServer {
       }
 
       // Run the request handler with the API key in context
-      await runWithContext(
-        { apiKey: context.apiKey, sessionId },
-        async () => {
-          await context.transport.handleRequest(req, res, req.body);
-        }
-      );
+      await runWithContext({ apiKey: context.apiKey, sessionId }, async () => {
+        await context.transport.handleRequest(req, res, req.body);
+      });
     });
 
     // Reusable handler for GET and DELETE requests
@@ -155,12 +152,9 @@ export class BaseMcpServer {
       }
 
       // Run the request handler with the API key in context
-      await runWithContext(
-        { apiKey: context.apiKey, sessionId },
-        async () => {
-          await context.transport.handleRequest(req, res);
-        }
-      );
+      await runWithContext({ apiKey: context.apiKey, sessionId }, async () => {
+        await context.transport.handleRequest(req, res);
+      });
     };
 
     // Handle GET requests for server-to-client notifications via SSE

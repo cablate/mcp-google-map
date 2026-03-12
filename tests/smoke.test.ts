@@ -16,6 +16,11 @@
  */
 
 import { randomUUID } from "node:crypto";
+import { config as dotenvConfig } from "dotenv";
+import { resolve } from "node:path";
+
+// Load .env from project root
+dotenvConfig({ path: resolve(import.meta.dirname ?? ".", "../.env") });
 
 // --------------- Config ---------------
 
@@ -225,13 +230,16 @@ async function testGeocode(session: McpSession): Promise<void> {
 
   if (content.length > 0) {
     const text = content[0]?.text ?? "";
-    const parsed = JSON.parse(text);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      // Response is plain text (error message or non-JSON)
+      assert(false, "Geocode returns valid JSON", `got: ${text.slice(0, 200)}`);
+      return;
+    }
     assert(parsed?.location !== undefined, "Result has location", JSON.stringify(parsed?.location));
-    assert(
-      typeof parsed?.location?.lat === "number",
-      "Latitude is a number",
-      `lat: ${parsed?.location?.lat}`
-    );
+    assert(typeof parsed?.location?.lat === "number", "Latitude is a number", `lat: ${parsed?.location?.lat}`);
   }
 }
 
@@ -286,8 +294,23 @@ async function testMultiSession(): Promise<void> {
 
     for (const { result, index, address } of geocodeResults) {
       const content = result?.result?.content ?? [];
-      const hasContent = content.length > 0 && !result?.result?.isError;
-      assert(hasContent, `Session ${index}: geocode "${address}" succeeded`);
+      if (content.length === 0) {
+        assert(false, `Session ${index}: geocode "${address}" succeeded`, "no content");
+        continue;
+      }
+      const text = content[0]?.text ?? "";
+      let valid = false;
+      try {
+        const parsed = JSON.parse(text);
+        valid = parsed?.location !== undefined;
+      } catch {
+        /* ignore parse errors */
+      }
+      assert(
+        valid,
+        `Session ${index}: geocode "${address}" succeeded`,
+        valid ? undefined : `got: ${text.slice(0, 120)}`
+      );
     }
   } else {
     console.log("  ⏭️  Concurrent geocode skipped (no GOOGLE_MAPS_API_KEY)");

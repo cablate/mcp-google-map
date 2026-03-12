@@ -6,10 +6,14 @@ const NAME = "maps_elevation";
 const DESCRIPTION = "Get elevation data (height above sea level) for specific geographic locations";
 
 const SCHEMA = {
-  locations: z.array(z.object({
-    latitude: z.number().describe("Latitude coordinate"),
-    longitude: z.number().describe("Longitude coordinate"),
-  })).describe("List of locations to get elevation data for"),
+  locations: z
+    .array(
+      z.object({
+        latitude: z.number().describe("Latitude coordinate"),
+        longitude: z.number().describe("Longitude coordinate"),
+      })
+    )
+    .describe("List of locations to get elevation data for"),
 };
 
 export type ElevationParams = z.infer<z.ZodObject<typeof SCHEMA>>;

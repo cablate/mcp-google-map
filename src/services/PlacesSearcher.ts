@@ -74,7 +74,13 @@ export class PlacesSearcher {
     this.newPlacesService = new NewPlacesService(apiKey);
   }
 
-  async searchNearby(params: { center: { value: string; isCoordinates: boolean }; keyword?: string; radius?: number; openNow?: boolean; minRating?: number }): Promise<SearchNearbyResponse> {
+  async searchNearby(params: {
+    center: { value: string; isCoordinates: boolean };
+    keyword?: string;
+    radius?: number;
+    openNow?: boolean;
+    minRating?: number;
+  }): Promise<SearchNearbyResponse> {
     try {
       const location = await this.mapsTools.getLocation(params.center);
       const places = await this.mapsTools.searchNearbyPlaces({
@@ -170,7 +176,11 @@ export class PlacesSearcher {
     }
   }
 
-  async calculateDistanceMatrix(origins: string[], destinations: string[], mode: "driving" | "walking" | "bicycling" | "transit" = "driving"): Promise<DistanceMatrixResponse> {
+  async calculateDistanceMatrix(
+    origins: string[],
+    destinations: string[],
+    mode: "driving" | "walking" | "bicycling" | "transit" = "driving"
+  ): Promise<DistanceMatrixResponse> {
     try {
       const result = await this.mapsTools.calculateDistanceMatrix(origins, destinations, mode);
 
@@ -186,7 +196,13 @@ export class PlacesSearcher {
     }
   }
 
-  async getDirections(origin: string, destination: string, mode: "driving" | "walking" | "bicycling" | "transit" = "driving", departure_time?: string, arrival_time?: string): Promise<DirectionsResponse> {
+  async getDirections(
+    origin: string,
+    destination: string,
+    mode: "driving" | "walking" | "bicycling" | "transit" = "driving",
+    departure_time?: string,
+    arrival_time?: string
+  ): Promise<DirectionsResponse> {
     try {
       const departureTime = departure_time ? new Date(departure_time) : new Date();
       const arrivalTime = arrival_time ? new Date(arrival_time) : undefined;
