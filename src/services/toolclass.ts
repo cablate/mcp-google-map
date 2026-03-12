@@ -37,19 +37,39 @@ interface GeocodeResult {
 }
 
 /**
- * Extracts a meaningful error message from various error types
- * Prioritizes Google Maps API error messages when available
+ * Extracts a meaningful, actionable error message from Google Maps API errors.
  */
 function extractErrorMessage(error: any): string {
-  // Extract Google API error message if available
-  const apiError = error?.response?.data?.error_message;
   const statusCode = error?.response?.status;
+  const apiError = error?.response?.data?.error_message;
+  const apiStatus = error?.response?.data?.status;
+
+  // Map common HTTP status codes to actionable messages
+  if (statusCode === 403) {
+    return "API key invalid or required API not enabled. Check: console.cloud.google.com → APIs & Services → Enable the relevant API (Places, Geocoding, etc.)";
+  }
+  if (statusCode === 429) {
+    return "API quota exceeded. Wait and retry, or check quota at console.cloud.google.com → Quotas";
+  }
+
+  // Map Google Maps API status codes
+  if (apiStatus === "ZERO_RESULTS") {
+    return "No results found. Try broader search terms or a larger radius.";
+  }
+  if (apiStatus === "OVER_QUERY_LIMIT") {
+    return "API quota exceeded. Wait and retry, or upgrade your billing plan.";
+  }
+  if (apiStatus === "REQUEST_DENIED") {
+    return `Request denied by Google Maps API. ${apiError || "Check your API key and enabled APIs."}`;
+  }
+  if (apiStatus === "INVALID_REQUEST") {
+    return `Invalid request parameters. ${apiError || "Check your input values."}`;
+  }
 
   if (apiError) {
     return `${apiError} (HTTP ${statusCode})`;
   }
 
-  // Fallback to standard error message
   return error instanceof Error ? error.message : String(error);
 }
 
