@@ -235,12 +235,16 @@ export class NewPlacesService {
   }
 
   private extractErrorMessage(error: any): string {
-    const apiError = error?.message || error?.details || error?.status;
+    const statusCode = error?.code;
+    const message = error?.message || error?.details;
 
-    if (apiError) {
-      return `${apiError}`;
+    if (statusCode === 7 || statusCode === 403) {
+      return "API key invalid or Places API (New) not enabled. Check: console.cloud.google.com → APIs & Services → Enable 'Places API (New)'";
+    }
+    if (statusCode === 8 || statusCode === 429) {
+      return "API quota exceeded. Wait and retry, or check quota at console.cloud.google.com → Quotas";
     }
 
-    return error instanceof Error ? error.message : String(error);
+    return message || (error instanceof Error ? error.message : String(error));
   }
 }
