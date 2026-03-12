@@ -33,14 +33,14 @@ export class ApiKeyManager {
   public getApiKey(req?: Request, sessionApiKey?: string): string | undefined {
     if (req) {
       // Check for API key in headers
-      const headerApiKey = req.headers['x-google-maps-api-key'] as string;
+      const headerApiKey = req.headers["x-google-maps-api-key"] as string;
       if (headerApiKey) {
         return headerApiKey;
       }
 
       // Check for Bearer token in Authorization header
-      const authHeader = req.headers['authorization'] as string;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
+      const authHeader = req.headers["authorization"] as string;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
         return authHeader.substring(7);
       }
     }

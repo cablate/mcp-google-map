@@ -29,29 +29,23 @@ export class BaseMcpServer {
   private sessions: { [sessionId: string]: SessionContext } = {};
   private httpServer: Server | null = null;
   private serverName: string;
+  private tools: ToolConfig[];
 
   constructor(name: string, tools: ToolConfig[]) {
     this.serverName = name;
-    this.server = new McpServer(
-      {
-        name: this.serverName,
-        version: VERSION,
-      },
-      {
-        capabilities: {
-          logging: {},
-          tools: {},
-        },
-      }
-    );
-
-    this.registerTools(tools);
+    this.tools = tools;
+    this.server = this.createMcpServer();
   }
 
-  private registerTools(tools: ToolConfig[]): void {
-    tools.forEach((tool) => {
-      this.server.tool(tool.name, tool.description, tool.schema, async (params: any) => tool.action(params));
+  private createMcpServer(): McpServer {
+    const server = new McpServer(
+      { name: this.serverName, version: VERSION },
+      { capabilities: { logging: {}, tools: {} } }
+    );
+    this.tools.forEach((tool) => {
+      server.tool(tool.name, tool.description, tool.schema, async (params: any) => tool.action(params));
     });
+    return server;
   }
 
   async connect(transport: Transport): Promise<void> {
@@ -108,7 +102,7 @@ export class BaseMcpServer {
         // Create session context
         context = {
           transport,
-          apiKey: requestApiKey
+          apiKey: requestApiKey,
         };
 
         // Clean up transport when closed
@@ -119,7 +113,8 @@ export class BaseMcpServer {
           }
         };
 
-        await this.server.connect(transport);
+        const sessionServer = this.createMcpServer();
+        await sessionServer.connect(transport);
       } else {
         // Invalid request
         res.status(400).json({
@@ -134,12 +129,9 @@ export class BaseMcpServer {
       }
 
       // Run the request handler with the API key in context
-      await runWithContext(
-        { apiKey: context.apiKey, sessionId },
-        async () => {
-          await context.transport.handleRequest(req, res, req.body);
-        }
-      );
+      await runWithContext({ apiKey: context.apiKey, sessionId }, async () => {
+        await context.transport.handleRequest(req, res, req.body);
+      });
     });
 
     // Reusable handler for GET and DELETE requests
@@ -160,12 +152,9 @@ export class BaseMcpServer {
       }
 
       // Run the request handler with the API key in context
-      await runWithContext(
-        { apiKey: context.apiKey, sessionId },
-        async () => {
-          await context.transport.handleRequest(req, res);
-        }
-      );
+      await runWithContext({ apiKey: context.apiKey, sessionId }, async () => {
+        await context.transport.handleRequest(req, res);
+      });
     };
 
     // Handle GET requests for server-to-client notifications via SSE

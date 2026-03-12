@@ -8,7 +8,10 @@ const DESCRIPTION = "Get detailed turn-by-turn navigation directions between two
 const SCHEMA = {
   origin: z.string().describe("Starting point address or coordinates"),
   destination: z.string().describe("Destination address or coordinates"),
-  mode: z.enum(["driving", "walking", "bicycling", "transit"]).default("driving").describe("Travel mode for directions"),
+  mode: z
+    .enum(["driving", "walking", "bicycling", "transit"])
+    .default("driving")
+    .describe("Travel mode for directions"),
   departure_time: z.string().optional().describe("Departure time (ISO string format)"),
   arrival_time: z.string().optional().describe("Arrival time (ISO string format)"),
 };

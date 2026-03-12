@@ -4,7 +4,29 @@ import { Logger } from "../index.js";
 export class NewPlacesService {
   private client: PlacesClient;
   private readonly defaultLanguage: string = "en";
-  private readonly placeFieldMask: string = ["displayName", "name", "id", "formattedAddress", "location", "utcOffsetMinutes", "regularOpeningHours.periods", "regularOpeningHours.weekdayDescriptions", "currentOpeningHours.openNow", "nationalPhoneNumber", "websiteUri", "priceLevel", "rating", "userRatingCount", "reviews.rating", "reviews.text", "reviews.publishTime", "reviews.authorAttribution.displayName", "photos.heightPx", "photos.widthPx", "photos.name"].join(",");
+  private readonly placeFieldMask: string = [
+    "displayName",
+    "name",
+    "id",
+    "formattedAddress",
+    "location",
+    "utcOffsetMinutes",
+    "regularOpeningHours.periods",
+    "regularOpeningHours.weekdayDescriptions",
+    "currentOpeningHours.openNow",
+    "nationalPhoneNumber",
+    "websiteUri",
+    "priceLevel",
+    "rating",
+    "userRatingCount",
+    "reviews.rating",
+    "reviews.text",
+    "reviews.publishTime",
+    "reviews.authorAttribution.displayName",
+    "photos.heightPx",
+    "photos.widthPx",
+    "photos.name",
+  ].join(",");
   constructor(apiKey?: string) {
     this.client = new PlacesClient({
       apiKey: apiKey || process.env.GOOGLE_MAPS_API_KEY || "",
@@ -55,7 +77,11 @@ export class NewPlacesService {
       user_ratings_total: place.userRatingCount || 0,
       opening_hours: place.regularOpeningHours
         ? {
-            open_now: this.isCurrentlyOpen(place.regularOpeningHours, place.utcOffsetMinutes, place.currentOpeningHours),
+            open_now: this.isCurrentlyOpen(
+              place.regularOpeningHours,
+              place.utcOffsetMinutes,
+              place.currentOpeningHours
+            ),
             weekday_text: this.formatOpeningHours(place.regularOpeningHours),
           }
         : undefined,
@@ -160,7 +186,7 @@ export class NewPlacesService {
         continue;
       }
 
-      let start = openDay * minutesInDay + openMinutes;
+      const start = openDay * minutesInDay + openMinutes;
       let end: number;
 
       if (closeDay === undefined || closeMinutes === undefined) {

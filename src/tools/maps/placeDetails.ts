@@ -3,7 +3,8 @@ import { PlacesSearcher } from "../../services/PlacesSearcher.js";
 import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "get_place_details";
-const DESCRIPTION = "Get detailed information about a specific place including contact details, reviews, ratings, and operating hours";
+const DESCRIPTION =
+  "Get detailed information about a specific place including contact details, reviews, ratings, and operating hours";
 
 const SCHEMA = {
   placeId: z.string().describe("Google Maps place ID"),
