@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.22
+
+- feat: Places API migration + search_places tool + tool descriptions (#32)
+
+
 ## 0.0.21
 
 - Migrated from deprecated `server.tool()` to `server.registerTool()` API for MCP SDK v1.27+ compatibility
