@@ -110,25 +110,14 @@ GOOGLE_MAPS_API_KEY=YOUR_API_KEY npx @cablate/mcp-google-map
 
 ### CLI Exec Mode (Agent Skill)
 
-Use the tools directly from the command line without running the MCP server — ideal for AI agent skills, shell scripts, and one-off queries.
+Use tools directly without running the MCP server:
 
 ```bash
-# Geocode an address
 npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
-
-# Search for places
 npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
-
-# Find nearby restaurants
-npx @cablate/mcp-google-map exec search-nearby '{"center":{"value":"35.68,139.74","isCoordinates":true},"keyword":"restaurant"}'
-
-# Get directions
-npx @cablate/mcp-google-map exec directions '{"origin":"Tokyo Tower","destination":"Shibuya Station","mode":"transit"}'
 ```
 
-Available tools: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`
-
-Output is always JSON to stdout. See [`skills/google-maps/SKILL.md`](./skills/google-maps/SKILL.md) for the agent skill definition and [`skills/google-maps/references/tools-api.md`](./skills/google-maps/references/tools-api.md) for full parameter documentation.
+All 8 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
 ### API Key Configuration
 

@@ -1,13 +1,13 @@
 ---
 name: google-maps
-description: Geospatial query capabilities — geocoding, nearby search, routing, place details, elevation. Trigger when the user mentions locations, addresses, coordinates, navigation, "what's nearby", "how to get there", distance/duration, or any question that inherently involves geographic information — even if they don't explicitly say "map".
+description: Geospatial query capabilities — geocoding, nearby search, routing, place details, elevation. Trigger when the user mentions locations, addresses, coordinates, navigation, "what's nearby", "how to get there", distance/duration, or any question that inherently involves geographic information — even if they don't explicitly say "map". Update when new tools are added or tool parameters change.
 ---
 
 # Google Maps - Geospatial Query Capabilities
 
 ## Overview
 
-Gives an AI Agent the ability to reason about physical space — not just "look up a map", but understand locations, distances, routes, and elevation, and naturally weave that information into conversation.
+Gives an AI Agent the ability to reason about physical space — understand locations, distances, routes, and elevation, and naturally weave that information into conversation.
 
 Without this Skill, the agent can only guess or refuse when asked "how do I get from Taipei 101 to the National Palace Museum?". With it, the agent returns exact coordinates, step-by-step routes, and travel times.
 
@@ -59,29 +59,15 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 - **Output**: JSON to stdout, errors to stderr
 - **Stateless**: each call is independent
 
-### Common Chaining Patterns
+---
 
-**Pattern 1: Search → Details**
-```bash
-# 1. Find places
-exec search-places '{"query":"Michelin restaurants in Taipei"}'
-# 2. Get details using place_id from results
-exec place-details '{"placeId":"ChIJ..."}'
-```
+## When to Update This Skill
 
-**Pattern 2: Geocode → Nearby Search**
-```bash
-# 1. Address to coordinates
-exec geocode '{"address":"Taipei 101"}'
-# 2. Search nearby using coordinates
-exec search-nearby '{"center":{"value":"25.033,121.564","isCoordinates":true},"keyword":"cafe","radius":500}'
-```
-
-**Pattern 3: Multi-point Comparison**
-```bash
-# Compare multiple origins to multiple destinations in one call
-exec distance-matrix '{"origins":["Taipei Main Station","Banqiao Station"],"destinations":["Taoyuan Airport","Songshan Airport"],"mode":"driving"}'
-```
+| Trigger | What to update |
+|---------|----------------|
+| New tool added to the package | Tool Map table + references/tools-api.md |
+| Tool parameters changed | references/tools-api.md |
+| New chaining pattern discovered in practice | references/tools-api.md chaining section |
 
 ---
 
@@ -89,4 +75,4 @@ exec distance-matrix '{"origins":["Taipei Main Station","Banqiao Station"],"dest
 
 | File | Content | When to read |
 |------|---------|--------------|
-| `references/tools-api.md` | Full parameter specs and response formats for all 8 tools | When you need exact parameter names, types, or response shapes |
+| `references/tools-api.md` | Full parameter specs, response formats, and chaining patterns for all 8 tools | When you need exact parameter names, types, response shapes, or multi-tool workflows |

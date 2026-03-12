@@ -157,3 +157,24 @@ Response:
 ```json
 [{ "elevation": 17.23, "location": { "lat": 35.6586, "lng": 139.7454 }, "resolution": 610.81 }]
 ```
+
+---
+
+## Common Chaining Patterns
+
+**Search → Details**
+```bash
+exec search-places '{"query":"Michelin restaurants in Taipei"}'
+exec place-details '{"placeId":"ChIJ..."}'  # use place_id from results
+```
+
+**Geocode → Nearby Search**
+```bash
+exec geocode '{"address":"Taipei 101"}'
+exec search-nearby '{"center":{"value":"25.033,121.564","isCoordinates":true},"keyword":"cafe","radius":500}'
+```
+
+**Multi-point Comparison**
+```bash
+exec distance-matrix '{"origins":["Taipei Main Station","Banqiao Station"],"destinations":["Taoyuan Airport","Songshan Airport"],"mode":"driving"}'
+```
