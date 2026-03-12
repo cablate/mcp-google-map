@@ -16,7 +16,18 @@
 
 ---
 
-A Model Context Protocol (MCP) server providing comprehensive Google Maps API integration with streamable HTTP transport support and multi-session capabilities.
+Google Maps tools for AI agents — use as an **MCP server** or as a standalone **Agent Skill** via CLI.
+
+```bash
+# Agent Skill — no server needed
+npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
+npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
+
+# MCP Server
+npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
+```
+
+All 8 tools available in both modes. See [`skills/google-maps/`](./skills/google-maps/) for the full agent skill definition.
 
 ## Special Thanks
 
