@@ -221,7 +221,7 @@ tests/
 - DNS rebinding protection available for production
 - Input validation using Zod schemas
 
-For enterprise security reviews, see [Security Assessment Clarifications](./SECURITY_ASSESSMENT.md).
+For enterprise security reviews, see [Security Assessment Clarifications](./SECURITY_ASSESSMENT.md) — a 23-item checklist covering licensing, data protection, credential management, tool contamination, and AI agent execution environment verification.
 
 ## Changelog
 
