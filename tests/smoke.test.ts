@@ -454,6 +454,87 @@ async function testMultiSession(): Promise<void> {
   }
 }
 
+// --------------- Test 6: CLI Exec Mode ---------------
+
+async function testExecMode(): Promise<void> {
+  console.log("\n🧪 Test 6: CLI exec mode");
+
+  const { execFileSync } = await import("node:child_process");
+  const { resolve } = await import("node:path");
+  const cliPath = resolve(import.meta.dirname ?? ".", "../dist/cli.js");
+
+  const execArgs = (tool: string, params: string): string => {
+    try {
+      return execFileSync("node", [cliPath, "exec", tool, params, "--apikey", API_KEY], {
+        encoding: "utf-8",
+        timeout: 15000,
+      }).trim();
+    } catch (err: any) {
+      return err.stdout?.trim() ?? err.message;
+    }
+  };
+
+  // Test: exec --help shows available tools
+  try {
+    const helpOut = execFileSync("node", [cliPath, "exec", "--help"], {
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+    assert(helpOut.includes("geocode"), "exec --help lists geocode");
+    assert(helpOut.includes("search-nearby"), "exec --help lists search-nearby");
+    assert(helpOut.includes("Execute a tool"), "exec --help shows description");
+  } catch {
+    assert(false, "exec --help runs without error");
+  }
+
+  // Test: exec unknown tool returns error
+  try {
+    execFileSync("node", [cliPath, "exec", "nonexistent", "{}", "--apikey", "fake"], {
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+    assert(false, "exec unknown tool exits with error");
+  } catch (err: any) {
+    const stderr = err.stderr ?? "";
+    assert(stderr.includes("Unknown tool"), "exec unknown tool error message", stderr.slice(0, 200));
+  }
+
+  if (!API_KEY) {
+    console.log("  ⏭️  Exec API tests skipped (no GOOGLE_MAPS_API_KEY)");
+    return;
+  }
+
+  // Test: exec geocode
+  const geocodeOut = execArgs("geocode", '{"address":"Tokyo Tower"}');
+  try {
+    const parsed = JSON.parse(geocodeOut);
+    assert(parsed?.success === true, "exec geocode succeeds");
+    assert(typeof parsed?.data?.location?.lat === "number", "exec geocode returns lat");
+  } catch {
+    assert(false, "exec geocode returns valid JSON", geocodeOut.slice(0, 200));
+  }
+
+  // Test: exec reverse-geocode
+  const reverseOut = execArgs("reverse-geocode", '{"latitude":35.6586,"longitude":139.7454}');
+  try {
+    const parsed = JSON.parse(reverseOut);
+    assert(parsed?.success === true, "exec reverse-geocode succeeds");
+    assert(parsed?.data?.formatted_address !== undefined, "exec reverse-geocode returns address");
+  } catch {
+    assert(false, "exec reverse-geocode returns valid JSON", reverseOut.slice(0, 200));
+  }
+
+  // Test: exec search-places
+  const searchOut = execArgs("search-places", '{"query":"ramen in Tokyo"}');
+  try {
+    const parsed = JSON.parse(searchOut);
+    assert(parsed?.success === true, "exec search-places succeeds");
+    assert(Array.isArray(parsed?.data) && parsed.data.length > 0, "exec search-places returns results");
+  } catch {
+    assert(false, "exec search-places returns valid JSON", searchOut.slice(0, 200));
+  }
+}
+
 // --------------- Main ---------------
 
 async function main() {
@@ -462,6 +543,9 @@ async function main() {
   console.log(`  Endpoint: ${MCP_ENDPOINT}`);
   console.log(`  API Key:  ${API_KEY ? "✅ provided" : "⚠️  not set (some tests skipped)"}`);
   console.log("═══════════════════════════════════════════");
+
+  // Test exec mode first (no server needed)
+  await testExecMode();
 
   try {
     console.log("\n⏳ Starting server...");
