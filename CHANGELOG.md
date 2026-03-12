@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.23
+
+- chore: remove test-new-api.js, update README security section
+
+
 ## 0.0.22
 
 - feat: Places API migration + search_places tool + tool descriptions (#32)
