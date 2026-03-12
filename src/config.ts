@@ -8,6 +8,7 @@ import { ReverseGeocode, ReverseGeocodeParams } from "./tools/maps/reverseGeocod
 import { DistanceMatrix, DistanceMatrixParams } from "./tools/maps/distanceMatrix.js";
 import { Directions, DirectionsParams } from "./tools/maps/directions.js";
 import { Elevation, ElevationParams } from "./tools/maps/elevation.js";
+import { SearchPlaces, SearchPlacesParams } from "./tools/maps/searchPlaces.js";
 
 // All Google Maps tools are read-only API queries
 const MAPS_TOOL_ANNOTATIONS = {
@@ -76,6 +77,13 @@ const serverConfigs: ServerInstanceConfig[] = [
         schema: Elevation.SCHEMA,
         annotations: MAPS_TOOL_ANNOTATIONS,
         action: (params: ElevationParams) => Elevation.ACTION(params),
+      },
+      {
+        name: SearchPlaces.NAME,
+        description: SearchPlaces.DESCRIPTION,
+        schema: SearchPlaces.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: SearchPlacesParams) => SearchPlaces.ACTION(params),
       },
     ],
   },

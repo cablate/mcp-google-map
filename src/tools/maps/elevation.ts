@@ -3,7 +3,8 @@ import { PlacesSearcher } from "../../services/PlacesSearcher.js";
 import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_elevation";
-const DESCRIPTION = "Get elevation data (height above sea level) for specific geographic locations";
+const DESCRIPTION =
+  "Get elevation (height above sea level in meters) for one or more geographic coordinates. Use for terrain analysis, hiking/cycling route planning, or when the user asks about altitude at specific locations.";
 
 const SCHEMA = {
   locations: z

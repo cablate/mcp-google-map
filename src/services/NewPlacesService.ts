@@ -27,6 +27,17 @@ export class NewPlacesService {
     "photos.widthPx",
     "photos.name",
   ].join(",");
+
+  private readonly searchNearbyFieldMask: string = [
+    "places.displayName",
+    "places.name",
+    "places.id",
+    "places.formattedAddress",
+    "places.location",
+    "places.rating",
+    "places.userRatingCount",
+    "places.currentOpeningHours.openNow",
+  ].join(",");
   constructor(apiKey?: string) {
     this.client = new PlacesClient({
       apiKey: apiKey || process.env.GOOGLE_MAPS_API_KEY || "",
@@ -34,6 +45,100 @@ export class NewPlacesService {
 
     if (!apiKey && !process.env.GOOGLE_MAPS_API_KEY) {
       throw new Error("Google Maps API Key is required");
+    }
+  }
+
+  async searchNearby(params: {
+    location: { lat: number; lng: number };
+    keyword?: string;
+    radius?: number;
+    maxResultCount?: number;
+  }): Promise<any[]> {
+    try {
+      const request: any = {
+        locationRestriction: {
+          circle: {
+            center: {
+              latitude: params.location.lat,
+              longitude: params.location.lng,
+            },
+            radius: params.radius || 1000,
+          },
+        },
+        maxResultCount: Math.min(params.maxResultCount || 20, 20),
+        languageCode: this.defaultLanguage,
+      };
+
+      if (params.keyword) {
+        request.includedTypes = [params.keyword];
+      }
+
+      const [response] = await this.client.searchNearby(request, {
+        otherArgs: {
+          headers: {
+            "X-Goog-FieldMask": this.searchNearbyFieldMask,
+          },
+        },
+      });
+
+      return (response.places || []).map((place: any) => this.transformSearchResult(place));
+    } catch (error: any) {
+      Logger.error("Error in searchNearby (New API):", error);
+      throw new Error(`Failed to search nearby places: ${this.extractErrorMessage(error)}`);
+    }
+  }
+
+  async searchText(params: {
+    textQuery: string;
+    locationBias?: { lat: number; lng: number; radius?: number };
+    openNow?: boolean;
+    minRating?: number;
+    includedType?: string;
+    maxResultCount?: number;
+  }): Promise<any[]> {
+    try {
+      const request: any = {
+        textQuery: params.textQuery,
+        languageCode: this.defaultLanguage,
+        maxResultCount: Math.min(params.maxResultCount || 10, 20),
+      };
+
+      if (params.locationBias) {
+        request.locationBias = {
+          circle: {
+            center: {
+              latitude: params.locationBias.lat,
+              longitude: params.locationBias.lng,
+            },
+            radius: params.locationBias.radius || 5000,
+          },
+        };
+      }
+
+      if (params.openNow) {
+        request.openNow = true;
+      }
+
+      if (params.minRating) {
+        request.minRating = params.minRating;
+      }
+
+      if (params.includedType) {
+        request.includedType = params.includedType;
+      }
+
+      const [response] = await this.client.searchText(request, {
+        otherArgs: {
+          headers: {
+            "X-Goog-FieldMask": this.searchNearbyFieldMask,
+          },
+        },
+      });
+
+      return (response.places || []).map((place: any) => this.transformSearchResult(place));
+    } catch (error: any) {
+      Logger.error("Error in searchText (New API):", error);
+      throw new Error(`Failed to search places: ${this.extractErrorMessage(error)}`);
     }
   }
 
@@ -60,6 +165,25 @@ export class NewPlacesService {
       Logger.error("Error in getPlaceDetails (New API):", error);
       throw new Error(`Failed to get place details for ${placeId}: ${this.extractErrorMessage(error)}`);
     }
+  }
+
+  private transformSearchResult(place: any) {
+    return {
+      name: place.displayName?.text || "",
+      place_id: this.extractLegacyPlaceId(place),
+      formatted_address: place.formattedAddress || "",
+      geometry: {
+        location: {
+          lat: place.location?.latitude || 0,
+          lng: place.location?.longitude || 0,
+        },
+      },
+      rating: place.rating || 0,
+      user_ratings_total: place.userRatingCount || 0,
+      opening_hours: {
+        open_now: place.currentOpeningHours?.openNow ?? null,
+      },
+    };
   }
 
   private transformPlaceResponse(place: any) {

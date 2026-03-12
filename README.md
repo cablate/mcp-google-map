@@ -8,7 +8,7 @@
 
 ---
 
-> **📢 Important Notice**
+> **Important Notice**
 >
 > Google officially announced MCP support for Google Maps on December 10, 2025, introducing **[Maps Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services)** - a fully-managed MCP server for geospatial data and routing.
 >
@@ -16,61 +16,41 @@
 
 ---
 
-A powerful Model Context Protocol (MCP) server providing comprehensive Google Maps API integration with streamable HTTP transport support and LLM processing capabilities.
+A Model Context Protocol (MCP) server providing comprehensive Google Maps API integration with streamable HTTP transport support and multi-session capabilities.
 
-## 🙌 Special Thanks
+## Special Thanks
 
-This project has received contributions from the community.  
+This project has received contributions from the community.
 Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add support for `streamablehttp`.
 
-## ✅ Testing Status
+## Verified Compatibility
 
-**This MCP server has been tested and verified to work correctly with:**
+This MCP server has been tested and verified with:
 
 - Claude Desktop
 - Dive Desktop
 - MCP protocol implementations
 
-All tools and features are confirmed functional through real-world testing.
+## Available Tools
 
-## Features
+| Tool | Description |
+|------|-------------|
+| `search_nearby` | Find places near a location by type (restaurant, cafe, hotel, etc.). Supports filtering by radius, rating, and open status. |
+| `maps_search_places` | Free-text place search (e.g., "sushi restaurants in Tokyo"). Supports location bias, rating, open-now filters. |
+| `get_place_details` | Get full details for a place by its place_id — reviews, phone, website, hours, photos. |
+| `maps_geocode` | Convert an address or landmark name into GPS coordinates. |
+| `maps_reverse_geocode` | Convert GPS coordinates into a street address. |
+| `maps_distance_matrix` | Calculate travel distances and times between multiple origins and destinations. |
+| `maps_directions` | Get step-by-step navigation between two points with route details. |
+| `maps_elevation` | Get elevation (meters above sea level) for geographic coordinates. |
 
-### 🆕 Latest Updates
+All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` — MCP clients can auto-approve these without user confirmation.
 
- - ℹ️  **Reminder: enable Places API (New) in https://console.cloud.google.com before using the new Place features.**
-
-
-### 🗺️ Google Maps Integration
-
-- **Location Search**
-
-  - Search for places near a specific location with customizable radius and filters
-  - Get detailed place information including ratings, opening hours, and contact details
-
-- **Geocoding Services**
-
-  - Convert addresses to coordinates (geocoding)
-  - Convert coordinates to addresses (reverse geocoding)
-
-- **Distance & Directions**
-
-  - Calculate distances and travel times between multiple origins and destinations
-  - Get detailed turn-by-turn directions between two points
-  - Support for different travel modes (driving, walking, bicycling, transit)
-
-- **Elevation Data**
-  - Retrieve elevation data for specific locations
-
-### 🚀 Advanced Features
-
-- **Streamable HTTP Transport**: Latest MCP protocol with real-time streaming capabilities
-- **Session Management**: Stateful sessions with UUID-based identification
-- **Multiple Connection Support**: Handle multiple concurrent client connections
-- **Echo Service**: Built-in testing tool for MCP server functionality
+> **Prerequisite**: Enable **Places API (New)** in [Google Cloud Console](https://console.cloud.google.com) before using place-related tools.
 
 ## Installation
 
-> ⚠️ **Important Notice**: This server uses HTTP transport, not stdio. Direct npx usage in MCP Server Settings is **NOT supported**.
+> **Note**: This server uses HTTP transport, not stdio. Direct npx usage in MCP Server Settings is **NOT supported**.
 
 ### Method 1: Global Installation (Recommended)
 
@@ -87,7 +67,7 @@ mcp-google-map -p 3000 -k "your_api_key_here"
 
 ### Method 2: Using npx (Quick Start)
 
-> ⚠️ **Warning**: Cannot be used directly in MCP Server Settings with stdio mode
+> Cannot be used directly in MCP Server Settings with stdio mode
 
 **Step 1: Launch HTTP Server in Terminal**
 
@@ -110,7 +90,7 @@ GOOGLE_MAPS_API_KEY=YOUR_API_KEY npx @cablate/mcp-google-map
 }
 ```
 
-### ❌ Common Mistake to Avoid
+### Common Mistake to Avoid
 
 ```json
 // This WILL NOT WORK - stdio mode not supported with npx
@@ -125,8 +105,8 @@ GOOGLE_MAPS_API_KEY=YOUR_API_KEY npx @cablate/mcp-google-map
 ### Server Information
 
 - **Endpoint**: `http://localhost:3000/mcp`
-- **Transport**: HTTP (not stdio)
-- **Tools**: 8 Google Maps tools available
+- **Transport**: Streamable HTTP (not stdio)
+- **Tools**: 8 Google Maps tools
 
 ### API Key Configuration
 
@@ -135,14 +115,12 @@ API keys can be provided in three ways (priority order):
 1. **HTTP Headers** (Highest priority)
 
    ```json
-   // MCP Client config
    {
      "mcp-google-map": {
        "transport": "streamableHttp",
        "url": "http://localhost:3000/mcp",
-       // if your MCP Client support 'headers'
        "headers": {
-         "X-Google-Maps-API-Key": "YOUR_API_KEY" 
+         "X-Google-Maps-API-Key": "YOUR_API_KEY"
        }
      }
    }
@@ -159,20 +137,6 @@ API keys can be provided in three ways (priority order):
    GOOGLE_MAPS_API_KEY=your_api_key_here
    MCP_SERVER_PORT=3000
    ```
-
-## Available Tools
-
-The server provides the following tools:
-
-### Google Maps Tools
-
-1. **search_nearby** - Search for nearby places based on location, with optional filtering by keywords, distance, rating, and operating hours
-2. **get_place_details** - Get detailed information about a specific place including contact details, reviews, ratings, and operating hours
-3. **maps_geocode** - Convert addresses or place names to geographic coordinates (latitude and longitude)
-4. **maps_reverse_geocode** - Convert geographic coordinates to a human-readable address
-5. **maps_distance_matrix** - Calculate travel distances and durations between multiple origins and destinations
-6. **maps_directions** - Get detailed turn-by-turn navigation directions between two locations
-7. **maps_elevation** - Get elevation data (height above sea level) for specific geographic locations
 
 ## Development
 
@@ -200,49 +164,68 @@ npm start
 npm run dev
 ```
 
+### Testing
+
+```bash
+# Run smoke tests (no API key required for basic tests)
+npm test
+
+# Run full E2E tests (requires GOOGLE_MAPS_API_KEY)
+npm run test:e2e
+```
+
 ### Project Structure
 
 ```
 src/
-├── cli.ts                    # Main CLI entry point
-├── config.ts                 # Server configuration
-├── index.ts                  # Package exports
+├── cli.ts                        # CLI entry point
+├── config.ts                     # Tool registration and server config
+├── index.ts                      # Package exports
 ├── core/
-│   └── BaseMcpServer.ts     # Base MCP server with streamable HTTP
-└── tools/
-    └── maps/                # Google Maps tools
-        ├── toolclass.ts     # Google Maps API client
-        ├── searchPlaces.ts  # Maps service layer
-        ├── searchNearby.ts  # Search nearby places
-        ├── placeDetails.ts  # Place details
-        ├── geocode.ts       # Geocoding
-        ├── reverseGeocode.ts # Reverse geocoding
-        ├── distanceMatrix.ts # Distance matrix
-        ├── directions.ts    # Directions
-        └── elevation.ts     # Elevation data
+│   └── BaseMcpServer.ts          # MCP server with streamable HTTP transport
+├── services/
+│   ├── NewPlacesService.ts       # Google Places API (New) client
+│   ├── PlacesSearcher.ts         # Service facade layer
+│   └── toolclass.ts              # Legacy Google Maps API client
+├── tools/
+│   └── maps/
+│       ├── searchNearby.ts       # search_nearby tool
+│       ├── searchPlaces.ts       # maps_search_places tool
+│       ├── placeDetails.ts       # get_place_details tool
+│       ├── geocode.ts            # maps_geocode tool
+│       ├── reverseGeocode.ts     # maps_reverse_geocode tool
+│       ├── distanceMatrix.ts     # maps_distance_matrix tool
+│       ├── directions.ts         # maps_directions tool
+│       └── elevation.ts          # maps_elevation tool
+└── utils/
+    ├── apiKeyManager.ts          # API key management
+    └── requestContext.ts         # Per-request context (API key isolation)
+tests/
+└── smoke.test.ts                 # Smoke + E2E test suite
 ```
 
 ## Tech Stack
 
 - **TypeScript** - Type-safe development
 - **Node.js** - Runtime environment
-- **Google Maps Services JS** - Google Maps API integration
-- **Model Context Protocol SDK** - MCP protocol implementation
+- **@googlemaps/places** - Google Places API (New) for place search and details
+- **@googlemaps/google-maps-services-js** - Legacy API for geocoding, directions, distance matrix, elevation
+- **@modelcontextprotocol/sdk** - MCP protocol implementation (v1.27+)
 - **Express.js** - HTTP server framework
 - **Zod** - Schema validation
 
-## Security Considerations
+## Security
 
-- API keys are handled server-side for security
+- API keys are handled server-side
+- Per-session API key isolation for multi-tenant deployments
 - DNS rebinding protection available for production
 - Input validation using Zod schemas
-- Error handling and logging
 
-### Security Assessment Clarifications (2026-03)
+For enterprise security reviews, see [Security Assessment Clarifications](./SECURITY_ASSESSMENT.md).
 
-For enterprise security reviews, see the standalone document:
+## Changelog
 
-- [Security Assessment Clarifications (23 items)](./SECURITY_ASSESSMENT.md)
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
 ## License
 
@@ -250,46 +233,16 @@ MIT
 
 ## Contributing
 
-Community participation and contributions are welcome! Here's how you can contribute:
+Community participation and contributions are welcome!
 
-- ⭐️ Star the project if you find it helpful
-- 🐛 Submit Issues: Report bugs or provide suggestions
-- 🔧 Create Pull Requests: Submit code improvements
-- 📖 Documentation: Help improve documentation
+- Submit Issues: Report bugs or provide suggestions
+- Create Pull Requests: Submit code improvements
+- Documentation: Help improve documentation
 
 ## Contact
 
-If you have any questions or suggestions, feel free to reach out:
-
-- 📧 Email: [reahtuoo310109@gmail.com](mailto:reahtuoo310109@gmail.com)
-- 💻 GitHub: [CabLate](https://github.com/cablate/)
-- 🤝 Collaboration: Welcome to discuss project cooperation
-- 📚 Technical Guidance: Sincere welcome for suggestions and guidance
-
-## Changelog
-
-### v0.0.19 (Latest)
-
-- **New Places API Integration**: Updated to use Google's new Places API (New) instead of the legacy API to resolve HTTP 403 errors and ensure continued functionality.
-
-### v0.0.18
-
-- **Error response improvements**: Now all error messages are in English with more detailed information (previously in Chinese)
-
-### v0.0.17
-
-- **Added HTTP Header Authentication**: Support for passing API keys via `X-Google-Maps-API-Key` header in MCP Client config
-- **Fixed Concurrent User Issues**: Each session now uses its own API key without conflicts
-- **Fixed npx Execution**: Resolved module bundling issues
-- **Improved Documentation**: Clearer setup instructions
-
-### v0.0.14
-
-- Added streamable HTTP transport support
-- Improved CLI interface with emoji indicators
-- Enhanced error handling and logging
-- Added comprehensive tool descriptions for LLM integration
-- Updated to latest MCP SDK version
+- Email: [reahtuoo310109@gmail.com](mailto:reahtuoo310109@gmail.com)
+- GitHub: [CabLate](https://github.com/cablate/)
 
 ## Star History
 

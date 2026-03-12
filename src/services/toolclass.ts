@@ -4,31 +4,6 @@ import { Logger } from "../index.js";
 
 dotenv.config();
 
-interface SearchParams {
-  location: { lat: number; lng: number };
-  radius?: number;
-  keyword?: string;
-  openNow?: boolean;
-  minRating?: number;
-}
-
-interface PlaceResult {
-  name: string;
-  place_id: string;
-  formatted_address?: string;
-  geometry: {
-    location: {
-      lat: number;
-      lng: number;
-    };
-  };
-  rating?: number;
-  user_ratings_total?: number;
-  opening_hours?: {
-    open_now?: boolean;
-  };
-}
-
 interface GeocodeResult {
   lat: number;
   lng: number;
@@ -84,62 +59,6 @@ export class GoogleMapsTools {
     this.apiKey = apiKey || process.env.GOOGLE_MAPS_API_KEY || "";
     if (!this.apiKey) {
       throw new Error("Google Maps API Key is required");
-    }
-  }
-
-  async searchNearbyPlaces(params: SearchParams): Promise<PlaceResult[]> {
-    const searchParams = {
-      location: params.location,
-      radius: params.radius || 1000,
-      keyword: params.keyword,
-      opennow: params.openNow,
-      language: this.defaultLanguage,
-      key: this.apiKey,
-    };
-
-    try {
-      const response = await this.client.placesNearby({
-        params: searchParams,
-      });
-
-      let results = response.data.results;
-
-      if (params.minRating) {
-        results = results.filter((place) => (place.rating || 0) >= (params.minRating || 0));
-      }
-
-      return results as PlaceResult[];
-    } catch (error: any) {
-      Logger.error("Error in searchNearbyPlaces:", error);
-      throw new Error(`Failed to search nearby places: ${extractErrorMessage(error)}`);
-    }
-  }
-
-  async getPlaceDetails(placeId: string) {
-    try {
-      const response = await this.client.placeDetails({
-        params: {
-          place_id: placeId,
-          fields: [
-            "name",
-            "rating",
-            "formatted_address",
-            "opening_hours",
-            "reviews",
-            "geometry",
-            "formatted_phone_number",
-            "website",
-            "price_level",
-            "photos",
-          ],
-          language: this.defaultLanguage,
-          key: this.apiKey,
-        },
-      });
-      return response.data.result;
-    } catch (error: any) {
-      Logger.error("Error in getPlaceDetails:", error);
-      throw new Error(`Failed to get place details for ${placeId}: ${extractErrorMessage(error)}`);
     }
   }
 
