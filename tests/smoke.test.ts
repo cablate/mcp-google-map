@@ -491,6 +491,7 @@ async function testExecMode(): Promise<void> {
   try {
     execFileSync("node", [cliPath, "exec", "nonexistent", "{}", "--apikey", "fake"], {
       encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
       timeout: 5000,
     });
     assert(false, "exec unknown tool exits with error");
