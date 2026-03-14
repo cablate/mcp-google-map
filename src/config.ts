@@ -11,6 +11,9 @@ import { Elevation, ElevationParams } from "./tools/maps/elevation.js";
 import { SearchPlaces, SearchPlacesParams } from "./tools/maps/searchPlaces.js";
 import { Timezone, TimezoneParams } from "./tools/maps/timezone.js";
 import { Weather, WeatherParams } from "./tools/maps/weather.js";
+import { ExploreArea, ExploreAreaParams } from "./tools/maps/exploreArea.js";
+import { PlanRoute, PlanRouteParams } from "./tools/maps/planRoute.js";
+import { ComparePlaces, ComparePlacesParams } from "./tools/maps/comparePlaces.js";
 
 // All Google Maps tools are read-only API queries
 const MAPS_TOOL_ANNOTATIONS = {
@@ -100,6 +103,27 @@ const serverConfigs: ServerInstanceConfig[] = [
         schema: Weather.SCHEMA,
         annotations: MAPS_TOOL_ANNOTATIONS,
         action: (params: WeatherParams) => Weather.ACTION(params),
+      },
+      {
+        name: ExploreArea.NAME,
+        description: ExploreArea.DESCRIPTION,
+        schema: ExploreArea.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: ExploreAreaParams) => ExploreArea.ACTION(params),
+      },
+      {
+        name: PlanRoute.NAME,
+        description: PlanRoute.DESCRIPTION,
+        schema: PlanRoute.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: PlanRouteParams) => PlanRoute.ACTION(params),
+      },
+      {
+        name: ComparePlaces.NAME,
+        description: ComparePlaces.DESCRIPTION,
+        schema: ComparePlaces.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: ComparePlacesParams) => ComparePlaces.ACTION(params),
       },
     ],
   },

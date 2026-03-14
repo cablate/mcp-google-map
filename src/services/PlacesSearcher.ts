@@ -316,6 +316,193 @@ export class PlacesSearcher {
     }
   }
 
+  // --------------- Composite Tools ---------------
+
+  async exploreArea(params: { location: string; types?: string[]; radius?: number; topN?: number }): Promise<any> {
+    const types = params.types || ["restaurant", "cafe", "attraction"];
+    const radius = params.radius || 1000;
+    const topN = params.topN || 3;
+
+    // 1. Geocode
+    const geo = await this.geocode(params.location);
+    if (!geo.success || !geo.data) throw new Error(geo.error || "Geocode failed");
+    const { lat, lng } = geo.data.location;
+
+    // 2. Search each type
+    const categories: any[] = [];
+    for (const type of types) {
+      const search = await this.searchNearby({
+        center: { value: `${lat},${lng}`, isCoordinates: true },
+        keyword: type,
+        radius,
+      });
+      if (!search.success || !search.data) continue;
+
+      // 3. Get details for top N
+      const topPlaces = search.data.slice(0, topN);
+      const detailed = [];
+      for (const place of topPlaces) {
+        if (!place.place_id) continue;
+        const details = await this.getPlaceDetails(place.place_id);
+        detailed.push({
+          name: place.name,
+          address: place.address,
+          rating: place.rating,
+          total_ratings: place.total_ratings,
+          open_now: place.open_now,
+          phone: details.data?.phone,
+          website: details.data?.website,
+        });
+      }
+      categories.push({ type, count: search.data.length, top: detailed });
+    }
+
+    return {
+      success: true,
+      data: {
+        location: { address: geo.data.formatted_address, lat, lng },
+        radius,
+        categories,
+      },
+    };
+  }
+
+  async planRoute(params: {
+    stops: string[];
+    mode?: "driving" | "walking" | "bicycling" | "transit";
+    optimize?: boolean;
+  }): Promise<any> {
+    const mode = params.mode || "driving";
+    const stops = params.stops;
+    if (stops.length < 2) throw new Error("Need at least 2 stops");
+
+    // 1. Geocode all stops
+    const geocoded: Array<{ originalName: string; address: string; lat: number; lng: number }> = [];
+    for (const stop of stops) {
+      const geo = await this.geocode(stop);
+      if (!geo.success || !geo.data) throw new Error(`Failed to geocode: ${stop}`);
+      geocoded.push({
+        originalName: stop,
+        address: geo.data.formatted_address,
+        lat: geo.data.location.lat,
+        lng: geo.data.location.lng,
+      });
+    }
+
+    // 2. If optimize requested and > 2 stops, use distance-matrix + nearest-neighbor
+    //    Use driving mode for optimization (transit matrix requires departure_time and often returns null)
+    let orderedStops = geocoded;
+    if (params.optimize !== false && geocoded.length > 2) {
+      const matrix = await this.calculateDistanceMatrix(stops, stops, "driving");
+      if (matrix.success && matrix.data) {
+        // Nearest-neighbor from first stop
+        const visited = new Set<number>([0]);
+        const order = [0];
+        let current = 0;
+        while (visited.size < geocoded.length) {
+          let bestIdx = -1;
+          let bestDuration = Infinity;
+          for (let i = 0; i < geocoded.length; i++) {
+            if (visited.has(i)) continue;
+            const dur = matrix.data.durations[current]?.[i]?.value ?? Infinity;
+            if (dur < bestDuration) {
+              bestDuration = dur;
+              bestIdx = i;
+            }
+          }
+          if (bestIdx === -1) break;
+          visited.add(bestIdx);
+          order.push(bestIdx);
+          current = bestIdx;
+        }
+        orderedStops = order.map((i) => geocoded[i]);
+      }
+    }
+
+    // 3. Get directions between consecutive stops (use original names for reliable results)
+    const legs: any[] = [];
+    let totalDistance = 0;
+    let totalDuration = 0;
+    for (let i = 0; i < orderedStops.length - 1; i++) {
+      const dir = await this.getDirections(orderedStops[i].originalName, orderedStops[i + 1].originalName, mode);
+      if (dir.success && dir.data) {
+        totalDistance += dir.data.total_distance.value;
+        totalDuration += dir.data.total_duration.value;
+        legs.push({
+          from: orderedStops[i].originalName,
+          to: orderedStops[i + 1].originalName,
+          distance: dir.data.total_distance.text,
+          duration: dir.data.total_duration.text,
+        });
+      } else {
+        legs.push({
+          from: orderedStops[i].originalName,
+          to: orderedStops[i + 1].originalName,
+          distance: "unknown",
+          duration: "unknown",
+          note: dir.error || "Directions unavailable for this segment",
+        });
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        mode,
+        optimized: params.optimize !== false && geocoded.length > 2,
+        stops: orderedStops.map((s) => `${s.originalName} (${s.address})`),
+        legs,
+        total_distance: `${(totalDistance / 1000).toFixed(1)} km`,
+        total_duration: `${Math.round(totalDuration / 60)} min`,
+      },
+    };
+  }
+
+  async comparePlaces(params: {
+    query: string;
+    userLocation?: { latitude: number; longitude: number };
+    limit?: number;
+  }): Promise<any> {
+    const limit = params.limit || 5;
+
+    // 1. Search
+    const search = await this.searchText({ query: params.query });
+    if (!search.success || !search.data) throw new Error(search.error || "Search failed");
+
+    const places = search.data.slice(0, limit);
+
+    // 2. Get details for each
+    const compared: any[] = [];
+    for (const place of places) {
+      const details = await this.getPlaceDetails(place.place_id);
+      compared.push({
+        name: place.name,
+        address: place.address,
+        rating: place.rating,
+        total_ratings: place.total_ratings,
+        open_now: place.open_now,
+        phone: details.data?.phone,
+        website: details.data?.website,
+        price_level: details.data?.price_level,
+      });
+    }
+
+    // 3. Distance from user location (if provided)
+    if (params.userLocation && compared.length > 0) {
+      const origin = `${params.userLocation.latitude},${params.userLocation.longitude}`;
+      const destinations = places.map((p: any) => `${p.location.lat},${p.location.lng}`);
+      const matrix = await this.calculateDistanceMatrix([origin], destinations, "driving");
+      if (matrix.success && matrix.data) {
+        for (let i = 0; i < compared.length; i++) {
+          compared[i].distance = matrix.data.distances[0]?.[i]?.text;
+          compared[i].drive_time = matrix.data.durations[0]?.[i]?.text;
+        }
+      }
+    }
+
+    return { success: true, data: compared };
+  }
+
   async getElevation(locations: Array<{ latitude: number; longitude: number }>): Promise<ElevationResponse> {
     try {
       const result = await this.mapsTools.getElevation(locations);

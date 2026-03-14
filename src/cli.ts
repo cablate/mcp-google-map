@@ -86,6 +86,9 @@ const EXEC_TOOLS = [
   "elevation",
   "timezone",
   "weather",
+  "explore-area",
+  "plan-route",
+  "compare-places",
 ] as const;
 
 async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
@@ -151,6 +154,18 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
         params.forecastDays,
         params.forecastHours
       );
+
+    case "explore-area":
+    case "maps_explore_area":
+      return searcher.exploreArea(params);
+
+    case "plan-route":
+    case "maps_plan_route":
+      return searcher.planRoute(params);
+
+    case "compare-places":
+    case "maps_compare_places":
+      return searcher.comparePlaces(params);
 
     default:
       throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);
