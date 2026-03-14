@@ -322,6 +322,76 @@ export class GoogleMapsTools {
     }
   }
 
+  async getWeather(latitude: number, longitude: number): Promise<any> {
+    try {
+      const url = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${this.apiKey}&location.latitude=${latitude}&location.longitude=${longitude}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const msg = errorData?.error?.message || `HTTP ${response.status}`;
+        throw new Error(msg);
+      }
+
+      const data = await response.json();
+
+      return {
+        temperature: data.temperature,
+        feelsLike: data.feelsLikeTemperature,
+        humidity: data.relativeHumidity,
+        wind: data.wind,
+        conditions: data.weatherCondition?.description?.text || data.weatherCondition?.type,
+        uvIndex: data.uvIndex,
+        precipitation: data.precipitation,
+        visibility: data.visibility,
+        pressure: data.pressure,
+        cloudCover: data.cloudCover,
+        isDayTime: data.isDayTime,
+      };
+    } catch (error: any) {
+      Logger.error("Error in getWeather:", error);
+      throw new Error(`Failed to get weather for (${latitude}, ${longitude}): ${extractErrorMessage(error)}`);
+    }
+  }
+
+  async getTimezone(
+    latitude: number,
+    longitude: number,
+    timestamp?: number
+  ): Promise<{ timeZoneId: string; timeZoneName: string; utcOffset: number; dstOffset: number; localTime: string }> {
+    try {
+      const ts = timestamp ? Math.floor(timestamp / 1000) : Math.floor(Date.now() / 1000);
+
+      const response = await this.client.timezone({
+        params: {
+          location: { lat: latitude, lng: longitude },
+          timestamp: ts,
+          key: this.apiKey,
+        },
+      });
+
+      const result = response.data;
+
+      if (result.status !== "OK") {
+        throw new Error(`Timezone API returned status: ${result.status}`);
+      }
+
+      const totalOffset = (result.rawOffset + result.dstOffset) * 1000;
+      const localTime = new Date(ts * 1000 + totalOffset).toISOString().replace("Z", "");
+
+      return {
+        timeZoneId: result.timeZoneId,
+        timeZoneName: result.timeZoneName,
+        utcOffset: result.rawOffset,
+        dstOffset: result.dstOffset,
+        localTime,
+      };
+    } catch (error: any) {
+      Logger.error("Error in getTimezone:", error);
+      throw new Error(`Failed to get timezone for (${latitude}, ${longitude}): ${extractErrorMessage(error)}`);
+    }
+  }
+
   async getElevation(
     locations: Array<{ latitude: number; longitude: number }>
   ): Promise<Array<{ elevation: number; location: { lat: number; lng: number } }>> {

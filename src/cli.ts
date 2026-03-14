@@ -84,6 +84,8 @@ const EXEC_TOOLS = [
   "directions",
   "distance-matrix",
   "elevation",
+  "timezone",
+  "weather",
 ] as const;
 
 async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
@@ -133,6 +135,14 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
     case "elevation":
     case "maps_elevation":
       return searcher.getElevation(params.locations);
+
+    case "timezone":
+    case "maps_timezone":
+      return searcher.getTimezone(params.latitude, params.longitude, params.timestamp);
+
+    case "weather":
+    case "maps_weather":
+      return searcher.getWeather(params.latitude, params.longitude);
 
     default:
       throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);

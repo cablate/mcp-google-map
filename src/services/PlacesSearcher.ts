@@ -56,6 +56,24 @@ interface DirectionsResponse {
   };
 }
 
+interface TimezoneResponse {
+  success: boolean;
+  error?: string;
+  data?: {
+    timeZoneId: string;
+    timeZoneName: string;
+    utcOffset: number;
+    dstOffset: number;
+    localTime: string;
+  };
+}
+
+interface WeatherResponse {
+  success: boolean;
+  error?: string;
+  data?: any;
+}
+
 interface ElevationResponse {
   success: boolean;
   error?: string;
@@ -264,6 +282,30 @@ export class PlacesSearcher {
       return {
         success: false,
         error: error instanceof Error ? error.message : "An error occurred while getting directions",
+      };
+    }
+  }
+
+  async getTimezone(latitude: number, longitude: number, timestamp?: number): Promise<TimezoneResponse> {
+    try {
+      const result = await this.mapsTools.getTimezone(latitude, longitude, timestamp);
+      return { success: true, data: result };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "An error occurred while getting timezone",
+      };
+    }
+  }
+
+  async getWeather(latitude: number, longitude: number): Promise<WeatherResponse> {
+    try {
+      const result = await this.mapsTools.getWeather(latitude, longitude);
+      return { success: true, data: result };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "An error occurred while getting weather",
       };
     }
   }
