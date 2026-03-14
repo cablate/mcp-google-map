@@ -2,7 +2,7 @@ import { z } from "zod";
 import { PlacesSearcher } from "../../services/PlacesSearcher.js";
 import { getCurrentApiKey } from "../../utils/requestContext.js";
 
-const NAME = "get_place_details";
+const NAME = "maps_place_details";
 const DESCRIPTION =
   "Get comprehensive details for a specific place using its Google Maps place_id. Use after search_nearby or maps_search_places to get full information including reviews, phone number, website, opening hours, and photos. Returns everything needed to evaluate or contact a business.";
 
