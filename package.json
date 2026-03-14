@@ -10,7 +10,8 @@
   "files": [
     "dist",
     "dist/**/*.map",
-    "README.md"
+    "README.md",
+    "skills"
   ],
   "scripts": {
     "build": "tsup --dts",
@@ -28,16 +29,21 @@
   },
   "keywords": [
     "google",
+    "google-maps",
     "map",
-    "api",
-    "llm",
-    "typescript",
     "mcp",
-    "server",
-    "streamable",
-    "location",
+    "mcp-server",
+    "model-context-protocol",
+    "agent-skill",
+    "ai-agent",
+    "geospatial",
     "geocoding",
-    "navigation"
+    "places",
+    "directions",
+    "navigation",
+    "location",
+    "streamable-http",
+    "typescript"
   ],
   "author": "CabLate",
   "license": "MIT",
