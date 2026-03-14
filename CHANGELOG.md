@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.31
+
+- docs: rewrite README header with value proposition and comparison table (#41)
+
+
 ## 0.0.30
 
 - fix: make release workflow resilient to version desync (#40)
