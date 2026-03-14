@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     # Skip automated version bump commits
