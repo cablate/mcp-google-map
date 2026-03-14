@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.32
+
+- feat: add maps_timezone and maps_weather tools (#42)
+
+
 ## 0.0.31
 
 - docs: rewrite README header with value proposition and comparison table (#41)
