@@ -384,7 +384,7 @@ async function testToolCalls(session: McpSession): Promise<void> {
   // Test weather (use US coordinates — Japan is unsupported by Weather API)
   const weatherResult = await sendRequest(session, "tools/call", {
     name: "maps_weather",
-    arguments: { latitude: 37.4220, longitude: -122.0841 },
+    arguments: { latitude: 37.422, longitude: -122.0841 },
   });
   const weatherContent = weatherResult?.result?.content ?? [];
   assert(weatherContent.length > 0, "Weather returns content");

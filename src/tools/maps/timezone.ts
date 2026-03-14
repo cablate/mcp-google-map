@@ -9,7 +9,10 @@ const DESCRIPTION =
 const SCHEMA = {
   latitude: z.number().describe("Latitude coordinate"),
   longitude: z.number().describe("Longitude coordinate"),
-  timestamp: z.number().optional().describe("Unix timestamp in ms to query timezone at a specific moment (defaults to now)"),
+  timestamp: z
+    .number()
+    .optional()
+    .describe("Unix timestamp in ms to query timezone at a specific moment (defaults to now)"),
 };
 
 export type TimezoneParams = z.infer<z.ZodObject<typeof SCHEMA>>;

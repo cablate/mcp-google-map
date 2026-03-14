@@ -142,7 +142,13 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
 
     case "weather":
     case "maps_weather":
-      return searcher.getWeather(params.latitude, params.longitude, params.type, params.forecastDays, params.forecastHours);
+      return searcher.getWeather(
+        params.latitude,
+        params.longitude,
+        params.type,
+        params.forecastDays,
+        params.forecastHours
+      );
 
     default:
       throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);

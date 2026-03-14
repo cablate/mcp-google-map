@@ -13,10 +13,7 @@ const SCHEMA = {
     .enum(["current", "forecast_daily", "forecast_hourly"])
     .optional()
     .describe("current = right now, forecast_daily = multi-day outlook, forecast_hourly = hour-by-hour"),
-  forecastDays: z
-    .number()
-    .optional()
-    .describe("Number of forecast days (1-10, only for forecast_daily, default: 5)"),
+  forecastDays: z.number().optional().describe("Number of forecast days (1-10, only for forecast_daily, default: 5)"),
   forecastHours: z
     .number()
     .optional()
