@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.29
+
+- fix: sync version to 0.0.28 to match npm (#39)
+- fix: add concurrency to release workflow to prevent race conditions (#38)
+- feat: auto-publish to MCP Registry on release (#37)
+- chore: update descriptions, server.json version, add CLAUDE.md (#36)
+
+
 ## 0.0.27
 
 - chore: align skill frontmatter to agentskills.io spec (#35)
