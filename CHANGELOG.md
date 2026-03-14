@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.26
+
+- feat: add stdio transport support + MCP Registry metadata
+
+
 ## 0.0.25
 
 - chore: add agent-skill keywords + ship skills/ in npm package
