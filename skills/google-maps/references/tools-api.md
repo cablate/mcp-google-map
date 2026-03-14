@@ -160,6 +160,95 @@ Response:
 
 ---
 
+## timezone
+
+Get timezone and local time for coordinates.
+
+```bash
+exec timezone '{"latitude": 35.6586, "longitude": 139.7454}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| latitude | number | yes | Latitude |
+| longitude | number | yes | Longitude |
+| timestamp | number | no | Unix timestamp in ms (defaults to now) |
+
+Response:
+```json
+{ "timeZoneId": "Asia/Tokyo", "timeZoneName": "Japan Standard Time", "utcOffset": 32400, "dstOffset": 0, "localTime": "2026-03-14T16:19:16.000" }
+```
+
+---
+
+## weather
+
+Get current weather or forecast. Coverage: most regions, but China, Japan, South Korea, Cuba, Iran, North Korea, Syria are unsupported.
+
+```bash
+exec weather '{"latitude": 37.4220, "longitude": -122.0841}'
+exec weather '{"latitude": 37.4220, "longitude": -122.0841, "type": "forecast_daily", "forecastDays": 3}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| latitude | number | yes | Latitude |
+| longitude | number | yes | Longitude |
+| type | string | no | `current` (default), `forecast_daily`, `forecast_hourly` |
+| forecastDays | number | no | 1-10, for forecast_daily (default: 5) |
+| forecastHours | number | no | 1-240, for forecast_hourly (default: 24) |
+
+---
+
+## explore-area (composite)
+
+Explore a neighborhood in one call. Internally chains geocode → search-nearby (per type) → place-details (top N).
+
+```bash
+exec explore-area '{"location": "Tokyo Tower", "types": ["restaurant", "cafe"], "topN": 2}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| location | string | yes | Address or landmark |
+| types | string[] | no | Place types to search (default: restaurant, cafe, attraction) |
+| radius | number | no | Search radius in meters (default: 1000) |
+| topN | number | no | Top results per type to get details for (default: 3) |
+
+---
+
+## plan-route (composite)
+
+Plan an optimized multi-stop route. Internally chains geocode → distance-matrix → nearest-neighbor → directions.
+
+```bash
+exec plan-route '{"stops": ["Tokyo Tower", "Shibuya Station", "Shinjuku Station", "Ueno Park"], "mode": "driving"}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| stops | string[] | yes | Addresses or landmarks (min 2) |
+| mode | string | no | driving, walking, bicycling, transit (default: driving) |
+| optimize | boolean | no | Auto-optimize visit order (default: true) |
+
+---
+
+## compare-places (composite)
+
+Compare places side-by-side. Internally chains search-places → place-details → distance-matrix.
+
+```bash
+exec compare-places '{"query": "ramen near Shibuya", "limit": 3}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| query | string | yes | Search query |
+| userLocation | object | no | `{ latitude, longitude }` — adds distance/drive time |
+| limit | number | no | Max places to compare (default: 5) |
+
+---
+
 ## Chaining Patterns
 
 ### Basic Patterns

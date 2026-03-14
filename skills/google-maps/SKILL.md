@@ -35,7 +35,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 
 ## Tool Map
 
-8 tools in three categories — pick by scenario:
+13 tools in four categories — pick by scenario:
 
 ### Place Discovery
 | Tool | When to use | Example |
@@ -52,10 +52,19 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | `directions` | How to get from A to B | "Route from Taipei Main Station to the airport" |
 | `distance-matrix` | Compare distances across multiple points | "Which of these 3 hotels is closest to the airport?" |
 
-### Terrain
+### Environment
 | Tool | When to use | Example |
 |------|-------------|---------|
 | `elevation` | Query altitude | "Elevation profile along this hiking trail" |
+| `timezone` | Need local time at a destination | "What time is it in Tokyo?" |
+| `weather` | Weather at a location (current or forecast) | "What's the weather in Paris?" |
+
+### Composite (one-call shortcuts)
+| Tool | When to use | Example |
+|------|-------------|---------|
+| `explore-area` | Overview of a neighborhood | "What's around Tokyo Tower?" |
+| `plan-route` | Multi-stop optimized itinerary | "Visit these 5 places efficiently" |
+| `compare-places` | Side-by-side comparison | "Which ramen shop near Shibuya?" |
 
 ---
 

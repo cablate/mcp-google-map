@@ -6,7 +6,7 @@
 
 Give your AI agent the ability to understand the physical world — geocode, route, search, and reason about locations.
 
-- **10 tools** — geocode, reverse-geocode, search-nearby, search-places, place-details, directions, distance-matrix, elevation, timezone, weather
+- **13 tools** — 10 atomic + 3 composite (explore-area, plan-route, compare-places)
 - **3 modes** — stdio, StreamableHTTP, standalone exec CLI
 - **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
 
@@ -14,7 +14,7 @@ Give your AI agent the ability to understand the physical world — geocode, rou
 
 | | This project | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
 |---|---|---|
-| Tools | **10** | 3 |
+| Tools | **13** | 3 |
 | Geocoding | Yes | No |
 | Step-by-step directions | Yes | No |
 | Elevation | Yes | No |
@@ -22,6 +22,7 @@ Give your AI agent the ability to understand the physical world — geocode, rou
 | Place details | Yes | No |
 | Timezone | Yes | No |
 | Weather | Yes | Yes |
+| Composite tools (explore, plan, compare) | Yes | No |
 | Open source | MIT | No |
 | Self-hosted | Yes | Google-managed only |
 | Agent Skill | Yes | No |
@@ -56,7 +57,11 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_directions` | Get step-by-step navigation between two points with route details. |
 | `maps_elevation` | Get elevation (meters above sea level) for geographic coordinates. |
 | `maps_timezone` | Get timezone ID, name, UTC/DST offsets, and local time for coordinates. |
-| `maps_weather` | Get current weather conditions — temperature, humidity, wind, UV, precipitation. |
+| `maps_weather` | Get current weather conditions or forecast — temperature, humidity, wind, UV, precipitation. |
+| **Composite Tools** | |
+| `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
+| `maps_plan_route` | Plan an optimized multi-stop route — geocodes, finds best order, returns directions. |
+| `maps_compare_places` | Compare places side-by-side — searches, gets details, and optionally calculates distances. |
 
 All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` — MCP clients can auto-approve these without user confirmation.
 
@@ -106,7 +111,7 @@ Then configure your MCP client:
 ### Server Information
 
 - **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
-- **Tools**: 10 Google Maps tools
+- **Tools**: 13 Google Maps tools (10 atomic + 3 composite)
 
 ### CLI Exec Mode (Agent Skill)
 
@@ -117,7 +122,7 @@ npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
 npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
 ```
 
-All 10 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
+All 13 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `explore-area`, `plan-route`, `compare-places`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
 ### API Key Configuration
 
@@ -209,7 +214,10 @@ src/
 │       ├── directions.ts         # maps_directions tool
 │       ├── elevation.ts          # maps_elevation tool
 │       ├── timezone.ts           # maps_timezone tool
-│       └── weather.ts            # maps_weather tool
+│       ├── weather.ts            # maps_weather tool
+│       ├── exploreArea.ts        # maps_explore_area (composite)
+│       ├── planRoute.ts          # maps_plan_route (composite)
+│       └── comparePlaces.ts      # maps_compare_places (composite)
 └── utils/
     ├── apiKeyManager.ts          # API key management
     └── requestContext.ts         # Per-request context (API key isolation)
