@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.30
+
+- fix: make release workflow resilient to version desync (#40)
+
+
 ## 0.0.29
 
 - fix: sync version to 0.0.28 to match npm (#39)
