@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.27
+
+- chore: align skill frontmatter to agentskills.io spec (#35)
+
+
 ## 0.0.26
 
 - feat: add stdio transport support + MCP Registry metadata
