@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.24
+
+- feat: add exec CLI subcommand + agent skill definition (#33)
+
+
 ## 0.0.23
 
 - chore: remove test-new-api.js, update README security section
