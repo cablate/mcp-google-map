@@ -6,41 +6,42 @@
 
 # MCP Google Map Server
 
----
+Give your AI agent the ability to understand the physical world — geocode, route, search, and reason about locations.
 
-> **Important Notice**
->
-> Google officially announced MCP support for Google Maps on December 10, 2025, introducing **[Maps Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services)** - a fully-managed MCP server for geospatial data and routing.
->
-> This community project remains actively maintained as an alternative with different features and deployment options.
+- **8 tools** — geocode, reverse-geocode, search-nearby, search-places, place-details, directions, distance-matrix, elevation
+- **3 modes** — stdio, StreamableHTTP, standalone exec CLI
+- **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
 
----
+### vs Google Grounding Lite
 
-Google Maps tools for AI agents — use as an **MCP server** or as a standalone **Agent Skill** via CLI.
+| | This project | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
+|---|---|---|
+| Tools | **8** | 3 |
+| Geocoding | Yes | No |
+| Step-by-step directions | Yes | No |
+| Elevation | Yes | No |
+| Distance matrix | Yes | No |
+| Place details | Yes | No |
+| Open source | MIT | No |
+| Self-hosted | Yes | Google-managed only |
+| Agent Skill | Yes | No |
+
+### Quick Start
 
 ```bash
-# Agent Skill — no server needed
-npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
-npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
+# stdio (Claude Desktop, Cursor, etc.)
+npx @cablate/mcp-google-map --stdio
 
-# MCP Server
+# exec CLI — no server needed
+npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
+
+# HTTP server
 npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 ```
 
-All 8 tools available in both modes. See [`skills/google-maps/`](./skills/google-maps/) for the full agent skill definition.
-
 ## Special Thanks
 
-This project has received contributions from the community.
 Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add support for `streamablehttp`.
-
-## Verified Compatibility
-
-This MCP server has been tested and verified with:
-
-- Claude Desktop
-- Dive Desktop
-- MCP protocol implementations
 
 ## Available Tools
 
