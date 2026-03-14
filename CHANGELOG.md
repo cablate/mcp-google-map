@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.34
+
+- docs: sync all tool references to 13 tools + add tool change checklist (#45)
+
+
 ## 0.0.33
 
 - feat: add composite tools — explore-area, plan-route, compare-places (#44)
