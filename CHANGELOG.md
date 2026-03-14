@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.25
+
+- chore: add agent-skill keywords + ship skills/ in npm package
+
+
 ## 0.0.24
 
 - feat: add exec CLI subcommand + agent skill definition (#33)
