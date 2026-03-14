@@ -61,62 +61,48 @@ All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` â
 
 ## Installation
 
-> **Note**: This server uses HTTP transport, not stdio. Direct npx usage in MCP Server Settings is **NOT supported**.
+### Method 1: stdio (Recommended for most clients)
 
-### Method 1: Global Installation (Recommended)
-
-```bash
-# Install globally
-npm install -g @cablate/mcp-google-map
-
-# Run the server
-mcp-google-map --port 3000 --apikey "your_api_key_here"
-
-# Using short options
-mcp-google-map -p 3000 -k "your_api_key_here"
-```
-
-### Method 2: Using npx (Quick Start)
-
-> Cannot be used directly in MCP Server Settings with stdio mode
-
-**Step 1: Launch HTTP Server in Terminal**
-
-```bash
-# Run in a separate terminal
-npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
-
-# Or with environment variable
-GOOGLE_MAPS_API_KEY=YOUR_API_KEY npx @cablate/mcp-google-map
-```
-
-**Step 2: Configure MCP Client to Use HTTP**
+Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports stdio:
 
 ```json
 {
-  "mcp-google-map": {
-    "transport": "http",
-    "url": "http://localhost:3000/mcp"
+  "mcpServers": {
+    "google-maps": {
+      "command": "npx",
+      "args": ["-y", "@cablate/mcp-google-map", "--stdio"],
+      "env": {
+        "GOOGLE_MAPS_API_KEY": "YOUR_API_KEY"
+      }
+    }
   }
 }
 ```
 
-### Common Mistake to Avoid
+### Method 2: HTTP Server
+
+For multi-session deployments, per-request API key isolation, or remote access:
+
+```bash
+npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
+```
+
+Then configure your MCP client:
 
 ```json
-// This WILL NOT WORK - stdio mode not supported with npx
 {
-  "mcp-google-map": {
-    "command": "npx",
-    "args": ["@cablate/mcp-google-map"]
+  "mcpServers": {
+    "google-maps": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp"
+    }
   }
 }
 ```
 
 ### Server Information
 
-- **Endpoint**: `http://localhost:3000/mcp`
-- **Transport**: Streamable HTTP (not stdio)
+- **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
 - **Tools**: 8 Google Maps tools
 
 ### CLI Exec Mode (Agent Skill)

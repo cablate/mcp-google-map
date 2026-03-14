@@ -216,7 +216,7 @@ if (isRunDirectly || isMainModule) {
     )
     .command(
       "$0",
-      "Start the MCP server",
+      "Start the MCP server (HTTP by default, --stdio for stdio mode)",
       (yargs) => {
         return yargs
           .option("port", {
@@ -231,26 +231,43 @@ if (isRunDirectly || isMainModule) {
             description: "Google Maps API key",
             default: process.env.GOOGLE_MAPS_API_KEY,
           })
+          .option("stdio", {
+            type: "boolean",
+            description: "Use stdio transport instead of HTTP",
+            default: false,
+          })
           .example([
-            ["$0", "Start server with default settings"],
-            ['$0 --port 3000 --apikey "your_api_key"', "Start with custom port and API key"],
+            ["$0", "Start HTTP server with default settings"],
+            ['$0 --port 3000 --apikey "your_api_key"', "Start HTTP with custom port and API key"],
+            ["$0 --stdio", "Start in stdio mode (for Claude Desktop, Cursor, etc.)"],
           ]);
       },
       async (argv) => {
-        Logger.log("🗺️  Google Maps MCP Server");
-        Logger.log("   A Model Context Protocol server for Google Maps services");
-        Logger.log("");
-
-        if (!argv.apikey) {
-          Logger.log("⚠️  Google Maps API Key not found!");
-          Logger.log("   Please provide --apikey parameter or set GOOGLE_MAPS_API_KEY in your .env file");
-          Logger.log("");
+        if (argv.apikey) {
+          process.env.GOOGLE_MAPS_API_KEY = argv.apikey as string;
         }
 
-        startServer(argv.port as number, argv.apikey as string).catch((error) => {
-          Logger.error("❌ Failed to start server:", error);
-          process.exit(1);
-        });
+        if (argv.stdio) {
+          // stdio mode — all logs go to stderr, stdout reserved for JSON-RPC
+          const server = new BaseMcpServer(serverConfigs[0].name, serverConfigs[0].tools);
+          await server.startStdio();
+        } else {
+          // HTTP mode
+          Logger.log("🗺️  Google Maps MCP Server");
+          Logger.log("   A Model Context Protocol server for Google Maps services");
+          Logger.log("");
+
+          if (!argv.apikey) {
+            Logger.log("⚠️  Google Maps API Key not found!");
+            Logger.log("   Please provide --apikey parameter or set GOOGLE_MAPS_API_KEY in your .env file");
+            Logger.log("");
+          }
+
+          startServer(argv.port as number, argv.apikey as string).catch((error) => {
+            Logger.error("❌ Failed to start server:", error);
+            process.exit(1);
+          });
+        }
       }
     )
     .version(packageVersion)

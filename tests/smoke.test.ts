@@ -454,10 +454,135 @@ async function testMultiSession(): Promise<void> {
   }
 }
 
-// --------------- Test 6: CLI Exec Mode ---------------
+// --------------- Test 6: Stdio Transport ---------------
+
+async function testStdio(): Promise<void> {
+  console.log("\n🧪 Test 6: Stdio transport");
+
+  const { spawn } = await import("node:child_process");
+  const { resolve } = await import("node:path");
+  const cliPath = resolve(import.meta.dirname ?? ".", "../dist/cli.js");
+
+  // Helper: send a JSON-RPC message over stdio and collect the response
+  const stdioCall = (messages: object[]): Promise<string[]> => {
+    return new Promise((resolvePromise, reject) => {
+      const args = ["--stdio"];
+      if (API_KEY) args.push("--apikey", API_KEY);
+
+      const child = spawn("node", [cliPath, ...args], {
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+
+      let stdout = "";
+      child.stdout!.on("data", (chunk: Buffer) => {
+        stdout += chunk.toString();
+      });
+
+      const timeout = setTimeout(() => {
+        child.kill();
+        reject(new Error("stdio test timed out"));
+      }, 15000);
+
+      child.on("close", () => {
+        clearTimeout(timeout);
+        resolvePromise(stdout.split("\n").filter((l) => l.trim()));
+      });
+
+      // Send all messages then close stdin
+      for (const msg of messages) {
+        child.stdin!.write(JSON.stringify(msg) + "\n");
+      }
+      child.stdin!.end();
+    });
+  };
+
+  // Test: initialize
+  try {
+    const lines = await stdioCall([
+      {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: PROTOCOL_VERSION,
+          capabilities: {},
+          clientInfo: { name: "stdio-test", version: "1.0.0" },
+        },
+      },
+    ]);
+    assert(lines.length > 0, "stdio: initialize returns response");
+    const resp = JSON.parse(lines[0]);
+    assert(resp?.result?.serverInfo?.name !== undefined, "stdio: server info present");
+    assert(resp?.result?.capabilities?.tools !== undefined, "stdio: tools capability present");
+  } catch (err: any) {
+    assert(false, "stdio: initialize succeeds", err.message);
+  }
+
+  // Test: initialize + list tools
+  try {
+    const lines = await stdioCall([
+      {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: PROTOCOL_VERSION,
+          capabilities: {},
+          clientInfo: { name: "stdio-test", version: "1.0.0" },
+        },
+      },
+      { jsonrpc: "2.0", method: "notifications/initialized" },
+      { jsonrpc: "2.0", id: 2, method: "tools/list" },
+    ]);
+    // Find tools/list response
+    const toolsResp = lines.map((l) => JSON.parse(l)).find((m: any) => m.id === 2);
+    const tools = toolsResp?.result?.tools ?? [];
+    assert(tools.length >= 8, `stdio: tools/list returns ${tools.length} tools`);
+  } catch (err: any) {
+    assert(false, "stdio: tools/list succeeds", err.message);
+  }
+
+  // Test: tool call (geocode) via stdio
+  if (API_KEY) {
+    try {
+      const lines = await stdioCall([
+        {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: PROTOCOL_VERSION,
+            capabilities: {},
+            clientInfo: { name: "stdio-test", version: "1.0.0" },
+          },
+        },
+        { jsonrpc: "2.0", method: "notifications/initialized" },
+        {
+          jsonrpc: "2.0",
+          id: 2,
+          method: "tools/call",
+          params: { name: "maps_geocode", arguments: { address: "Tokyo Tower" } },
+        },
+      ]);
+      const geocodeResp = lines.map((l) => JSON.parse(l)).find((m: any) => m.id === 2);
+      const content = geocodeResp?.result?.content ?? [];
+      assert(content.length > 0, "stdio: geocode returns content");
+      if (content.length > 0) {
+        const parsed = JSON.parse(content[0].text);
+        assert(typeof parsed?.location?.lat === "number", "stdio: geocode returns lat");
+      }
+    } catch (err: any) {
+      assert(false, "stdio: geocode succeeds", err.message);
+    }
+  } else {
+    console.log("  ⏭️  stdio tool call skipped (no GOOGLE_MAPS_API_KEY)");
+  }
+}
+
+// --------------- Test 7: CLI Exec Mode ---------------
 
 async function testExecMode(): Promise<void> {
-  console.log("\n🧪 Test 6: CLI exec mode");
+  console.log("\n🧪 Test 7: CLI exec mode");
 
   const { execFileSync } = await import("node:child_process");
   const { resolve } = await import("node:path");
@@ -545,7 +670,8 @@ async function main() {
   console.log(`  API Key:  ${API_KEY ? "✅ provided" : "⚠️  not set (some tests skipped)"}`);
   console.log("═══════════════════════════════════════════");
 
-  // Test exec mode first (no server needed)
+  // Test stdio and exec mode first (no server needed)
+  await testStdio();
   await testExecMode();
 
   try {

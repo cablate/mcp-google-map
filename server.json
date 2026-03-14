@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.cablate/google-map",
+  "title": "Google Maps MCP Server",
+  "description": "Google Maps tools for AI agents — 8 tools (geocode, search, directions, elevation) via MCP server or standalone Agent Skill CLI. The only maps MCP with Agent Skill definitions, exec CLI mode, and StreamableHTTP multi-session support.",
+  "repository": {
+    "url": "https://github.com/cablate/mcp-google-map",
+    "source": "github"
+  },
+  "version": "0.0.24",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@cablate/mcp-google-map",
+      "version": "0.0.24",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GOOGLE_MAPS_API_KEY",
+          "description": "Google Maps API key (get one at https://console.cloud.google.com)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

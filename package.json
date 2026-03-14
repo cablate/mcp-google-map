@@ -1,7 +1,8 @@
 {
   "name": "@cablate/mcp-google-map",
   "version": "0.0.25",
-  "description": "Google Maps MCP server with streamable HTTP transport support for location services, geocoding, and navigation",
+  "mcpName": "io.github.cablate/google-map",
+  "description": "Google Maps tools for AI agents — 8 tools (geocode, search, directions, elevation) via MCP server or standalone Agent Skill CLI",
   "type": "module",
   "main": "dist/index.js",
   "bin": {

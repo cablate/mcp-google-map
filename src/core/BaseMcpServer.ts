@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { isInitializeRequest, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
@@ -177,6 +178,11 @@ export class BaseMcpServer {
       Logger.log(`[${this.serverName}] HTTP server listening on port ${port}`);
       Logger.log(`[${this.serverName}] MCP endpoint available at http://localhost:${port}/mcp`);
     });
+  }
+
+  async startStdio(): Promise<void> {
+    const transport = new StdioServerTransport();
+    await this.connect(transport);
   }
 
   async stopHttpServer(): Promise<void> {
