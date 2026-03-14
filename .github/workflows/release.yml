@@ -35,6 +35,12 @@ jobs:
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
+      - name: Sync latest from main (pick up previous release commits)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+
       - name: Bump version
         run: npm version patch --no-git-tag-version
 
@@ -82,11 +88,10 @@ jobs:
       - name: Commit version bump & tag
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json package-lock.json CHANGELOG.md server.json
           git commit -m "chore: release v${VERSION}"
           git tag "v${VERSION}"
+          git pull --rebase
           git push
           git push --tags
 
