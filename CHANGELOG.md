@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.33
+
+- feat: add composite tools — explore-area, plan-route, compare-places (#44)
+- refactor!: unify tool namespace to maps_* prefix (#43)
+
+
 ## 0.0.32
 
 - feat: add maps_timezone and maps_weather tools (#42)

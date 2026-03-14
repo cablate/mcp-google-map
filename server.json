@@ -7,12 +7,12 @@
     "url": "https://github.com/cablate/mcp-google-map",
     "source": "github"
   },
-  "version": "0.0.32",
+  "version": "0.0.33",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@cablate/mcp-google-map",
-      "version": "0.0.32",
+      "version": "0.0.33",
       "transport": {
         "type": "stdio"
       },
