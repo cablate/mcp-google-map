@@ -1,6 +1,14 @@
 ---
 name: google-maps
 description: Geospatial query capabilities — geocoding, nearby search, routing, place details, elevation. Trigger when the user mentions locations, addresses, coordinates, navigation, "what's nearby", "how to get there", distance/duration, or any question that inherently involves geographic information — even if they don't explicitly say "map". Update when new tools are added or tool parameters change.
+license: MIT
+version: 0.0.25
+compatibility:
+  - claude-code
+  - cursor
+  - vscode-copilot
+  - openai-codex
+  - gemini-cli
 ---
 
 # Google Maps - Geospatial Query Capabilities
@@ -17,9 +25,11 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 
 | Principle | Explanation |
 |-----------|-------------|
-| Chain over single-shot | Most geo questions require chaining: geocode → search-nearby → place-details. Think about the full pipeline when planning queries. |
+| Chain over single-shot | Most geo questions require 2-5 tool calls chained together. See Scenario Recipes in references/tools-api.md for the full patterns. |
+| Match recipe to intent | Map the user's question to a recipe (Trip Planning, Local Discovery, Route Comparison, Neighborhood Analysis, Multi-Stop, Place Comparison, Along the Route) before calling any tool. |
 | Precise input saves trouble | Use coordinates over address strings when available. Use place_id over name search. More precise input = more reliable output. |
 | Output is structured | Every tool returns JSON. Use it directly for downstream computation or comparison — no extra parsing needed. |
+| Present as tables | Users prefer comparison tables and scorecards over raw JSON. Format results for readability. |
 
 ---
 
@@ -75,4 +85,4 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 
 | File | Content | When to read |
 |------|---------|--------------|
-| `references/tools-api.md` | Full parameter specs, response formats, and chaining patterns for all 8 tools | When you need exact parameter names, types, response shapes, or multi-tool workflows |
+| `references/tools-api.md` | Full parameter specs, response formats, 7 scenario recipes, and decision guide | When you need exact parameters, response shapes, or multi-tool workflow patterns |
