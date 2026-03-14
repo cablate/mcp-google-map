@@ -16,7 +16,18 @@
 
 ---
 
-A Model Context Protocol (MCP) server providing comprehensive Google Maps API integration with streamable HTTP transport support and multi-session capabilities.
+Google Maps tools for AI agents — use as an **MCP server** or as a standalone **Agent Skill** via CLI.
+
+```bash
+# Agent Skill — no server needed
+npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
+npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
+
+# MCP Server
+npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
+```
+
+All 8 tools available in both modes. See [`skills/google-maps/`](./skills/google-maps/) for the full agent skill definition.
 
 ## Special Thanks
 
@@ -107,6 +118,17 @@ GOOGLE_MAPS_API_KEY=YOUR_API_KEY npx @cablate/mcp-google-map
 - **Endpoint**: `http://localhost:3000/mcp`
 - **Transport**: Streamable HTTP (not stdio)
 - **Tools**: 8 Google Maps tools
+
+### CLI Exec Mode (Agent Skill)
+
+Use tools directly without running the MCP server:
+
+```bash
+npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
+npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
+```
+
+All 8 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
 ### API Key Configuration
 
@@ -202,6 +224,11 @@ src/
     └── requestContext.ts         # Per-request context (API key isolation)
 tests/
 └── smoke.test.ts                 # Smoke + E2E test suite
+skills/
+└── google-maps/
+    ├── SKILL.md                  # Agent skill definition
+    └── references/
+        └── tools-api.md          # Tool parameter reference
 ```
 
 ## Tech Stack

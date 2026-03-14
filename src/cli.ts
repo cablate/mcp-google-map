@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import { config as dotenvConfig } from "dotenv";
-import express from "express";
-import path, { resolve } from "path";
+import { resolve } from "path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import serverConfigs from "./config.js";
 import { BaseMcpServer } from "./core/BaseMcpServer.js";
 import { Logger } from "./index.js";
+import { PlacesSearcher } from "./services/PlacesSearcher.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { readFileSync } from "fs";
@@ -73,9 +73,75 @@ export async function startServer(port?: number, apiKey?: string): Promise<void>
   Logger.log("💡 Need help? Check the README.md for configuration details.");
 }
 
+// --------------- Exec Mode ---------------
+
+const EXEC_TOOLS = [
+  "geocode",
+  "reverse-geocode",
+  "search-nearby",
+  "search-places",
+  "place-details",
+  "directions",
+  "distance-matrix",
+  "elevation",
+] as const;
+
+async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
+  const searcher = new PlacesSearcher(apiKey);
+
+  switch (toolName) {
+    case "geocode":
+    case "maps_geocode":
+      return searcher.geocode(params.address);
+
+    case "reverse-geocode":
+    case "maps_reverse_geocode":
+      return searcher.reverseGeocode(params.latitude, params.longitude);
+
+    case "search-nearby":
+    case "search_nearby":
+      return searcher.searchNearby(params);
+
+    case "search-places":
+    case "maps_search_places":
+      return searcher.searchText({
+        query: params.query,
+        locationBias: params.locationBias,
+        openNow: params.openNow,
+        minRating: params.minRating,
+        includedType: params.includedType,
+      });
+
+    case "place-details":
+    case "get_place_details":
+      return searcher.getPlaceDetails(params.placeId);
+
+    case "directions":
+    case "maps_directions":
+      return searcher.getDirections(
+        params.origin,
+        params.destination,
+        params.mode,
+        params.departure_time,
+        params.arrival_time
+      );
+
+    case "distance-matrix":
+    case "maps_distance_matrix":
+      return searcher.calculateDistanceMatrix(params.origins, params.destinations, params.mode);
+
+    case "elevation":
+    case "maps_elevation":
+      return searcher.getElevation(params.locations);
+
+    default:
+      throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);
+  }
+}
+
+// --------------- Entry Point ---------------
+
 // Check if this script is being run directly
-// When installed globally via npm, process.argv[1] might be a symlink like /usr/local/bin/mcp-google-map
-// So we check multiple conditions to ensure the script runs properly
 const isRunDirectly =
   process.argv[1] &&
   (process.argv[1].endsWith("cli.ts") ||
@@ -83,66 +149,112 @@ const isRunDirectly =
     process.argv[1].endsWith("mcp-google-map") ||
     process.argv[1].includes("mcp-google-map"));
 
-// For ES modules, we can also check if this file is the entry point
 const isMainModule = import.meta.url === `file://${process.argv[1]}`;
 
 if (isRunDirectly || isMainModule) {
-  // Read package.json to get version
   let packageVersion = "0.0.0";
   try {
     const packageJsonPath = resolve(__dirname, "../package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     packageVersion = packageJson.version;
   } catch (e) {
-    // Fallback version if package.json can't be read
     packageVersion = "0.0.0";
   }
 
-  // Parse command line arguments
-  const argv = yargs(hideBin(process.argv))
-    .option("port", {
-      alias: "p",
-      type: "number",
-      description: "Port to run the MCP server on",
-      default: process.env.MCP_SERVER_PORT ? parseInt(process.env.MCP_SERVER_PORT) : 3000,
-    })
-    .option("apikey", {
-      alias: "k",
-      type: "string",
-      description: "Google Maps API key",
-      default: process.env.GOOGLE_MAPS_API_KEY,
-    })
-    .option("help", {
-      alias: "h",
-      type: "boolean",
-      description: "Show help",
-    })
+  yargs(hideBin(process.argv))
+    .command(
+      "exec <tool> [params]",
+      "Execute a tool directly and output JSON",
+      (yargs) => {
+        return yargs
+          .positional("tool", {
+            type: "string",
+            describe: `Tool name: ${EXEC_TOOLS.join(", ")}`,
+          })
+          .positional("params", {
+            type: "string",
+            describe: "JSON parameters string",
+          })
+          .option("apikey", {
+            alias: "k",
+            type: "string",
+            description: "Google Maps API key",
+            default: process.env.GOOGLE_MAPS_API_KEY,
+          })
+          .example([
+            ['$0 exec geocode \'{"address":"Tokyo Tower"}\'', "Geocode an address"],
+            [
+              '$0 exec search-nearby \'{"center":{"value":"35.68,139.74","isCoordinates":true},"keyword":"restaurant"}\'',
+              "Search nearby",
+            ],
+            ['$0 exec search-places \'{"query":"ramen in Tokyo"}\'', "Text search"],
+          ]);
+      },
+      async (argv) => {
+        if (!argv.apikey) {
+          console.error(
+            JSON.stringify(
+              {
+                error: "GOOGLE_MAPS_API_KEY not set. Use --apikey or set GOOGLE_MAPS_API_KEY environment variable.",
+              },
+              null,
+              2
+            )
+          );
+          process.exit(1);
+        }
+        try {
+          const params = argv.params ? JSON.parse(argv.params as string) : {};
+          const result = await execTool(argv.tool as string, params, argv.apikey as string);
+          console.log(JSON.stringify(result, null, 2));
+          process.exit(0);
+        } catch (error: any) {
+          console.error(JSON.stringify({ error: error.message }, null, 2));
+          process.exit(1);
+        }
+      }
+    )
+    .command(
+      "$0",
+      "Start the MCP server",
+      (yargs) => {
+        return yargs
+          .option("port", {
+            alias: "p",
+            type: "number",
+            description: "Port to run the MCP server on",
+            default: process.env.MCP_SERVER_PORT ? parseInt(process.env.MCP_SERVER_PORT) : 3000,
+          })
+          .option("apikey", {
+            alias: "k",
+            type: "string",
+            description: "Google Maps API key",
+            default: process.env.GOOGLE_MAPS_API_KEY,
+          })
+          .example([
+            ["$0", "Start server with default settings"],
+            ['$0 --port 3000 --apikey "your_api_key"', "Start with custom port and API key"],
+          ]);
+      },
+      async (argv) => {
+        Logger.log("🗺️  Google Maps MCP Server");
+        Logger.log("   A Model Context Protocol server for Google Maps services");
+        Logger.log("");
+
+        if (!argv.apikey) {
+          Logger.log("⚠️  Google Maps API Key not found!");
+          Logger.log("   Please provide --apikey parameter or set GOOGLE_MAPS_API_KEY in your .env file");
+          Logger.log("");
+        }
+
+        startServer(argv.port as number, argv.apikey as string).catch((error) => {
+          Logger.error("❌ Failed to start server:", error);
+          process.exit(1);
+        });
+      }
+    )
     .version(packageVersion)
     .alias("version", "v")
-    .example([
-      ["$0", "Start server with default settings"],
-      ['$0 --port 3000 --apikey "your_api_key"', "Start server with custom port and API key"],
-      ['$0 -p 3001 -k "your_api_key"', "Start server with short options"],
-    ])
     .help()
-    .parseSync();
-
-  // Show welcome message
-  Logger.log("🗺️  Google Maps MCP Server");
-  Logger.log("   A Model Context Protocol server for Google Maps services");
-  Logger.log("");
-
-  // Check for Google Maps API key
-  if (!argv.apikey) {
-    Logger.log("⚠️  Google Maps API Key not found!");
-    Logger.log("   Please provide --apikey parameter or set GOOGLE_MAPS_API_KEY in your .env file");
-    Logger.log("   Example: mcp-google-map --apikey your_api_key_here");
-    Logger.log("   Or: GOOGLE_MAPS_API_KEY=your_api_key_here");
-    Logger.log("");
-  }
-
-  startServer(argv.port, argv.apikey).catch((error) => {
-    Logger.error("❌ Failed to start server:", error);
-    process.exit(1);
-  });
+    .parse();
 }
