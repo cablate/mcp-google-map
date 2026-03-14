@@ -2,7 +2,7 @@ import { z } from "zod";
 import { PlacesSearcher } from "../../services/PlacesSearcher.js";
 import { getCurrentApiKey } from "../../utils/requestContext.js";
 
-const NAME = "search_nearby";
+const NAME = "maps_search_nearby";
 const DESCRIPTION =
   "Find places near a specific location by type (e.g., restaurants, cafes, hotels). Use when the user wants to discover what's around a given address or coordinates, such as 'find coffee shops near Times Square' or 'what hotels are near the airport'. Supports filtering by place type, search radius, minimum rating, and whether currently open.";
 

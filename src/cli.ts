@@ -102,6 +102,7 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
 
     case "search-nearby":
     case "search_nearby":
+    case "maps_search_nearby":
       return searcher.searchNearby(params);
 
     case "search-places":
@@ -116,6 +117,7 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
 
     case "place-details":
     case "get_place_details":
+    case "maps_place_details":
       return searcher.getPlaceDetails(params.placeId);
 
     case "directions":

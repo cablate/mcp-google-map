@@ -200,8 +200,8 @@ async function testListTools(session: McpSession): Promise<void> {
 
   const toolNames = tools.map((t: any) => t.name);
   const expectedTools = [
-    "search_nearby",
-    "get_place_details",
+    "maps_search_nearby",
+    "maps_place_details",
     "maps_geocode",
     "maps_reverse_geocode",
     "maps_distance_matrix",
@@ -313,7 +313,7 @@ async function testToolCalls(session: McpSession): Promise<void> {
 
   // Test search_nearby (uses Places API New)
   const nearbyResult = await sendRequest(session, "tools/call", {
-    name: "search_nearby",
+    name: "maps_search_nearby",
     arguments: {
       center: { value: "35.6586,139.7454", isCoordinates: true },
       keyword: "restaurant",
