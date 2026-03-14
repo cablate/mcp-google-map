@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_weather";
 const DESCRIPTION =
-  "Get current weather conditions or forecast for a geographic location. Returns temperature, humidity, wind, UV index, precipitation, and more. Supports current conditions, daily forecast (up to 10 days), and hourly forecast (up to 240 hours). Note: coverage varies by region — China, Japan, South Korea, Cuba, Iran, North Korea, Syria are unsupported or limited. Use when the user asks about weather at a destination, is planning outdoor activities, or needs weather for travel planning.";
+  "Get weather for a location — current conditions, daily forecast (10 days), or hourly forecast (240 hours). Use when the user asks 'what's the weather in Paris', is planning outdoor activities, or needs to pack for a trip. Coverage: most regions supported, but China, Japan, South Korea, Cuba, Iran, North Korea, Syria are unavailable.";
 
 const SCHEMA = {
   latitude: z.number().describe("Latitude coordinate"),
@@ -12,7 +12,7 @@ const SCHEMA = {
   type: z
     .enum(["current", "forecast_daily", "forecast_hourly"])
     .optional()
-    .describe("Weather data type: current (default), forecast_daily (up to 10 days), forecast_hourly (up to 240 hours)"),
+    .describe("current = right now, forecast_daily = multi-day outlook, forecast_hourly = hour-by-hour"),
   forecastDays: z
     .number()
     .optional()

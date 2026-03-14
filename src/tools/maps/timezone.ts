@@ -4,12 +4,12 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_timezone";
 const DESCRIPTION =
-  "Get the timezone for a geographic location. Returns timezone ID, name, UTC offset, DST offset, and current local time. Use when the user asks about local time at a destination, needs to coordinate across timezones, or is planning travel across timezone boundaries.";
+  "Get the timezone and current local time for a location. Use when the user asks 'what time is it in Tokyo', needs to coordinate a meeting across timezones, or is planning travel across timezone boundaries. Returns timezone ID, UTC/DST offsets, and computed local time.";
 
 const SCHEMA = {
   latitude: z.number().describe("Latitude coordinate"),
   longitude: z.number().describe("Longitude coordinate"),
-  timestamp: z.number().optional().describe("Unix timestamp in milliseconds (defaults to now)"),
+  timestamp: z.number().optional().describe("Unix timestamp in ms to query timezone at a specific moment (defaults to now)"),
 };
 
 export type TimezoneParams = z.infer<z.ZodObject<typeof SCHEMA>>;

@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_elevation";
 const DESCRIPTION =
-  "Get elevation (height above sea level in meters) for one or more geographic coordinates. Use for terrain analysis, hiking/cycling route planning, or when the user asks about altitude at specific locations.";
+  "Get elevation (meters above sea level) for geographic coordinates. Use when the user asks 'how high is this place', 'is this area flood-prone', or needs altitude for hiking/cycling route profiles. Also useful for real estate risk assessment — low elevation near water suggests flood risk.";
 
 const SCHEMA = {
   locations: z
