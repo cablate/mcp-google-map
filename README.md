@@ -1,46 +1,45 @@
-[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/cablate-mcp-google-map-badge.png)](https://mseep.ai/app/cablate-mcp-google-map)
+[![npm version](https://img.shields.io/npm/v/@cablate/mcp-google-map)](https://www.npmjs.com/package/@cablate/mcp-google-map) [![license](https://img.shields.io/github/license/cablate/mcp-google-map)](./LICENSE) [![npm downloads](https://img.shields.io/npm/dm/@cablate/mcp-google-map)](https://www.npmjs.com/package/@cablate/mcp-google-map)
 
-<a href="https://glama.ai/mcp/servers/@cablate/mcp-google-map">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@cablate/mcp-google-map/badge" alt="Google Map Server MCP server" />
-</a>
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D)
 
 # MCP Google Map Server
 
----
+Give your AI agent the ability to understand the physical world — geocode, route, search, and reason about locations.
 
-> **Important Notice**
->
-> Google officially announced MCP support for Google Maps on December 10, 2025, introducing **[Maps Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services)** - a fully-managed MCP server for geospatial data and routing.
->
-> This community project remains actively maintained as an alternative with different features and deployment options.
+- **8 tools** — geocode, reverse-geocode, search-nearby, search-places, place-details, directions, distance-matrix, elevation
+- **3 modes** — stdio, StreamableHTTP, standalone exec CLI
+- **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
 
----
+### vs Google Grounding Lite
 
-Google Maps tools for AI agents — use as an **MCP server** or as a standalone **Agent Skill** via CLI.
+| | This project | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
+|---|---|---|
+| Tools | **8** | 3 |
+| Geocoding | Yes | No |
+| Step-by-step directions | Yes | No |
+| Elevation | Yes | No |
+| Distance matrix | Yes | No |
+| Place details | Yes | No |
+| Open source | MIT | No |
+| Self-hosted | Yes | Google-managed only |
+| Agent Skill | Yes | No |
+
+### Quick Start
 
 ```bash
-# Agent Skill — no server needed
-npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
-npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
+# stdio (Claude Desktop, Cursor, etc.)
+npx @cablate/mcp-google-map --stdio
 
-# MCP Server
+# exec CLI — no server needed
+npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
+
+# HTTP server
 npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 ```
 
-All 8 tools available in both modes. See [`skills/google-maps/`](./skills/google-maps/) for the full agent skill definition.
-
 ## Special Thanks
 
-This project has received contributions from the community.
 Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add support for `streamablehttp`.
-
-## Verified Compatibility
-
-This MCP server has been tested and verified with:
-
-- Claude Desktop
-- Dive Desktop
-- MCP protocol implementations
 
 ## Available Tools
 
@@ -258,5 +257,9 @@ Community participation and contributions are welcome!
 - GitHub: [CabLate](https://github.com/cablate/)
 
 ## Star History
+
+<a href="https://glama.ai/mcp/servers/@cablate/mcp-google-map">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@cablate/mcp-google-map/badge" alt="Google Map Server MCP server" />
+</a>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=cablate/mcp-google-map&type=Date)](https://www.star-history.com/#cablate/mcp-google-map&Date)
