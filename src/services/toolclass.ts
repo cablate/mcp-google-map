@@ -322,35 +322,72 @@ export class GoogleMapsTools {
     }
   }
 
-  async getWeather(latitude: number, longitude: number): Promise<any> {
+  async getWeather(
+    latitude: number,
+    longitude: number,
+    type: "current" | "forecast_daily" | "forecast_hourly" = "current",
+    forecastDays?: number,
+    forecastHours?: number
+  ): Promise<any> {
     try {
-      const url = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${this.apiKey}&location.latitude=${latitude}&location.longitude=${longitude}`;
+      const baseParams = `key=${this.apiKey}&location.latitude=${latitude}&location.longitude=${longitude}`;
+      let url: string;
+
+      switch (type) {
+        case "forecast_daily": {
+          const days = Math.min(Math.max(forecastDays || 5, 1), 10);
+          url = `https://weather.googleapis.com/v1/forecast/days:lookup?${baseParams}&days=${days}`;
+          break;
+        }
+        case "forecast_hourly": {
+          const hours = Math.min(Math.max(forecastHours || 24, 1), 240);
+          url = `https://weather.googleapis.com/v1/forecast/hours:lookup?${baseParams}&hours=${hours}`;
+          break;
+        }
+        default:
+          url = `https://weather.googleapis.com/v1/currentConditions:lookup?${baseParams}`;
+      }
+
       const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const msg = errorData?.error?.message || `HTTP ${response.status}`;
+
+        if (msg.includes("not supported for this location")) {
+          throw new Error(
+            `Weather data is not available for this location (${latitude}, ${longitude}). ` +
+              "The Google Weather API has limited coverage — China, Japan, South Korea, Cuba, Iran, North Korea, and Syria are unsupported. " +
+              "Try a location in North America, Europe, or Oceania."
+          );
+        }
+
         throw new Error(msg);
       }
 
       const data = await response.json();
 
-      return {
-        temperature: data.temperature,
-        feelsLike: data.feelsLikeTemperature,
-        humidity: data.relativeHumidity,
-        wind: data.wind,
-        conditions: data.weatherCondition?.description?.text || data.weatherCondition?.type,
-        uvIndex: data.uvIndex,
-        precipitation: data.precipitation,
-        visibility: data.visibility,
-        pressure: data.pressure,
-        cloudCover: data.cloudCover,
-        isDayTime: data.isDayTime,
-      };
+      if (type === "current") {
+        return {
+          temperature: data.temperature,
+          feelsLike: data.feelsLikeTemperature,
+          humidity: data.relativeHumidity,
+          wind: data.wind,
+          conditions: data.weatherCondition?.description?.text || data.weatherCondition?.type,
+          uvIndex: data.uvIndex,
+          precipitation: data.precipitation,
+          visibility: data.visibility,
+          pressure: data.airPressure,
+          cloudCover: data.cloudCover,
+          isDayTime: data.isDaytime,
+        };
+      }
+
+      // forecast_daily or forecast_hourly — return as-is with light cleanup
+      return data;
     } catch (error: any) {
       Logger.error("Error in getWeather:", error);
-      throw new Error(`Failed to get weather for (${latitude}, ${longitude}): ${extractErrorMessage(error)}`);
+      throw new Error(error.message || `Failed to get weather for (${latitude}, ${longitude})`);
     }
   }
 

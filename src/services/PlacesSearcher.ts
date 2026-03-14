@@ -298,9 +298,15 @@ export class PlacesSearcher {
     }
   }
 
-  async getWeather(latitude: number, longitude: number): Promise<WeatherResponse> {
+  async getWeather(
+    latitude: number,
+    longitude: number,
+    type: "current" | "forecast_daily" | "forecast_hourly" = "current",
+    forecastDays?: number,
+    forecastHours?: number
+  ): Promise<WeatherResponse> {
     try {
-      const result = await this.mapsTools.getWeather(latitude, longitude);
+      const result = await this.mapsTools.getWeather(latitude, longitude, type, forecastDays, forecastHours);
       return { success: true, data: result };
     } catch (error) {
       return {
