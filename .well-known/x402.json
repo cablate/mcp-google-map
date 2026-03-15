@@ -1,0 +1,12 @@
+{
+  "name": "cablate/mcp-google-map",
+  "description": "A powerful Model Context Protocol (MCP) server providing comprehensive Google Maps API integration with LLM processing capabilities.",
+  "accepts": [
+    {
+      "network": "eip155:8453",
+      "asset": "USDC",
+      "address": "YOUR_WALLET_ADDRESS"
+    }
+  ],
+  "resources": []
+}
