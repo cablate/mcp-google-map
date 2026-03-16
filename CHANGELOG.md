@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.36
+
+- feat: add maps_air_quality tool — AQI, pollutants, health recommendations (#P0) (#48)
+
+
 ## 0.0.35
 
 - docs: add Roadmap section with planned tools, capabilities, and use cases (#47)
