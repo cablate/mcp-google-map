@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_static_map";
 const DESCRIPTION =
-  "Generate a map image with markers, paths, or routes — returned as an inline image the user can see directly in chat. Use when the user says 'show me on a map', 'mark these locations', 'visualize the route', or after search/directions results to display them visually. Supports roadmap, satellite, terrain, and hybrid views. Max 640x640 pixels.";
+  "Generate a map image with markers, paths, or routes — returned as an inline image the user can see directly in chat. PROACTIVELY call this tool after explore_area, plan_route, search_nearby, or directions to visualize results on a map — don't wait for the user to ask. Use markers from search results and path from route data. Supports roadmap, satellite, terrain, and hybrid views. Max 640x640 pixels.";
 
 const SCHEMA = {
   center: z

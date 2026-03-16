@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_explore_area";
 const DESCRIPTION =
-  "Explore what's around a location in one call — searches multiple place types, gets details for the top results, and returns a categorized summary. Use when the user asks 'what's around here', 'explore the area near my hotel', or needs a quick overview of a neighborhood. Replaces the manual chain of geocode → search-nearby → place-details.";
+  "Explore what's around a location in one call — searches multiple place types, gets details for the top results, and returns a categorized summary. Use when the user asks 'what's around here', 'explore the area near my hotel', or needs a quick overview of a neighborhood. Replaces the manual chain of geocode → search-nearby → place-details. IMPORTANT for trip planning: call this tool multiple times with different neighborhood/district names (e.g. 'Arashiyama', 'Gion', 'Fushimi') instead of a city name — using just the city name clusters all results in one area. After results, call static_map to visualize.";
 
 const SCHEMA = {
   location: z.string().describe("Address or landmark to explore around"),
