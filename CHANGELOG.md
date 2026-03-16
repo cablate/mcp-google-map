@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.35
+
+- docs: add Roadmap section with planned tools, capabilities, and use cases (#47)
+
+
 ## 0.0.34
 
 - docs: sync all tool references to 13 tools + add tool change checklist (#45)
