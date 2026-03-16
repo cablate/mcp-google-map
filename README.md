@@ -128,6 +128,27 @@ npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
 
 All 15 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `explore-area`, `plan-route`, `compare-places`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
+### Batch Geocode
+
+Geocode hundreds of addresses from a file:
+
+```bash
+npx @cablate/mcp-google-map batch-geocode -i addresses.txt -o results.json
+cat addresses.txt | npx @cablate/mcp-google-map batch-geocode -i -
+```
+
+Input: one address per line. Output: JSON with `{ total, succeeded, failed, results[] }`. Default concurrency: 20 parallel requests.
+
+### Prompt Templates
+
+3 built-in MCP prompts available in clients that support the prompts primitive (Claude Desktop `/` commands):
+
+| Prompt | What it does |
+|--------|-------------|
+| `travel-planner` | Plan a trip — geocode, explore, weather, route, map |
+| `neighborhood-scout` | Analyze a neighborhood — amenities, commute, air quality, scorecard |
+| `route-optimizer` | Optimize multi-stop route — best order, directions, map |
+
 ### API Key Configuration
 
 API keys can be provided in three ways (priority order):
@@ -224,6 +245,8 @@ src/
 │       ├── exploreArea.ts        # maps_explore_area (composite)
 │       ├── planRoute.ts          # maps_plan_route (composite)
 │       └── comparePlaces.ts      # maps_compare_places (composite)
+├── prompts/
+│   └── geoPrompts.ts            # MCP prompt templates (3 geo prompts)
 └── utils/
     ├── apiKeyManager.ts          # API key management
     └── requestContext.ts         # Per-request context (API key isolation)
@@ -265,12 +288,13 @@ For enterprise security reviews, see [Security Assessment Clarifications](./SECU
 | `maps_air_quality` | AQI, pollutants — health-aware travel, outdoor planning, real estate | **Done** |
 | `maps_validate_address` | Standardize and verify addresses — logistics/e-commerce | Planned |
 | `maps_isochrone` | "Show me everything within 30 min drive" — reachability analysis | Planned |
-| `maps_batch_geocode` | Geocode hundreds of addresses in one call — data enrichment | Planned |
+| `maps_batch_geocode` | Geocode hundreds of addresses in one call — data enrichment | **Done** (CLI) |
 
 ### Capabilities
 
 | Feature | What it unlocks | Status |
 |---------|----------------|--------|
+| MCP Prompt Templates | 3 geo prompts (travel-planner, neighborhood-scout, route-optimizer) — Claude Desktop `/` commands | **Done** |
 | Spatial Context | Agent remembers "the area we were just looking at" across turns | Research |
 | Geo Agent Template | One command to spin up a full geo-aware AI agent | Research |
 | Geo-Reasoning Benchmark | 10-scenario test suite measuring LLM geospatial reasoning accuracy | Research |

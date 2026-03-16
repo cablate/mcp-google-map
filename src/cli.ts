@@ -10,7 +10,8 @@ import { Logger } from "./index.js";
 import { PlacesSearcher } from "./services/PlacesSearcher.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { createInterface } from "readline";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -260,6 +261,127 @@ if (isRunDirectly || isMainModule) {
           console.error(JSON.stringify({ error: error.message }, null, 2));
           process.exit(1);
         }
+      }
+    )
+    .command(
+      "batch-geocode",
+      "Geocode multiple addresses from a file (one address per line)",
+      (yargs) => {
+        return yargs
+          .option("input", {
+            alias: "i",
+            type: "string",
+            describe: "Input file path (one address per line). Use - for stdin.",
+            demandOption: true,
+          })
+          .option("output", {
+            alias: "o",
+            type: "string",
+            describe: "Output file path (JSON). Defaults to stdout.",
+          })
+          .option("concurrency", {
+            alias: "c",
+            type: "number",
+            describe: "Max parallel requests",
+            default: 20,
+          })
+          .option("apikey", {
+            alias: "k",
+            type: "string",
+            description: "Google Maps API key",
+            default: process.env.GOOGLE_MAPS_API_KEY,
+          })
+          .example([
+            ["$0 batch-geocode -i addresses.txt", "Geocode to stdout"],
+            ["$0 batch-geocode -i addresses.txt -o results.json", "Geocode to file"],
+            ["cat addresses.txt | $0 batch-geocode -i -", "Geocode from stdin"],
+          ]);
+      },
+      async (argv) => {
+        if (!argv.apikey) {
+          console.error("Error: GOOGLE_MAPS_API_KEY not set. Use --apikey or set env var.");
+          process.exit(1);
+        }
+
+        // Read addresses
+        let lines: string[];
+        if (argv.input === "-") {
+          // Read from stdin
+          const rl = createInterface({ input: process.stdin });
+          lines = [];
+          for await (const line of rl) {
+            const trimmed = line.trim();
+            if (trimmed) lines.push(trimmed);
+          }
+        } else {
+          if (!existsSync(argv.input as string)) {
+            console.error(`Error: File not found: ${argv.input}`);
+            process.exit(1);
+          }
+          lines = readFileSync(argv.input as string, "utf-8")
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l.length > 0);
+        }
+
+        if (lines.length === 0) {
+          console.error("Error: No addresses found in input.");
+          process.exit(1);
+        }
+
+        const searcher = new PlacesSearcher(argv.apikey as string);
+        const concurrency = Math.min(Math.max(argv.concurrency as number, 1), 50);
+        const results: any[] = [];
+        let completed = 0;
+
+        // Process with concurrency limit
+        const semaphore = async (tasks: (() => Promise<void>)[], limit: number) => {
+          const executing: Promise<void>[] = [];
+          for (const task of tasks) {
+            const p = task().then(() => {
+              executing.splice(executing.indexOf(p), 1);
+            });
+            executing.push(p);
+            if (executing.length >= limit) {
+              await Promise.race(executing);
+            }
+          }
+          await Promise.all(executing);
+        };
+
+        const tasks = lines.map((address, index) => async () => {
+          try {
+            const result = await searcher.geocode(address);
+            results[index] = { address, ...result };
+          } catch (error: any) {
+            results[index] = { address, success: false, error: error.message };
+          }
+          completed++;
+          if (!argv.output) return; // Don't log progress when outputting to stdout
+          process.stderr.write(`\r  ${completed}/${lines.length} geocoded`);
+        });
+
+        await semaphore(tasks, concurrency);
+
+        if (argv.output) {
+          process.stderr.write("\n");
+        }
+
+        // Summary
+        const succeeded = results.filter((r) => r.success).length;
+        const failed = results.filter((r) => !r.success).length;
+        const summary = { total: lines.length, succeeded, failed, results };
+
+        const json = JSON.stringify(summary, null, 2);
+
+        if (argv.output) {
+          writeFileSync(argv.output as string, json, "utf-8");
+          console.error(`Done: ${succeeded}/${lines.length} succeeded. Output: ${argv.output}`);
+        } else {
+          console.log(json);
+        }
+
+        process.exit(failed > 0 ? 1 : 0);
       }
     )
     .command(

@@ -10,6 +10,7 @@ import { z } from "zod";
 import { Logger } from "../index.js";
 import { ApiKeyManager } from "../utils/apiKeyManager.js";
 import { runWithContext } from "../utils/requestContext.js";
+import { GEO_PROMPTS, PromptConfig } from "../prompts/geoPrompts.js";
 
 const VERSION = "0.0.1";
 
@@ -54,6 +55,17 @@ export class BaseMcpServer {
           annotations: tool.annotations,
         },
         async (params: any) => tool.action(params)
+      );
+    });
+    // Register geo prompts
+    GEO_PROMPTS.forEach((prompt) => {
+      server.registerPrompt(
+        prompt.name,
+        {
+          description: prompt.description,
+          argsSchema: prompt.argsSchema,
+        },
+        (args: any) => prompt.callback(args)
       );
     });
     return server;
