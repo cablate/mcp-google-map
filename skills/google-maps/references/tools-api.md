@@ -200,6 +200,44 @@ exec weather '{"latitude": 37.4220, "longitude": -122.0841, "type": "forecast_da
 
 ---
 
+## air-quality
+
+Get air quality index, pollutant concentrations, and health recommendations for a location.
+
+```bash
+exec air-quality '{"latitude": 35.6762, "longitude": 139.6503}'
+exec air-quality '{"latitude": 35.6762, "longitude": 139.6503, "includePollutants": true}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| latitude | number | yes | Latitude |
+| longitude | number | yes | Longitude |
+| includeHealthRecommendations | boolean | no | Health advice per demographic group (default: true) |
+| includePollutants | boolean | no | Individual pollutant concentrations (default: false) |
+
+Response:
+```json
+{
+  "aqi": 76,
+  "category": "Good",
+  "dominantPollutant": "pm25",
+  "healthRecommendations": {
+    "generalPopulation": "...",
+    "elderly": "...",
+    "lungDiseasePopulation": "...",
+    "heartDiseasePopulation": "...",
+    "athletes": "...",
+    "pregnantWomen": "...",
+    "children": "..."
+  }
+}
+```
+
+Chaining: `geocode` → `air-quality` when the user gives an address instead of coordinates.
+
+---
+
 ## explore-area (composite)
 
 Explore a neighborhood in one call. Internally chains geocode → search-nearby (per type) → place-details (top N).
@@ -268,6 +306,12 @@ search-nearby {"center":{"value":"25.033,121.564","isCoordinates":true},"keyword
 **Multi-point Comparison** — Compare distances across multiple origins and destinations in one call.
 ```
 distance-matrix {"origins":["Taipei Main Station","Banqiao Station"],"destinations":["Taoyuan Airport","Songshan Airport"],"mode":"driving"}
+```
+
+**Geocode → Air Quality** — Check air quality at a named location.
+```
+geocode {"address":"Tokyo"}
+air-quality {"latitude":35.6762,"longitude":139.6503}
 ```
 
 ---

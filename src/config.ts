@@ -14,6 +14,7 @@ import { Weather, WeatherParams } from "./tools/maps/weather.js";
 import { ExploreArea, ExploreAreaParams } from "./tools/maps/exploreArea.js";
 import { PlanRoute, PlanRouteParams } from "./tools/maps/planRoute.js";
 import { ComparePlaces, ComparePlacesParams } from "./tools/maps/comparePlaces.js";
+import { AirQuality, AirQualityParams } from "./tools/maps/airQuality.js";
 
 // All Google Maps tools are read-only API queries
 const MAPS_TOOL_ANNOTATIONS = {
@@ -124,6 +125,13 @@ const serverConfigs: ServerInstanceConfig[] = [
         schema: ComparePlaces.SCHEMA,
         annotations: MAPS_TOOL_ANNOTATIONS,
         action: (params: ComparePlacesParams) => ComparePlaces.ACTION(params),
+      },
+      {
+        name: AirQuality.NAME,
+        description: AirQuality.DESCRIPTION,
+        schema: AirQuality.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: AirQualityParams) => AirQuality.ACTION(params),
       },
     ],
   },
