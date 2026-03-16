@@ -392,23 +392,32 @@ Use these recipes when the user's question maps to a multi-step workflow. Think 
 
 This is the most common complex scenario. The goal is a time-ordered itinerary with routes between stops.
 
+> **Read `references/travel-planning.md` first** — it contains the full methodology, anti-patterns, and time budget guidelines.
+
 **Steps:**
-1. `geocode` — Resolve all mentioned landmarks to coordinates
-2. `search-nearby` — Find restaurants/attractions near each landmark (use coordinates from step 1)
+1. **Identify districts** — Break the city into 3-6 geographically distinct areas using your knowledge. Assign adjacent districts to the same day.
+2. `explore-area` or `search-nearby` — Search **per district** (e.g. "Asakusa, Tokyo", "Shibuya, Tokyo"), NOT the city name. This prevents clustering.
 3. `place-details` — Get ratings, hours, reviews for top candidates (use place_id from step 2)
-4. `distance-matrix` — Compare travel times between all candidate stops to find the optimal order
-5. `directions` — Generate turn-by-turn routes between stops in the final order
+4. `plan-route` — Build one route per day following a **geographic arc** (e.g. south→north). Use `optimize: false` if you already determined the spatial order.
+5. `weather` + `air-quality` — Check conditions for outdoor activities
+6. `static-map` — Visualize each day's route with markers
 
 **Key decisions:**
 - If the user says "near X", use `search-nearby`. If they say "best Y in Z", use `search-places`.
 - Always check `opening_hours` from `place-details` before including in itinerary.
-- Use `distance-matrix` to order stops efficiently, THEN use `directions` for the final route.
+- **Never backtrack**: stops should progress in one geographic direction per day.
+- Alternate activity types: temple → food → walk → shrine → cafe. Not 5 temples in a row.
+- Budget 5-7 stops per day max (including meals). Major temples = 90-120 min, not "30 min".
 
 **Example output shape:**
 ```
-Morning: Tokyo Tower (9:00) → 12 min walk → Zojoji Temple (9:30)
-Lunch: Sushi Dai (11:30) ★4.6 — 2.1 km, 8 min by transit
-Afternoon: TeamLab (14:00) → Odaiba area
+Day 1: South → East arc
+  09:00 Fushimi Inari (90 min) → 25 min transit
+  11:00 Kiyomizu-dera (90 min) → 10 min walk
+  12:45 Gion lunch — Kaiseki restaurant ★4.7 (75 min)
+  14:15 Yasaka Shrine (30 min) → 15 min walk
+  15:00 Pontocho stroll + cafe (45 min)
+  17:30 Dinner near Kawaramachi
 ```
 
 ---

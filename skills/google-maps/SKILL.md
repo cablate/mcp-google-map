@@ -102,3 +102,4 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 | File | Content | When to read |
 |------|---------|--------------|
 | `references/tools-api.md` | Full parameter specs, response formats, 7 scenario recipes, and decision guide | When you need exact parameters, response shapes, or multi-tool workflow patterns |
+| `references/travel-planning.md` | Travel planning best practices — district-based exploration, geographic arc routing, anti-patterns | When planning multi-day trips or itineraries |
