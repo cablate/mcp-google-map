@@ -90,6 +90,7 @@ const EXEC_TOOLS = [
   "plan-route",
   "compare-places",
   "air-quality",
+  "static-map",
 ] as const;
 
 async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
@@ -176,6 +177,10 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
         params.includeHealthRecommendations,
         params.includePollutants
       );
+
+    case "static-map":
+    case "maps_static_map":
+      return searcher.getStaticMap(params);
 
     default:
       throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);

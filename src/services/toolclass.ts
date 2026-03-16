@@ -475,6 +475,72 @@ export class GoogleMapsTools {
     }
   }
 
+  async getStaticMap(params: {
+    center?: string;
+    zoom?: number;
+    size?: string;
+    maptype?: string;
+    markers?: string[];
+    path?: string[];
+  }): Promise<{ base64: string; size: number; dimensions: string }> {
+    try {
+      const dimensions = params.size || "600x400";
+      const queryParts: string[] = [
+        `key=${this.apiKey}`,
+        `size=${dimensions}`,
+        `maptype=${params.maptype || "roadmap"}`,
+      ];
+
+      if (params.center) {
+        queryParts.push(`center=${encodeURIComponent(params.center)}`);
+      }
+      if (params.zoom !== undefined) {
+        queryParts.push(`zoom=${params.zoom}`);
+      }
+      if (params.markers) {
+        for (const marker of params.markers) {
+          queryParts.push(`markers=${encodeURIComponent(marker)}`);
+        }
+      }
+      if (params.path) {
+        for (const p of params.path) {
+          queryParts.push(`path=${encodeURIComponent(p)}`);
+        }
+      }
+
+      const url = `https://maps.googleapis.com/maps/api/staticmap?${queryParts.join("&")}`;
+
+      // Check URL length limit
+      if (url.length > 16384) {
+        throw new Error(`URL exceeds 16,384 character limit (${url.length}). Reduce markers or path points.`);
+      }
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json") || contentType.includes("text/")) {
+          const errorText = await response.text();
+          throw new Error(`Static Maps API error: ${errorText}`);
+        }
+        throw new Error(`Static Maps API returned HTTP ${response.status}`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const base64 = buffer.toString("base64");
+
+      return {
+        base64,
+        size: buffer.length,
+        dimensions,
+      };
+    } catch (error: any) {
+      Logger.error("Error in getStaticMap:", error);
+      throw new Error(error.message || "Failed to generate static map");
+    }
+  }
+
   async getTimezone(
     latitude: number,
     longitude: number,

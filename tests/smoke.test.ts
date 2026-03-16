@@ -211,6 +211,7 @@ async function testListTools(session: McpSession): Promise<void> {
     "maps_timezone",
     "maps_weather",
     "maps_air_quality",
+    "maps_static_map",
   ];
 
   for (const name of expectedTools) {
