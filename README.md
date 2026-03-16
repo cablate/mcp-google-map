@@ -247,10 +247,18 @@ src/
 tests/
 └── smoke.test.ts                 # Smoke + E2E test suite
 skills/
-└── google-maps/
-    ├── SKILL.md                  # Agent skill definition
+├── google-maps/                  # Agent Skill — how to USE the tools
+│   ├── SKILL.md                  # Tool map, recipes, invocation
+│   └── references/
+│       ├── tools-api.md          # Tool parameters + scenario recipes
+│       └── travel-planning.md    # Travel planning methodology
+└── project-docs/                 # Project Skill — how to DEVELOP/MAINTAIN
+    ├── SKILL.md                  # Architecture overview + onboarding
     └── references/
-        └── tools-api.md          # Tool parameter reference
+        ├── architecture.md       # System design, code map, 9-file checklist
+        ├── google-maps-api-guide.md  # API endpoints, pricing, gotchas
+        ├── geo-domain-knowledge.md   # GIS fundamentals, Japan context
+        └── decisions.md          # 10 ADRs (design decisions + rationale)
 ```
 
 ## Tech Stack
