@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.37
+
+- feat: add batch geocode CLI + MCP tool, tests for new tools (#50)
+
+
 ## 0.0.36
 
 - feat: add maps_air_quality tool — AQI, pollutants, health recommendations (#P0) (#48)
