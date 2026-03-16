@@ -395,31 +395,50 @@ This is the most common complex scenario. The goal is a time-ordered itinerary w
 > **Read `references/travel-planning.md` first** — it contains the full methodology, anti-patterns, and time budget guidelines.
 
 **Steps:**
-1. **Identify districts** — Break the city into 3-6 geographically distinct areas using your knowledge. Assign adjacent districts to the same day.
-2. `explore-area` or `search-nearby` — Search **per district** (e.g. "Asakusa, Tokyo", "Shibuya, Tokyo"), NOT the city name. This prevents clustering.
-3. `place-details` — Get ratings, hours, reviews for top candidates (use place_id from step 2)
-4. `plan-route` — Build one route per day following a **geographic arc** (e.g. south→north). Use `optimize: false` if you already determined the spatial order.
-5. `weather` + `air-quality` — Check conditions for outdoor activities
-6. `static-map` — **Always** visualize each day's route with markers and path
+1. `search-places` — Search "top attractions in {city}" to get **anchor points** spread across the city. The results are naturally geographically diverse.
+2. **Cluster by proximity** — Look at the anchor coordinates. Group nearby anchors into the same day. Arrange each day as a **directional arc** (e.g. south→north).
+3. `explore-area` or `search-nearby` — For each anchor, search around **its coordinates** for restaurants, cafes, shops. This finds supporting stops along the day's route.
+4. `place-details` — Get ratings, hours, reviews for top candidates
+5. `plan-route` — Build one route per day. Use `optimize: false` when you've determined the geographic order.
+6. `weather` + `air-quality` — Check conditions for outdoor activities
+7. `static-map` — **Always** visualize each day's route with numbered markers and path
 
 **Key decisions:**
-- If the user says "near X", use `search-nearby`. If they say "best Y in Z", use `search-places`.
+- **Never use the city name as explore_area input** — use anchor coordinates or district names.
 - Always check `opening_hours` from `place-details` before including in itinerary.
 - **Never backtrack**: stops should progress in one geographic direction per day.
 - Alternate activity types: temple → food → walk → shrine → cafe. Not 5 temples in a row.
 - Budget 5-7 stops per day max (including meals). Major temples = 90-120 min, not "30 min".
-- **Always generate a map** for each day using `static-map` — this is the primary visual output.
+- If two stops are >2km apart, suggest transit instead of walking.
+- **Always generate a map** for each day using `static-map`.
+
+**Example flow (Kyoto 2-day):**
+```
+search_places("top attractions in Kyoto")
+→ Fushimi Inari (34.97, south), Kiyomizu-dera (34.99, east),
+  Kinkaku-ji (35.04, north), Arashiyama (35.01, west)
+
+Day 1 cluster: Fushimi (south) + Kiyomizu/Gion (east) — south→center arc
+Day 2 cluster: Nishiki (center) + Arashiyama (west) — center→west arc
+
+explore_area("Fushimi Inari, Kyoto", types:["restaurant"])
+explore_area("Gion, Kyoto", types:["restaurant","cafe"])
+→ pick best-rated for lunch/dinner along Day 1 route
+
+plan_route(Day 1 stops, mode:"walking", optimize:false)
+static_map(markers + path for Day 1)
+```
 
 **Example output shape:**
 ```
-Day 1: South → East arc
+Day 1: South → Center arc
   09:00 Fushimi Inari (90 min) → 25 min transit
-  11:00 Kiyomizu-dera (90 min) → 10 min walk
+  11:00 Kiyomizu-dera (90 min) → 10 min walk down Sannen-zaka
   12:45 Gion lunch — Kaiseki restaurant ★4.7 (75 min)
   14:15 Yasaka Shrine (30 min) → 15 min walk
   15:00 Pontocho stroll + cafe (45 min)
   17:30 Dinner near Kawaramachi
-[map with markers A-F and walking path]
+[map with markers 1-6 and walking path]
 ```
 
 ---

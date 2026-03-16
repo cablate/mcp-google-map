@@ -2,74 +2,79 @@
 
 ## The #1 Anti-Pattern: Single-Point Exploration
 
-**Wrong:** `explore_area("Kyoto")` → everything clusters around Kyoto Station / one area.
+**Wrong:** `explore_area("Kyoto")` → everything clusters within 1km of one geocoded point.
 
-**Right:** Identify distinct districts first, then explore each separately.
+**Right:** Use `search_places` first to get geographically diverse anchor points across the city, then explore around each anchor.
 
 ---
 
-## Correct Flow for Multi-Day Trip Planning
+## Correct Flow: Tool-Driven Geographic Spread
 
-### Step 1: Identify City Districts (use your own knowledge + search)
+### Step 1: Get Anchor Points via search_places
 
-Before calling any geo tool, break the city into 3-6 distinct districts based on geography and character. You already know major cities — use that knowledge.
+`search_places` returns results that are **naturally spread across the city** (Google's algorithm ranks geographic diversity). Use this as your first call to establish the spatial skeleton.
 
-Example for Kyoto:
-- **Higashiyama** (east): Kiyomizu-dera, Gion, Yasaka Shrine, Ninenzaka
-- **Arashiyama** (west): Bamboo Grove, Tenryu-ji, Togetsukyo Bridge
-- **Fushimi** (south): Fushimi Inari, sake breweries
-- **Central/Nishiki** (downtown): Nishiki Market, Pontocho, Kawaramachi
-- **Northern**: Kinkaku-ji, Ryoan-ji, Daitoku-ji
+```
+search_places("top attractions in Kyoto")
+→ Fushimi Inari (south), Kiyomizu-dera (east), Kinkaku-ji (north), Arashiyama (west), Nijo Castle (center)
+```
 
-### Step 2: Assign Districts to Days by Geography
+These anchor points span ~10km. This is your trip skeleton.
 
-Group **geographically adjacent** districts into the same day. Each day should follow a **directional arc** (e.g. south→north, east→west) — never zigzag.
+### Step 2: Cluster Anchors into Days by Proximity
+
+Look at the coordinates from Step 1. Group **geographically close** anchors into the same day, and arrange each day as a **directional arc** (south→north, east→west) — never zigzag.
 
 Example:
-- Day 1: Fushimi (morning) → Higashiyama (afternoon/evening) — south to east arc
-- Day 2: Central/Nishiki (morning) → Arashiyama (afternoon) — center to west arc
+- Day 1: Fushimi Inari (south) → Kiyomizu-dera (east) → Gion area → Pontocho (center) — **south→east→center arc**
+- Day 2: Nishiki Market (center) → Nijo Castle → train → Arashiyama (west) — **center→west arc**
 
-### Step 3: Explore Each District Separately
+### Step 3: Fill In Between Anchors
 
-Call `explore_area` (or `search_nearby`) **per district**, NOT per city:
-
-```
-explore_area("Fushimi Inari, Kyoto", types: ["temple", "restaurant"])
-explore_area("Gion, Kyoto", types: ["restaurant", "attraction"])
-explore_area("Arashiyama, Kyoto", types: ["temple", "restaurant", "cafe"])
-```
-
-### Step 4: Build Linear Routes Per Day
-
-For each day, order stops to form a **geographic line or arc** — not a loop that backtracks:
+For each anchor, use it as the center point for `explore_area` or `search_nearby` to find **supporting stops** (restaurants, cafes, shops) along the route:
 
 ```
-Day 1: Fushimi Inari → Kiyomizu-dera → Sannen-zaka → Gion lunch → Yasaka Shrine → Pontocho dinner
-       (south ──────────────────────────────────────────────────────────→ north-west)
-
-Day 2: Nishiki Market → Kawaramachi → train to Arashiyama → Bamboo Grove → Tenryu-ji → kaiseki dinner
-       (center ────────────────────────────────────→ west)
+explore_area("Fushimi Inari, Kyoto", types: ["restaurant"], radius: 800)
+explore_area("Gion, Kyoto", types: ["restaurant", "cafe"], radius: 500)
+explore_area("Arashiyama, Kyoto", types: ["restaurant", "cafe"], radius: 600)
 ```
 
-Use `plan_route` with `optimize: false` when you've already determined a logical geographic order. Set `optimize: true` only when you have a set of stops in the same area with no obvious direction.
+Key: these searches use the **anchor's coordinates as center**, not the city name. Each search finds places **near that day's route**, not random places across the city.
+
+### Step 4: Build Linear Route Per Day
+
+Order stops to form a **one-directional path**. Each stop should be **further along the arc** than the previous one — never backtrack.
+
+```
+Day 1 (south → center):
+  Fushimi Inari → [local lunch near Inari] → Kiyomizu-dera → Sannen-zaka → [Gion restaurant] → Yasaka Shrine → Pontocho dinner
+
+Day 2 (center → west):
+  Nishiki Market → [street food] → Nijo Castle → [cafe break] → train to Arashiyama → Bamboo Grove → Tenryu-ji → [kaiseki dinner]
+```
+
+Use `plan_route` with `optimize: false` when you've determined the geographic order. Use `optimize: true` only for stops within the same small area with no obvious direction.
 
 ### Step 5: Visualize with Maps
 
 **Always** call `static_map` after building each day's route:
 - Use numbered markers (label:1, label:2, ...) for each stop
-- Use path to draw the walking/driving route
+- Use path to draw the route
 - Use different marker colors per category (red=temple, blue=restaurant, green=park)
 
-This is essential — the map is the primary visual output users expect from a trip plan.
+The map is the primary visual deliverable. Never skip this step.
 
-### Step 6: Validate the Route Makes Sense
+---
 
-After generating the route, check:
-- [ ] Total walking distance per day is realistic (< 10km for walking, < 20km mixed)
-- [ ] No backtracking: the route doesn't go A→B→A area
-- [ ] Meal timing: lunch 11:30-13:00, dinner 17:30-19:30
-- [ ] Opening hours: temples often close at 17:00, markets by 18:00
-- [ ] Transit: if two stops are >3km apart, suggest transit instead of walking
+## Why This Works
+
+| Approach | Geographic spread | Unknown cities | Visual output |
+|----------|------------------|----------------|---------------|
+| `explore_area("city name")` | 1km radius — bad | Fails | None |
+| AI pre-knowledge of districts | Good for famous cities | Fails for unknown | None |
+| **search_places → anchor → expand** | Natural 5-15km spread | Works everywhere | Map per day |
+
+The key insight: **Google's search_places algorithm does the geographic spreading for you.** You don't need to know the city's districts — the search results reveal them.
 
 ---
 
@@ -77,13 +82,13 @@ After generating the route, check:
 
 | Anti-Pattern | What Goes Wrong | Fix |
 |-------------|-----------------|-----|
-| **Single-point explosion** | `explore_area("Kyoto")` → all results in 1km radius | Explore per district |
-| **Backtracking route** | A(east) → B(west) → C(east) → D(west) | Group by geography, route as arc |
-| **No map output** | AI returns JSON/text only, no visual | Always call static_map after route/search |
-| **Ignoring transit** | 5km walk between stops | Use distance_matrix to detect >2km gaps, suggest transit |
-| **Tourist-only results** | Only famous spots, no local gems | Mix `search_nearby` (type-based) with `search_places` (query: "local favorite ramen in X") |
-| **Time blindness** | 8 stops in one day, each "1 hour" | Budget 2-3hr for major temples, 30-60min for shops, include transit time |
+| **Single-point explosion** | `explore_area("Kyoto")` → 1km cluster | search_places first → use results as centers |
+| **Backtracking route** | A(east) → B(west) → C(east) | Sort stops by geographic direction per day |
+| **No map output** | Text/JSON only, no visual | Always call static_map after route |
+| **Ignoring transit** | 5km walk between stops | >2km gap → suggest transit |
 | **Same-type clustering** | 5 temples in a row | Alternate: temple → food → walk → shrine → cafe |
+| **Time blindness** | 10 stops in one day | Budget 5-7 stops max (see time table below) |
+| **Tourist-only results** | Only famous spots | Mix search_nearby (type) with search_places ("local favorite ramen in X") |
 
 ---
 
@@ -105,8 +110,21 @@ A realistic day fits **5-7 stops** with meals, not 10+.
 
 ---
 
+## Validation Checklist
+
+After generating the itinerary, verify:
+- [ ] Stops span multiple areas of the city (not all within 1km)
+- [ ] Each day follows one geographic direction (no zigzag)
+- [ ] Total walking per day < 10km (suggest transit for >2km gaps)
+- [ ] Meal timing: lunch 11:30-13:00, dinner 17:30-19:30
+- [ ] Opening hours: temples often close 17:00, markets by 18:00
+- [ ] Activity variety: not 5 of the same type in a row
+- [ ] A map is generated for each day
+
+---
+
 ## When to Read This Document
 
 - When the user asks to "plan a trip", "create an itinerary", or "plan X days in Y"
-- When the result of a trip plan shows clustering in one area
+- When a trip plan clusters all stops in one small area
 - When building multi-day travel content
