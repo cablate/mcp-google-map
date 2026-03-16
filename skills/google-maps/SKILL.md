@@ -86,18 +86,6 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 
 ---
 
-## Prompt Templates
-
-3 MCP prompts for common geo workflows (available as `/` commands in Claude Desktop):
-
-| Prompt | Trigger | Tools used |
-|--------|---------|-----------|
-| `travel-planner` | "Plan a trip to X" | geocode → explore_area → weather → plan_route → static_map |
-| `neighborhood-scout` | "Analyze this neighborhood" | geocode → explore_area → elevation → distance_matrix → air_quality → static_map |
-| `route-optimizer` | "Visit these places efficiently" | plan_route → static_map |
-
----
-
 ## When to Update This Skill
 
 | Trigger | What to update |
