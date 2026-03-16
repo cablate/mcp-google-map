@@ -98,9 +98,24 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 
 ---
 
-## Reference
+## Reference — Complete Knowledge Package
 
+Read these files to fully understand the project, its tools, and its domain.
+
+### For Using the Tools
 | File | Content | When to read |
 |------|---------|--------------|
 | `references/tools-api.md` | Full parameter specs, response formats, 7 scenario recipes, and decision guide | When you need exact parameters, response shapes, or multi-tool workflow patterns |
-| `references/travel-planning.md` | Travel planning best practices — district-based exploration, geographic arc routing, anti-patterns | When planning multi-day trips or itineraries — **read this before Recipe 1** |
+| `references/travel-planning.md` | Travel planning methodology — 6-layer model, Search Along Route, anti-patterns | When planning multi-day trips — **read before Recipe 1** |
+
+### For Developing / Maintaining the Project
+| File | Content | When to read |
+|------|---------|--------------|
+| `references/architecture.md` | System architecture, transport modes, tool registration flow, code map | When adding tools, understanding data flow, or onboarding |
+| `references/google-maps-api-guide.md` | API endpoints, pricing, coverage limits, common gotchas | When debugging API errors or evaluating new APIs |
+| `references/decisions.md` | Key design decisions with context and rationale (ADR format) | When questioning "why was X built this way?" |
+
+### Domain Knowledge
+| File | Content | When to read |
+|------|---------|--------------|
+| `references/geo-domain-knowledge.md` | GIS fundamentals, coordinate systems, spatial search, place types, Japan-specific knowledge | When you need geographic domain context to make better tool calls or design decisions |

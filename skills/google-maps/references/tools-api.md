@@ -294,6 +294,36 @@ Chaining patterns:
 
 ---
 
+## search-along-route
+
+Search for places along a route between two points. Results ranked by minimal detour time — perfect for finding meals, cafes, or attractions "on the way" between landmarks.
+
+```bash
+exec search-along-route '{"textQuery": "restaurant", "origin": "Fushimi Inari, Kyoto", "destination": "Kiyomizu-dera, Kyoto", "mode": "walking"}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| textQuery | string | yes | What to search for ("restaurant", "cafe", "temple") |
+| origin | string | yes | Route start point |
+| destination | string | yes | Route end point |
+| mode | string | no | walking, driving, bicycling, transit (default: walking) |
+| maxResults | number | no | Max results (default: 5, max: 20) |
+
+Response:
+```json
+{
+  "places": [
+    { "name": "SUSHI MATSUHIRO", "rating": 5.0, "location": { "lat": 34.968, "lng": 135.771 } }
+  ],
+  "route": { "distance": "4.0 km", "duration": "58 mins", "polyline": "..." }
+}
+```
+
+Key for trip planning: use this between consecutive anchors to find **along-the-way** stops instead of searching at endpoints.
+
+---
+
 ## explore-area (composite)
 
 Explore a neighborhood in one call. Internally chains geocode → search-nearby (per type) → place-details (top N).
@@ -395,48 +425,48 @@ This is the most common complex scenario. The goal is a time-ordered itinerary w
 > **Read `references/travel-planning.md` first** — it contains the full methodology, anti-patterns, and time budget guidelines.
 
 **Steps:**
-1. `search-places` — Search "top attractions in {city}" to get **anchor points** spread across the city. The results are naturally geographically diverse.
-2. **Cluster by proximity** — Look at the anchor coordinates. Group nearby anchors into the same day. Arrange each day as a **directional arc** (e.g. south→north).
-3. `explore-area` or `search-nearby` — For each anchor, search around **its coordinates** for restaurants, cafes, shops. This finds supporting stops along the day's route.
-4. `place-details` — Get ratings, hours, reviews for top candidates
-5. `plan-route` — Build one route per day. Use `optimize: false` when you've determined the geographic order.
-6. `weather` + `air-quality` — Check conditions for outdoor activities
-7. `static-map` — **Always** visualize each day's route with numbered markers and path
+1. `search-places` — Search "top attractions in {city}" → geographically diverse **anchor points**
+2. **Design arcs** — Group nearby anchors into same-day arcs. One direction per day (south→north).
+3. `search-along-route` — Between each pair of anchors, find restaurants/cafes **along the walking route** (ranked by minimal detour)
+4. `place-details` — Get ratings, hours for top candidates
+5. `plan-route` — Validate each day's route. Use `optimize: false` (you already know the geographic order).
+6. `weather` + `air-quality` — Adjust for conditions
+7. `static-map` — **Always** visualize each day with numbered markers + path
 
 **Key decisions:**
-- **Never use the city name as explore_area input** — use anchor coordinates or district names.
-- Always check `opening_hours` from `place-details` before including in itinerary.
-- **Never backtrack**: stops should progress in one geographic direction per day.
-- Alternate activity types: temple → food → walk → shrine → cafe. Not 5 temples in a row.
-- Budget 5-7 stops per day max (including meals). Major temples = 90-120 min, not "30 min".
-- If two stops are >2km apart, suggest transit instead of walking.
-- **Always generate a map** for each day using `static-map`.
+- **Use `search-along-route` for meals and breaks** — not explore_area or search_nearby. Along-route results are on the path, not random nearby points.
+- **Never backtrack**: stops progress in one direction per day.
+- Alternate activity types: temple → food → walk → shrine → cafe.
+- Budget 5-7 stops per day max. Major temples = 90-120 min.
+- Edge landmarks (geographically isolated) go at start or end of a day.
+- **Always generate a map** for each day.
 
 **Example flow (Kyoto 2-day):**
 ```
 search_places("top attractions in Kyoto")
-→ Fushimi Inari (34.97, south), Kiyomizu-dera (34.99, east),
-  Kinkaku-ji (35.04, north), Arashiyama (35.01, west)
+→ Fushimi Inari(south), Kiyomizu(east), Kinkaku-ji(north), Arashiyama(west)
 
-Day 1 cluster: Fushimi (south) + Kiyomizu/Gion (east) — south→center arc
-Day 2 cluster: Nishiki (center) + Arashiyama (west) — center→west arc
+Day 1 arc: south→center — Fushimi → Kiyomizu → Gion → Pontocho
+Day 2 arc: center→west — Nishiki → Nijo Castle → Arashiyama
 
-explore_area("Fushimi Inari, Kyoto", types:["restaurant"])
-explore_area("Gion, Kyoto", types:["restaurant","cafe"])
-→ pick best-rated for lunch/dinner along Day 1 route
+search_along_route("restaurant", "Fushimi Inari", "Kiyomizu-dera", "walking")
+→ finds lunch options ALONG the 4km route (not at endpoints)
 
-plan_route(Day 1 stops, mode:"walking", optimize:false)
-static_map(markers + path for Day 1)
+search_along_route("kaiseki restaurant", "Gion, Kyoto", "Arashiyama, Kyoto")
+→ finds dinner along the afternoon route
+
+plan_route(Day 1 stops, optimize:false) → static_map(Day 1)
+plan_route(Day 2 stops, optimize:false) → static_map(Day 2)
 ```
 
-**Example output shape:**
+**Example output:**
 ```
 Day 1: South → Center arc
-  09:00 Fushimi Inari (90 min) → 25 min transit
-  11:00 Kiyomizu-dera (90 min) → 10 min walk down Sannen-zaka
-  12:45 Gion lunch — Kaiseki restaurant ★4.7 (75 min)
-  14:15 Yasaka Shrine (30 min) → 15 min walk
-  15:00 Pontocho stroll + cafe (45 min)
+  08:30 Fushimi Inari (90 min) → 25 min transit
+  10:30 Kiyomizu-dera (90 min) → walk down Sannen-zaka
+  12:30 [along-route find] Gion lunch ★4.7 (75 min)
+  14:00 Yasaka Shrine (30 min) → 15 min walk
+  14:45 Pontocho stroll + cafe (45 min)
   17:30 Dinner near Kawaramachi
 [map with markers 1-6 and walking path]
 ```
