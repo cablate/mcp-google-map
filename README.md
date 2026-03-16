@@ -139,15 +139,7 @@ cat addresses.txt | npx @cablate/mcp-google-map batch-geocode -i -
 
 Input: one address per line. Output: JSON with `{ total, succeeded, failed, results[] }`. Default concurrency: 20 parallel requests.
 
-### Prompt Templates
 
-3 built-in MCP prompts available in clients that support the prompts primitive (Claude Desktop `/` commands):
-
-| Prompt | What it does |
-|--------|-------------|
-| `travel-planner` | Plan a trip — geocode, explore, weather, route, map |
-| `neighborhood-scout` | Analyze a neighborhood — amenities, commute, air quality, scorecard |
-| `route-optimizer` | Optimize multi-stop route — best order, directions, map |
 
 ### API Key Configuration
 
@@ -245,8 +237,6 @@ src/
 │       ├── exploreArea.ts        # maps_explore_area (composite)
 │       ├── planRoute.ts          # maps_plan_route (composite)
 │       └── comparePlaces.ts      # maps_compare_places (composite)
-├── prompts/
-│   └── geoPrompts.ts            # MCP prompt templates (3 geo prompts)
 └── utils/
     ├── apiKeyManager.ts          # API key management
     └── requestContext.ts         # Per-request context (API key isolation)
@@ -294,7 +284,6 @@ For enterprise security reviews, see [Security Assessment Clarifications](./SECU
 
 | Feature | What it unlocks | Status |
 |---------|----------------|--------|
-| MCP Prompt Templates | 3 geo prompts (travel-planner, neighborhood-scout, route-optimizer) — Claude Desktop `/` commands | **Done** |
 | Spatial Context | Agent remembers "the area we were just looking at" across turns | Research |
 | Geo Agent Template | One command to spin up a full geo-aware AI agent | Research |
 | Geo-Reasoning Benchmark | 10-scenario test suite measuring LLM geospatial reasoning accuracy | Research |
