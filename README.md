@@ -249,6 +249,38 @@ skills/
 
 For enterprise security reviews, see [Security Assessment Clarifications](./SECURITY_ASSESSMENT.md) — a 23-item checklist covering licensing, data protection, credential management, tool contamination, and AI agent execution environment verification.
 
+## Roadmap
+
+### New Tools
+
+| Tool | What it unlocks | Status |
+|------|----------------|--------|
+| `maps_static_map` | Return map images with pins/routes — multimodal AI can "see" the map | Planned |
+| `maps_air_quality` | AQI, pollutants — health-aware travel, outdoor planning, real estate | Planned |
+| `maps_validate_address` | Standardize and verify addresses — logistics/e-commerce | Planned |
+| `maps_isochrone` | "Show me everything within 30 min drive" — reachability analysis | Planned |
+| `maps_batch_geocode` | Geocode hundreds of addresses in one call — data enrichment | Planned |
+
+### Capabilities
+
+| Feature | What it unlocks | Status |
+|---------|----------------|--------|
+| Spatial Context | Agent remembers "the area we were just looking at" across turns | Research |
+| Geo Agent Template | One command to spin up a full geo-aware AI agent | Research |
+| Geo-Reasoning Benchmark | 10-scenario test suite measuring LLM geospatial reasoning accuracy | Research |
+
+### Use Cases We're Building Toward
+
+These are the real-world scenarios driving our tool decisions:
+
+- **Travel planning** — "Plan a day trip in Tokyo" (geocode → search → directions → weather)
+- **Real estate analysis** — "Analyze this neighborhood: schools, commute, flood risk" (search-nearby × N + elevation + distance-matrix)
+- **Logistics optimization** — "Route these 12 deliveries efficiently from the warehouse" (plan-route)
+- **Field sales** — "Visit 6 clients in Chicago, minimize drive time, find lunch spots" (plan-route + search-nearby)
+- **Disaster response** — "Nearest open hospitals? Am I in a flood zone?" (search-nearby + elevation)
+- **Content creation** — "Top 5 neighborhoods in Austin with restaurant density and airport distance" (explore-area + distance-matrix)
+- **Accessibility** — "Wheelchair-accessible restaurants, avoid steep routes" (search-nearby + place-details + elevation)
+
 ## Changelog
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
