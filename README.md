@@ -6,7 +6,7 @@
 
 Give your AI agent the ability to understand the physical world — geocode, route, search, and reason about locations.
 
-- **15 tools** — 12 atomic + 3 composite (explore-area, plan-route, compare-places)
+- **16 tools** — 13 atomic + 3 composite (explore-area, plan-route, compare-places)
 - **3 modes** — stdio, StreamableHTTP, standalone exec CLI
 - **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
 
@@ -14,7 +14,7 @@ Give your AI agent the ability to understand the physical world — geocode, rou
 
 | | This project | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
 |---|---|---|
-| Tools | **15** | 3 |
+| Tools | **16** | 3 |
 | Geocoding | Yes | No |
 | Step-by-step directions | Yes | No |
 | Elevation | Yes | No |
@@ -62,6 +62,7 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_weather` | Get current weather conditions or forecast — temperature, humidity, wind, UV, precipitation. |
 | `maps_air_quality` | Get air quality index, pollutant concentrations, and health recommendations by demographic group. |
 | `maps_static_map` | Generate a map image with markers, paths, or routes — returned inline for the user to see directly. |
+| `maps_batch_geocode` | Geocode up to 50 addresses in one call — returns coordinates for each. |
 | **Composite Tools** | |
 | `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
 | `maps_plan_route` | Plan an optimized multi-stop route — geocodes, finds best order, returns directions. |
@@ -115,7 +116,7 @@ Then configure your MCP client:
 ### Server Information
 
 - **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
-- **Tools**: 15 Google Maps tools (12 atomic + 3 composite)
+- **Tools**: 16 Google Maps tools (13 atomic + 3 composite)
 
 ### CLI Exec Mode (Agent Skill)
 
@@ -126,7 +127,7 @@ npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
 npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
 ```
 
-All 15 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `explore-area`, `plan-route`, `compare-places`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
+All 16 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `batch-geocode-tool`, `explore-area`, `plan-route`, `compare-places`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
 ### Batch Geocode
 
@@ -234,6 +235,7 @@ src/
 │       ├── weather.ts            # maps_weather tool
 │       ├── airQuality.ts         # maps_air_quality tool
 │       ├── staticMap.ts          # maps_static_map tool
+│       ├── batchGeocode.ts       # maps_batch_geocode tool
 │       ├── exploreArea.ts        # maps_explore_area (composite)
 │       ├── planRoute.ts          # maps_plan_route (composite)
 │       └── comparePlaces.ts      # maps_compare_places (composite)

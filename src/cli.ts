@@ -92,6 +92,7 @@ const EXEC_TOOLS = [
   "compare-places",
   "air-quality",
   "static-map",
+  "batch-geocode-tool",
 ] as const;
 
 async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
@@ -182,6 +183,22 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
     case "static-map":
     case "maps_static_map":
       return searcher.getStaticMap(params);
+
+    case "batch-geocode-tool":
+    case "maps_batch_geocode": {
+      const results = await Promise.all(
+        (params.addresses as string[]).map(async (address: string) => {
+          try {
+            const result = await searcher.geocode(address);
+            return { address, ...result };
+          } catch (error: any) {
+            return { address, success: false, error: error.message };
+          }
+        })
+      );
+      const succeeded = results.filter((r) => r.success).length;
+      return { success: true, data: { total: params.addresses.length, succeeded, failed: params.addresses.length - succeeded, results } };
+    }
 
     default:
       throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);

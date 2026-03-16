@@ -26,6 +26,33 @@ Response:
 
 ---
 
+## batch-geocode
+
+Geocode multiple addresses in one call (max 50).
+
+```bash
+exec batch-geocode-tool '{"addresses": ["Tokyo Tower", "Eiffel Tower", "Statue of Liberty"]}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| addresses | string[] | yes | List of addresses or landmarks (max 50) |
+
+Response:
+```json
+{
+  "total": 3,
+  "succeeded": 3,
+  "failed": 0,
+  "results": [
+    { "address": "Tokyo Tower", "success": true, "data": { "location": { "lat": 35.658, "lng": 139.745 }, "formatted_address": "..." } },
+    ...
+  ]
+}
+```
+
+---
+
 ## reverse-geocode
 
 Convert GPS coordinates to a street address.
