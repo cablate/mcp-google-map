@@ -322,6 +322,81 @@ export class GoogleMapsTools {
     }
   }
 
+  async searchAlongRoute(params: {
+    textQuery: string;
+    origin: string;
+    destination: string;
+    mode?: string;
+    maxResults?: number;
+  }): Promise<{ places: any[]; route: { distance: string; duration: string; polyline: string } }> {
+    try {
+      // Step 1: Get directions to obtain the encoded polyline
+      const directions = await this.getDirections(
+        params.origin,
+        params.destination,
+        (params.mode as any) || "walking"
+      );
+
+      const polyline = directions.routes[0]?.overview_polyline?.points;
+      if (!polyline) {
+        throw new Error("Could not get route polyline");
+      }
+
+      // Step 2: Call Places searchText REST API with searchAlongRouteParameters
+      const maxResults = Math.min(params.maxResults || 5, 20);
+      const fieldMask = "places.displayName,places.id,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.currentOpeningHours.openNow";
+
+      const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": this.apiKey,
+          "X-Goog-FieldMask": fieldMask,
+        },
+        body: JSON.stringify({
+          textQuery: params.textQuery,
+          searchAlongRouteParameters: {
+            polyline: {
+              encodedPolyline: polyline,
+            },
+          },
+          maxResultCount: maxResults,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.error?.message || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const places = (data.places || []).map((place: any) => ({
+        name: place.displayName?.text || "",
+        place_id: place.id || "",
+        formatted_address: place.formattedAddress || "",
+        location: {
+          lat: place.location?.latitude || 0,
+          lng: place.location?.longitude || 0,
+        },
+        rating: place.rating || 0,
+        user_ratings_total: place.userRatingCount || 0,
+        open_now: place.currentOpeningHours?.openNow ?? null,
+      }));
+
+      return {
+        places,
+        route: {
+          distance: directions.total_distance.text,
+          duration: directions.total_duration.text,
+          polyline,
+        },
+      };
+    } catch (error: any) {
+      Logger.error("Error in searchAlongRoute:", error);
+      throw new Error(error.message || "Failed to search along route");
+    }
+  }
+
   async getWeather(
     latitude: number,
     longitude: number,

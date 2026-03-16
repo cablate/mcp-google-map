@@ -35,7 +35,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 
 ## Tool Map
 
-16 tools in five categories — pick by scenario:
+17 tools in five categories — pick by scenario:
 
 ### Place Discovery
 | Tool | When to use | Example |
@@ -52,6 +52,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 |------|-------------|---------|
 | `directions` | How to get from A to B | "Route from Taipei Main Station to the airport" |
 | `distance-matrix` | Compare distances across multiple points | "Which of these 3 hotels is closest to the airport?" |
+| `search-along-route` | Find places along a route (meals, stops) ranked by detour time | "Restaurants between Fushimi Inari and Kiyomizu-dera" |
 
 ### Environment
 | Tool | When to use | Example |

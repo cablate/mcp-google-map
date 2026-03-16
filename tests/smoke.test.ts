@@ -213,6 +213,7 @@ async function testListTools(session: McpSession): Promise<void> {
     "maps_air_quality",
     "maps_static_map",
     "maps_batch_geocode",
+    "maps_search_along_route",
   ];
 
   for (const name of expectedTools) {
@@ -477,6 +478,30 @@ async function testToolCalls(session: McpSession): Promise<void> {
       /* ignore parse errors */
     }
     assert(valid, "Batch geocode returns 2 results with correct counts");
+  }
+
+  // Test search along route
+  const alongResult = await sendRequest(session, "tools/call", {
+    name: "maps_search_along_route",
+    arguments: {
+      textQuery: "restaurant",
+      origin: "Fushimi Inari, Kyoto",
+      destination: "Kiyomizu-dera, Kyoto",
+      mode: "walking",
+      maxResults: 3,
+    },
+  });
+  const alongContent = alongResult?.result?.content ?? [];
+  assert(alongContent.length > 0, "Search along route returns content");
+  if (alongContent.length > 0) {
+    let valid = false;
+    try {
+      const parsed = JSON.parse(alongContent[0].text);
+      valid = Array.isArray(parsed?.places) && parsed.places.length > 0 && parsed?.route?.polyline !== undefined;
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(valid, "Search along route returns places and route polyline");
   }
 }
 
