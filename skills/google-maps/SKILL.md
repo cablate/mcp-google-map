@@ -35,7 +35,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 
 ## Tool Map
 
-13 tools in four categories — pick by scenario:
+14 tools in four categories — pick by scenario:
 
 ### Place Discovery
 | Tool | When to use | Example |
@@ -58,6 +58,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | `elevation` | Query altitude | "Elevation profile along this hiking trail" |
 | `timezone` | Need local time at a destination | "What time is it in Tokyo?" |
 | `weather` | Weather at a location (current or forecast) | "What's the weather in Paris?" |
+| `air-quality` | AQI, pollutants, health recommendations | "Is the air safe for jogging?" |
 
 ### Composite (one-call shortcuts)
 | Tool | When to use | Example |

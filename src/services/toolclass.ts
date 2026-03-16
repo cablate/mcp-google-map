@@ -391,6 +391,90 @@ export class GoogleMapsTools {
     }
   }
 
+  async getAirQuality(
+    latitude: number,
+    longitude: number,
+    includeHealthRecommendations: boolean = true,
+    includePollutants: boolean = false
+  ): Promise<any> {
+    try {
+      const url = `https://airquality.googleapis.com/v1/currentConditions:lookup?key=${this.apiKey}`;
+
+      const extraComputations: string[] = [];
+      if (includeHealthRecommendations) {
+        extraComputations.push("HEALTH_RECOMMENDATIONS");
+      }
+      if (includePollutants) {
+        extraComputations.push("POLLUTANT_CONCENTRATION");
+      }
+
+      const body: any = {
+        location: { latitude, longitude },
+      };
+      if (extraComputations.length > 0) {
+        body.extraComputations = extraComputations;
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const msg = errorData?.error?.message || `HTTP ${response.status}`;
+        throw new Error(msg);
+      }
+
+      const data = await response.json();
+
+      // Extract the primary index
+      const indexes = data.indexes || [];
+      const primaryIndex = indexes[0];
+
+      const result: any = {
+        dateTime: data.dateTime,
+        regionCode: data.regionCode,
+        aqi: primaryIndex?.aqi,
+        category: primaryIndex?.category,
+        dominantPollutant: primaryIndex?.dominantPollutant,
+        color: primaryIndex?.color,
+      };
+
+      // Include all available indexes (universal + local)
+      if (indexes.length > 1) {
+        result.indexes = indexes.map((idx: any) => ({
+          code: idx.code,
+          displayName: idx.displayName,
+          aqi: idx.aqi,
+          category: idx.category,
+          dominantPollutant: idx.dominantPollutant,
+        }));
+      }
+
+      // Health recommendations
+      if (data.healthRecommendations) {
+        result.healthRecommendations = data.healthRecommendations;
+      }
+
+      // Pollutants
+      if (data.pollutants) {
+        result.pollutants = data.pollutants.map((p: any) => ({
+          code: p.code,
+          displayName: p.displayName,
+          concentration: p.concentration,
+          additionalInfo: p.additionalInfo,
+        }));
+      }
+
+      return result;
+    } catch (error: any) {
+      Logger.error("Error in getAirQuality:", error);
+      throw new Error(error.message || `Failed to get air quality for (${latitude}, ${longitude})`);
+    }
+  }
+
   async getTimezone(
     latitude: number,
     longitude: number,

@@ -74,6 +74,12 @@ interface WeatherResponse {
   data?: any;
 }
 
+interface AirQualityResponse {
+  success: boolean;
+  error?: string;
+  data?: any;
+}
+
 interface ElevationResponse {
   success: boolean;
   error?: string;
@@ -312,6 +318,28 @@ export class PlacesSearcher {
       return {
         success: false,
         error: error instanceof Error ? error.message : "An error occurred while getting weather",
+      };
+    }
+  }
+
+  async getAirQuality(
+    latitude: number,
+    longitude: number,
+    includeHealthRecommendations?: boolean,
+    includePollutants?: boolean
+  ): Promise<AirQualityResponse> {
+    try {
+      const result = await this.mapsTools.getAirQuality(
+        latitude,
+        longitude,
+        includeHealthRecommendations,
+        includePollutants
+      );
+      return { success: true, data: result };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "An error occurred while getting air quality",
       };
     }
   }

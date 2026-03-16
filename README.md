@@ -6,7 +6,7 @@
 
 Give your AI agent the ability to understand the physical world — geocode, route, search, and reason about locations.
 
-- **13 tools** — 10 atomic + 3 composite (explore-area, plan-route, compare-places)
+- **14 tools** — 11 atomic + 3 composite (explore-area, plan-route, compare-places)
 - **3 modes** — stdio, StreamableHTTP, standalone exec CLI
 - **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
 
@@ -14,7 +14,7 @@ Give your AI agent the ability to understand the physical world — geocode, rou
 
 | | This project | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
 |---|---|---|
-| Tools | **13** | 3 |
+| Tools | **14** | 3 |
 | Geocoding | Yes | No |
 | Step-by-step directions | Yes | No |
 | Elevation | Yes | No |
@@ -58,6 +58,7 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_elevation` | Get elevation (meters above sea level) for geographic coordinates. |
 | `maps_timezone` | Get timezone ID, name, UTC/DST offsets, and local time for coordinates. |
 | `maps_weather` | Get current weather conditions or forecast — temperature, humidity, wind, UV, precipitation. |
+| `maps_air_quality` | Get air quality index, pollutant concentrations, and health recommendations by demographic group. |
 | **Composite Tools** | |
 | `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
 | `maps_plan_route` | Plan an optimized multi-stop route — geocodes, finds best order, returns directions. |
@@ -111,7 +112,7 @@ Then configure your MCP client:
 ### Server Information
 
 - **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
-- **Tools**: 13 Google Maps tools (10 atomic + 3 composite)
+- **Tools**: 14 Google Maps tools (11 atomic + 3 composite)
 
 ### CLI Exec Mode (Agent Skill)
 
@@ -122,7 +123,7 @@ npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
 npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
 ```
 
-All 13 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `explore-area`, `plan-route`, `compare-places`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
+All 14 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `explore-area`, `plan-route`, `compare-places`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
 ### API Key Configuration
 
@@ -215,6 +216,7 @@ src/
 │       ├── elevation.ts          # maps_elevation tool
 │       ├── timezone.ts           # maps_timezone tool
 │       ├── weather.ts            # maps_weather tool
+│       ├── airQuality.ts         # maps_air_quality tool
 │       ├── exploreArea.ts        # maps_explore_area (composite)
 │       ├── planRoute.ts          # maps_plan_route (composite)
 │       └── comparePlaces.ts      # maps_compare_places (composite)
@@ -256,7 +258,7 @@ For enterprise security reviews, see [Security Assessment Clarifications](./SECU
 | Tool | What it unlocks | Status |
 |------|----------------|--------|
 | `maps_static_map` | Return map images with pins/routes — multimodal AI can "see" the map | Planned |
-| `maps_air_quality` | AQI, pollutants — health-aware travel, outdoor planning, real estate | Planned |
+| `maps_air_quality` | AQI, pollutants — health-aware travel, outdoor planning, real estate | **Done** |
 | `maps_validate_address` | Standardize and verify addresses — logistics/e-commerce | Planned |
 | `maps_isochrone` | "Show me everything within 30 min drive" — reachability analysis | Planned |
 | `maps_batch_geocode` | Geocode hundreds of addresses in one call — data enrichment | Planned |
