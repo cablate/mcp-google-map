@@ -26,6 +26,33 @@ Response:
 
 ---
 
+## batch-geocode
+
+Geocode multiple addresses in one call (max 50).
+
+```bash
+exec batch-geocode-tool '{"addresses": ["Tokyo Tower", "Eiffel Tower", "Statue of Liberty"]}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| addresses | string[] | yes | List of addresses or landmarks (max 50) |
+
+Response:
+```json
+{
+  "total": 3,
+  "succeeded": 3,
+  "failed": 0,
+  "results": [
+    { "address": "Tokyo Tower", "success": true, "data": { "location": { "lat": 35.658, "lng": 139.745 }, "formatted_address": "..." } },
+    ...
+  ]
+}
+```
+
+---
+
 ## reverse-geocode
 
 Convert GPS coordinates to a street address.
@@ -238,6 +265,35 @@ Chaining: `geocode` → `air-quality` when the user gives an address instead of 
 
 ---
 
+## static-map
+
+Generate a map image with markers, paths, or routes. Returns an inline PNG image.
+
+```bash
+exec static-map '{"center": "Tokyo Tower", "zoom": 14}'
+exec static-map '{"markers": ["color:red|label:A|35.6586,139.7454", "color:blue|label:B|35.6595,139.7006"]}'
+exec static-map '{"markers": ["color:red|35.6586,139.7454"], "maptype": "satellite", "zoom": 16}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| center | string | no | "lat,lng" or address. Optional if markers/path provided. |
+| zoom | number | no | 0-21 (auto-fit if omitted) |
+| size | string | no | "WxH" pixels. Default: "600x400". Max: "640x640" |
+| maptype | string | no | roadmap, satellite, terrain, hybrid. Default: roadmap |
+| markers | string[] | no | Marker descriptors: "color:red\|label:A\|lat,lng" |
+| path | string[] | no | Path descriptors: "color:0x0000ff\|weight:3\|lat1,lng1\|lat2,lng2" |
+
+Response: MCP image content (inline PNG) + size metadata.
+
+Chaining patterns:
+- `search-nearby` → `static-map` (mark found places on map)
+- `plan-route` / `directions` → `static-map` (draw the route with path + markers)
+- `explore-area` → `static-map` (visualize neighborhood search results)
+- `compare-places` → `static-map` (show compared places side by side)
+
+---
+
 ## explore-area (composite)
 
 Explore a neighborhood in one call. Internally chains geocode → search-nearby (per type) → place-details (top N).
@@ -312,6 +368,18 @@ distance-matrix {"origins":["Taipei Main Station","Banqiao Station"],"destinatio
 ```
 geocode {"address":"Tokyo"}
 air-quality {"latitude":35.6762,"longitude":139.6503}
+```
+
+**Search → Map** — Find places, then show them on a map.
+```
+search-nearby {"center":{"value":"35.6586,139.7454","isCoordinates":true},"keyword":"cafe","radius":500}
+static-map {"markers":["color:red|label:1|lat1,lng1","color:red|label:2|lat2,lng2"]}
+```
+
+**Directions → Map** — Get a route, then visualize it.
+```
+directions {"origin":"Tokyo Tower","destination":"Shibuya Station","mode":"walking"}
+static-map {"path":["color:0x4285F4|weight:4|lat1,lng1|lat2,lng2|..."],"markers":["color:green|label:A|origin","color:red|label:B|dest"]}
 ```
 
 ---

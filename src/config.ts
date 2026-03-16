@@ -15,6 +15,8 @@ import { ExploreArea, ExploreAreaParams } from "./tools/maps/exploreArea.js";
 import { PlanRoute, PlanRouteParams } from "./tools/maps/planRoute.js";
 import { ComparePlaces, ComparePlacesParams } from "./tools/maps/comparePlaces.js";
 import { AirQuality, AirQualityParams } from "./tools/maps/airQuality.js";
+import { StaticMap, StaticMapParams } from "./tools/maps/staticMap.js";
+import { BatchGeocode, BatchGeocodeParams } from "./tools/maps/batchGeocode.js";
 
 // All Google Maps tools are read-only API queries
 const MAPS_TOOL_ANNOTATIONS = {
@@ -132,6 +134,20 @@ const serverConfigs: ServerInstanceConfig[] = [
         schema: AirQuality.SCHEMA,
         annotations: MAPS_TOOL_ANNOTATIONS,
         action: (params: AirQualityParams) => AirQuality.ACTION(params),
+      },
+      {
+        name: StaticMap.NAME,
+        description: StaticMap.DESCRIPTION,
+        schema: StaticMap.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: StaticMapParams) => StaticMap.ACTION(params),
+      },
+      {
+        name: BatchGeocode.NAME,
+        description: BatchGeocode.DESCRIPTION,
+        schema: BatchGeocode.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: BatchGeocodeParams) => BatchGeocode.ACTION(params),
       },
     ],
   },

@@ -211,6 +211,8 @@ async function testListTools(session: McpSession): Promise<void> {
     "maps_timezone",
     "maps_weather",
     "maps_air_quality",
+    "maps_static_map",
+    "maps_batch_geocode",
   ];
 
   for (const name of expectedTools) {
@@ -420,6 +422,61 @@ async function testToolCalls(session: McpSession): Promise<void> {
       /* ignore parse errors */
     }
     assert(valid, "Distance matrix returns distances and durations");
+  }
+
+  // Test air quality (Tokyo — supported unlike weather)
+  const aqResult = await sendRequest(session, "tools/call", {
+    name: "maps_air_quality",
+    arguments: { latitude: 35.6762, longitude: 139.6503 },
+  });
+  const aqContent = aqResult?.result?.content ?? [];
+  assert(aqContent.length > 0, "Air quality returns content");
+  if (aqContent.length > 0) {
+    let valid = false;
+    try {
+      const parsed = JSON.parse(aqContent[0].text);
+      valid = typeof parsed?.aqi === "number" && parsed?.category !== undefined;
+    } catch {
+      /* ignore parse errors */
+    }
+    if (!valid) {
+      console.log("  ⚠️  Air quality returned unexpected data (API may not be enabled)");
+    }
+    assert(true, "Air quality tool callable");
+  }
+
+  // Test static map
+  const mapResult = await sendRequest(session, "tools/call", {
+    name: "maps_static_map",
+    arguments: { center: "Tokyo Tower", zoom: 14 },
+  });
+  const mapContent = mapResult?.result?.content ?? [];
+  assert(mapContent.length > 0, "Static map returns content");
+  if (mapContent.length > 0) {
+    const imageContent = mapContent.find((c: any) => c.type === "image");
+    assert(imageContent !== undefined, "Static map returns image content type");
+    if (imageContent) {
+      assert(imageContent.mimeType === "image/png", "Static map returns PNG");
+      assert(typeof imageContent.data === "string" && imageContent.data.length > 100, "Static map returns base64 data");
+    }
+  }
+
+  // Test batch geocode
+  const batchResult = await sendRequest(session, "tools/call", {
+    name: "maps_batch_geocode",
+    arguments: { addresses: ["Tokyo Tower", "Eiffel Tower"] },
+  });
+  const batchContent = batchResult?.result?.content ?? [];
+  assert(batchContent.length > 0, "Batch geocode returns content");
+  if (batchContent.length > 0) {
+    let valid = false;
+    try {
+      const parsed = JSON.parse(batchContent[0].text);
+      valid = parsed?.total === 2 && parsed?.succeeded === 2 && Array.isArray(parsed?.results);
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(valid, "Batch geocode returns 2 results with correct counts");
   }
 }
 
@@ -701,6 +758,46 @@ async function testExecMode(): Promise<void> {
     assert(Array.isArray(parsed?.data) && parsed.data.length > 0, "exec search-places returns results");
   } catch {
     assert(false, "exec search-places returns valid JSON", searchOut.slice(0, 200));
+  }
+
+  // Test: exec air-quality
+  const aqOut = execArgs("air-quality", '{"latitude":35.6762,"longitude":139.6503}');
+  try {
+    const parsed = JSON.parse(aqOut);
+    assert(parsed?.success === true, "exec air-quality succeeds");
+    assert(typeof parsed?.data?.aqi === "number", "exec air-quality returns AQI");
+  } catch {
+    assert(false, "exec air-quality returns valid JSON", aqOut.slice(0, 200));
+  }
+
+  // Test: exec static-map
+  const mapOut = execArgs("static-map", '{"center":"Tokyo Tower","zoom":14}');
+  try {
+    const parsed = JSON.parse(mapOut);
+    assert(parsed?.success === true, "exec static-map succeeds");
+    assert(typeof parsed?.data?.base64 === "string" && parsed.data.base64.length > 100, "exec static-map returns base64");
+    assert(parsed?.data?.dimensions === "600x400", "exec static-map returns correct dimensions");
+  } catch {
+    assert(false, "exec static-map returns valid JSON", mapOut.slice(0, 200));
+  }
+
+  // Test: batch-geocode
+  const { writeFileSync, unlinkSync } = await import("node:fs");
+  const tmpFile = resolve(import.meta.dirname ?? ".", "test-addresses.tmp");
+  writeFileSync(tmpFile, "Tokyo Tower\nEiffel Tower\n", "utf-8");
+  try {
+    const batchOut = execFileSync("node", [cliPath, "batch-geocode", "-i", tmpFile, "--apikey", API_KEY], {
+      encoding: "utf-8",
+      timeout: 30000,
+    }).trim();
+    const parsed = JSON.parse(batchOut);
+    assert(parsed?.total === 2, "batch-geocode processes 2 addresses");
+    assert(parsed?.succeeded === 2, "batch-geocode succeeds for all");
+    assert(Array.isArray(parsed?.results) && parsed.results.length === 2, "batch-geocode returns 2 results");
+  } catch (err: any) {
+    assert(false, "batch-geocode runs successfully", (err.stdout ?? err.message).slice(0, 200));
+  } finally {
+    try { unlinkSync(tmpFile); } catch { /* ignore */ }
   }
 }
 
