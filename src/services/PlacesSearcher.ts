@@ -74,6 +74,16 @@ interface WeatherResponse {
   data?: any;
 }
 
+interface StaticMapResponse {
+  success: boolean;
+  error?: string;
+  data?: {
+    base64: string;
+    size: number;
+    dimensions: string;
+  };
+}
+
 interface AirQualityResponse {
   success: boolean;
   error?: string;
@@ -340,6 +350,25 @@ export class PlacesSearcher {
       return {
         success: false,
         error: error instanceof Error ? error.message : "An error occurred while getting air quality",
+      };
+    }
+  }
+
+  async getStaticMap(params: {
+    center?: string;
+    zoom?: number;
+    size?: string;
+    maptype?: string;
+    markers?: string[];
+    path?: string[];
+  }): Promise<StaticMapResponse> {
+    try {
+      const result = await this.mapsTools.getStaticMap(params);
+      return { success: true, data: result };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "An error occurred while generating static map",
       };
     }
   }
