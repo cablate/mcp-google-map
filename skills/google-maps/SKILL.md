@@ -35,7 +35,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 
 ## Tool Map
 
-15 tools in five categories — pick by scenario:
+16 tools in five categories — pick by scenario:
 
 ### Place Discovery
 | Tool | When to use | Example |
@@ -45,6 +45,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | `search-nearby` | Know a location, find nearby places by type | "Coffee shops near my hotel" |
 | `search-places` | Natural language place search | "Best ramen in Tokyo" |
 | `place-details` | Have a place_id, need full info | "Opening hours and reviews for this restaurant?" |
+| `batch-geocode` | Geocode multiple addresses at once (max 50) | "Get coordinates for all these offices" |
 
 ### Routing & Distance
 | Tool | When to use | Example |

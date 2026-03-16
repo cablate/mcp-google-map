@@ -212,6 +212,7 @@ async function testListTools(session: McpSession): Promise<void> {
     "maps_weather",
     "maps_air_quality",
     "maps_static_map",
+    "maps_batch_geocode",
   ];
 
   for (const name of expectedTools) {
@@ -458,6 +459,24 @@ async function testToolCalls(session: McpSession): Promise<void> {
       assert(imageContent.mimeType === "image/png", "Static map returns PNG");
       assert(typeof imageContent.data === "string" && imageContent.data.length > 100, "Static map returns base64 data");
     }
+  }
+
+  // Test batch geocode
+  const batchResult = await sendRequest(session, "tools/call", {
+    name: "maps_batch_geocode",
+    arguments: { addresses: ["Tokyo Tower", "Eiffel Tower"] },
+  });
+  const batchContent = batchResult?.result?.content ?? [];
+  assert(batchContent.length > 0, "Batch geocode returns content");
+  if (batchContent.length > 0) {
+    let valid = false;
+    try {
+      const parsed = JSON.parse(batchContent[0].text);
+      valid = parsed?.total === 2 && parsed?.succeeded === 2 && Array.isArray(parsed?.results);
+    } catch {
+      /* ignore parse errors */
+    }
+    assert(valid, "Batch geocode returns 2 results with correct counts");
   }
 }
 
