@@ -163,7 +163,7 @@ const serverConfigs: ServerInstanceConfig[] = [
 ];
 
 export function filterTools(tools: ToolConfig[]): ToolConfig[] {
-  const raw = process.env.GOOGLE_MAPS_GOOGLE_MAPS_ENABLED_TOOLS?.trim();
+  const raw = process.env.GOOGLE_MAPS_ENABLED_TOOLS?.trim();
   if (!raw || raw === "*") return tools;
 
   const enabled = new Set(

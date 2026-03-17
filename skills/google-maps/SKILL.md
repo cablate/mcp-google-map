@@ -2,7 +2,7 @@
 name: google-maps
 description: Geospatial query capabilities — geocoding, nearby search, routing, place details, elevation. Trigger when the user mentions locations, addresses, coordinates, navigation, "what's nearby", "how to get there", distance/duration, or any question that inherently involves geographic information — even if they don't explicitly say "map". Update when new tools are added or tool parameters change.
 license: MIT
-version: 0.0.37
+version: 0.0.38
 compatibility:
   - claude-code
   - cursor
