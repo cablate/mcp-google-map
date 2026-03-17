@@ -1,14 +1,23 @@
-**English** | [繁體中文](./README.zh-TW.md)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/v/@cablate/mcp-google-map" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/dm/@cablate/mcp-google-map" alt="npm downloads"></a>
+  <a href="https://github.com/cablate/mcp-google-map/stargazers"><img src="https://img.shields.io/github/stars/cablate/mcp-google-map?style=social" alt="GitHub stars"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/cablate/mcp-google-map" alt="license"></a>
+</p>
 
-[![npm version](https://img.shields.io/npm/v/@cablate/mcp-google-map)](https://www.npmjs.com/package/@cablate/mcp-google-map) [![license](https://img.shields.io/github/license/cablate/mcp-google-map)](./LICENSE) [![npm downloads](https://img.shields.io/npm/dm/@cablate/mcp-google-map)](https://www.npmjs.com/package/@cablate/mcp-google-map)
+<p align="center">
+  <img src="./assets/banner.webp" alt="MCP Google Maps — AI-Powered Geospatial Tools" width="800">
+</p>
 
-[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D)
+<h3 align="center"><b>Give your AI agent the ability to understand the physical world —<br>geocode, route, search, and reason about locations.</b></h3>
 
-# MCP Google Map Server
+<p align="center">
+  <b>English</b> | <a href="./README.zh-TW.md">繁體中文</a>
+</p>
 
-Give your AI agent the ability to understand the physical world — geocode, route, search, and reason about locations.
-
-<img src="./assets/demo-grid-en.png" alt="Travel planning demo — Kyoto 2-day, Tokyo outdoor, Japan 5-day, Bangkok budget" width="800">
+<p align="center">
+  <img src="./assets/demo-grid-en.png" alt="Travel planning demo — Kyoto 2-day, Tokyo outdoor, Japan 5-day, Bangkok budget" width="800">
+</p>
 
 - **17 tools** — 14 atomic + 3 composite (explore-area, plan-route, compare-places)
 - **3 modes** — stdio, StreamableHTTP, standalone exec CLI
