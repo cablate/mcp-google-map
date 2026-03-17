@@ -4,7 +4,7 @@ import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import serverConfigs from "./config.js";
+import serverConfigs, { filterTools } from "./config.js";
 import { BaseMcpServer } from "./core/BaseMcpServer.js";
 import { Logger } from "./index.js";
 import { PlacesSearcher } from "./services/PlacesSearcher.js";
@@ -56,7 +56,7 @@ export async function startServer(port?: number, apiKey?: string): Promise<void>
     }
 
     try {
-      const server = new BaseMcpServer(config.name, config.tools);
+      const server = new BaseMcpServer(config.name, filterTools(config.tools));
       Logger.log(`🔧 [${config.name}] Initializing MCP Server in HTTP mode on port ${serverPort}...`);
       await server.startHttpServer(serverPort);
       Logger.log(`✅ [${config.name}] MCP Server started successfully!`);
@@ -442,9 +442,11 @@ if (isRunDirectly || isMainModule) {
           process.env.GOOGLE_MAPS_API_KEY = argv.apikey as string;
         }
 
+        const tools = filterTools(serverConfigs[0].tools);
+
         if (argv.stdio) {
           // stdio mode — all logs go to stderr, stdout reserved for JSON-RPC
-          const server = new BaseMcpServer(serverConfigs[0].name, serverConfigs[0].tools);
+          const server = new BaseMcpServer(serverConfigs[0].name, tools);
           await server.startStdio();
         } else {
           // HTTP mode

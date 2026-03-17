@@ -93,6 +93,19 @@ Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports std
 }
 ```
 
+**Reduce context usage** — If you only need a subset of tools, set `GOOGLE_MAPS_ENABLED_TOOLS` to limit which tools are registered:
+
+```json
+{
+  "env": {
+    "GOOGLE_MAPS_API_KEY": "YOUR_API_KEY",
+    "GOOGLE_MAPS_ENABLED_TOOLS": "maps_geocode,maps_directions,maps_search_places"
+  }
+}
+```
+
+Omit or set to `*` for all 17 tools (default).
+
 ### Method 2: HTTP Server
 
 For multi-session deployments, per-request API key isolation, or remote access:
@@ -117,7 +130,7 @@ Then configure your MCP client:
 ### Server Information
 
 - **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
-- **Tools**: 16 Google Maps tools (14 atomic + 3 composite)
+- **Tools**: 17 Google Maps tools (14 atomic + 3 composite) — filterable via `GOOGLE_MAPS_ENABLED_TOOLS`
 
 ### CLI Exec Mode (Agent Skill)
 

@@ -96,6 +96,7 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 - **Output**: JSON to stdout, errors to stderr
 - **Stateless**: each call is independent
 - **Tool names**: CLI accepts both `maps_geocode` and `geocode` short forms
+- **Tool filtering**: Set `GOOGLE_MAPS_ENABLED_TOOLS` env var to a comma-separated list of tool names to limit registered tools (reduces MCP client context usage). Omit or set to `*` for all tools.
 
 ---
 
