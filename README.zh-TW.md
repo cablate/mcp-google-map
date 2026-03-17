@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/banner.png" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
+<img src="./assets/banner.webp" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
 
 [English](./README.md) | **繁體中文**
 
