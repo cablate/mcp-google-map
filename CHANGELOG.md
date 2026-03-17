@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.38
+
+- feat: proactive map visualization + travel planning skill (#51)
+
+
 ## 0.0.37
 
 - feat: add batch geocode CLI + MCP tool, tests for new tools (#50)
