@@ -6,6 +6,8 @@
 
 Give your AI agent the ability to understand the physical world — geocode, route, search, and reason about locations.
 
+<img src="./assets/demo-grid-en.png" alt="Travel planning demo — Kyoto 2-day, Tokyo outdoor, Japan 5-day, Bangkok budget" width="800">
+
 - **17 tools** — 14 atomic + 3 composite (explore-area, plan-route, compare-places)
 - **3 modes** — stdio, StreamableHTTP, standalone exec CLI
 - **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
