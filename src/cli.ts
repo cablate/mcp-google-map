@@ -198,7 +198,10 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
         })
       );
       const succeeded = results.filter((r) => r.success).length;
-      return { success: true, data: { total: params.addresses.length, succeeded, failed: params.addresses.length - succeeded, results } };
+      return {
+        success: true,
+        data: { total: params.addresses.length, succeeded, failed: params.addresses.length - succeeded, results },
+      };
     }
 
     case "search-along-route":

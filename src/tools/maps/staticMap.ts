@@ -13,10 +13,7 @@ const SCHEMA = {
     .describe('Map center — "lat,lng" or address. Optional if markers or path are provided.'),
   zoom: z.number().optional().describe("Zoom level 0-21 (0 = world, 15 = streets, 21 = buildings). Default: auto-fit."),
   size: z.string().optional().describe('Image size "WxH" in pixels. Default: "600x400". Max: "640x640".'),
-  maptype: z
-    .enum(["roadmap", "satellite", "terrain", "hybrid"])
-    .optional()
-    .describe("Map style. Default: roadmap."),
+  maptype: z.enum(["roadmap", "satellite", "terrain", "hybrid"]).optional().describe("Map style. Default: roadmap."),
   markers: z
     .array(z.string())
     .optional()

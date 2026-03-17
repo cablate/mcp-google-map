@@ -331,11 +331,7 @@ export class GoogleMapsTools {
   }): Promise<{ places: any[]; route: { distance: string; duration: string; polyline: string } }> {
     try {
       // Step 1: Get directions to obtain the encoded polyline
-      const directions = await this.getDirections(
-        params.origin,
-        params.destination,
-        (params.mode as any) || "walking"
-      );
+      const directions = await this.getDirections(params.origin, params.destination, (params.mode as any) || "walking");
 
       const polyline = directions.routes[0]?.overview_polyline?.points;
       if (!polyline) {
@@ -344,7 +340,8 @@ export class GoogleMapsTools {
 
       // Step 2: Call Places searchText REST API with searchAlongRouteParameters
       const maxResults = Math.min(params.maxResults || 5, 20);
-      const fieldMask = "places.displayName,places.id,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.currentOpeningHours.openNow";
+      const fieldMask =
+        "places.displayName,places.id,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.currentOpeningHours.openNow";
 
       const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
         method: "POST",

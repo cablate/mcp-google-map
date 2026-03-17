@@ -7,11 +7,7 @@ const DESCRIPTION =
   "Geocode multiple addresses in one call — up to 50 addresses, returns coordinates for each. Use when the user provides a list of addresses and needs all their coordinates, e.g. 'geocode these 10 offices' or 'get coordinates for all these restaurants'. For more than 50, use the CLI batch-geocode command instead.";
 
 const SCHEMA = {
-  addresses: z
-    .array(z.string())
-    .min(1)
-    .max(50)
-    .describe("List of addresses or landmark names to geocode (max 50)"),
+  addresses: z.array(z.string()).min(1).max(50).describe("List of addresses or landmark names to geocode (max 50)"),
 };
 
 export type BatchGeocodeParams = z.infer<z.ZodObject<typeof SCHEMA>>;

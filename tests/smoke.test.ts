@@ -800,7 +800,10 @@ async function testExecMode(): Promise<void> {
   try {
     const parsed = JSON.parse(mapOut);
     assert(parsed?.success === true, "exec static-map succeeds");
-    assert(typeof parsed?.data?.base64 === "string" && parsed.data.base64.length > 100, "exec static-map returns base64");
+    assert(
+      typeof parsed?.data?.base64 === "string" && parsed.data.base64.length > 100,
+      "exec static-map returns base64"
+    );
     assert(parsed?.data?.dimensions === "600x400", "exec static-map returns correct dimensions");
   } catch {
     assert(false, "exec static-map returns valid JSON", mapOut.slice(0, 200));
@@ -822,7 +825,11 @@ async function testExecMode(): Promise<void> {
   } catch (err: any) {
     assert(false, "batch-geocode runs successfully", (err.stdout ?? err.message).slice(0, 200));
   } finally {
-    try { unlinkSync(tmpFile); } catch { /* ignore */ }
+    try {
+      unlinkSync(tmpFile);
+    } catch {
+      /* ignore */
+    }
   }
 }
 
