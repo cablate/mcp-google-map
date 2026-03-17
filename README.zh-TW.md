@@ -1,14 +1,18 @@
+<div align="center">
+
+<img src="./assets/banner.png" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
+
 [English](./README.md) | **繁體中文**
 
 [![npm version](https://img.shields.io/npm/v/@cablate/mcp-google-map)](https://www.npmjs.com/package/@cablate/mcp-google-map) [![license](https://img.shields.io/github/license/cablate/mcp-google-map)](./LICENSE) [![npm downloads](https://img.shields.io/npm/dm/@cablate/mcp-google-map)](https://www.npmjs.com/package/@cablate/mcp-google-map)
 
 [<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D)
 
-# MCP Google Map Server
-
 讓你的 AI 代理理解真實世界 — 地理編碼、路線規劃、地點搜尋、空間推理。
 
 <img src="./assets/demo-grid-zh.png" alt="旅行規劃展示 — 京都二日遊、東京戶外一日、日本五日、曼谷背包客" width="800">
+
+</div>
 
 - **17 個工具** — 14 個原子工具 + 3 個組合工具（explore-area、plan-route、compare-places）
 - **3 種模式** — stdio、StreamableHTTP、獨立 exec CLI
