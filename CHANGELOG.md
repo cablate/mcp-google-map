@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.39
+
+- fix: align skill tool names with actual MCP names (#52)
+
+
 ## 0.0.38
 
 - feat: proactive map visualization + travel planning skill (#51)
