@@ -1,12 +1,4 @@
 <p align="center">
-  <img src="./assets/banner.webp" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
-</p>
-
-<p align="center">
-  <a href="./README.md">English</a> | <b>繁體中文</b>
-</p>
-
-<p align="center">
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/v/@cablate/mcp-google-map" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/dm/@cablate/mcp-google-map" alt="npm downloads"></a>
   <a href="https://github.com/cablate/mcp-google-map/stargazers"><img src="https://img.shields.io/github/stars/cablate/mcp-google-map" alt="GitHub stars"></a>
@@ -17,12 +9,13 @@
 </p>
 
 <p align="center">
-  <a href="https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D"><img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code"></a>
-  <a href="https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522google-maps%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540cablate%252Fmcp-google-map%2540latest%2522%252C%2522--stdio%2522%255D%252C%2522env%2522%253A%257B%2522GOOGLE_MAPS_API_KEY%2522%253A%2522YOUR_API_KEY%2522%257D%257D"><img src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5" alt="Install in VS Code Insiders"></a>
+  <img src="./assets/banner.webp" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
 </p>
 
+<h3 align="center">讓你的 AI 代理理解真實世界 —<br>地理編碼、路線規劃、地點搜尋、空間推理。</h3>
+
 <p align="center">
-  讓你的 AI 代理理解真實世界 — 地理編碼、路線規劃、地點搜尋、空間推理。
+  <a href="./README.md">English</a> | <b>繁體中文</b>
 </p>
 
 <p align="center">
