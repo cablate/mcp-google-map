@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.41
+
+- docs: add hero banner + badges to README (#56)
+- docs: add demo screenshots + Chinese README + language switcher (#55)
+- fix: shorten server.json description to fit MCP Registry 100-char limit (#54)
+- chore: update server.json and package.json descriptions (#53)
+
 ## 0.0.39
 
 - fix: align skill tool names with actual MCP names (#52)
