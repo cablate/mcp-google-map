@@ -1,3 +1,4 @@
+import { Logger } from "./index.js";
 import { ToolConfig } from "./core/BaseMcpServer.js";
 
 // Import tool definitions
@@ -160,5 +161,26 @@ const serverConfigs: ServerInstanceConfig[] = [
     ],
   },
 ];
+
+export function filterTools(tools: ToolConfig[]): ToolConfig[] {
+  const raw = process.env.GOOGLE_MAPS_ENABLED_TOOLS?.trim();
+  if (!raw || raw === "*") return tools;
+
+  const enabled = new Set(
+    raw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  );
+  const filtered = tools.filter((t) => enabled.has(t.name));
+
+  if (filtered.length === 0) {
+    Logger.error(`GOOGLE_MAPS_ENABLED_TOOLS matched 0 tools. Available: ${tools.map((t) => t.name).join(", ")}`);
+    return tools;
+  }
+
+  Logger.log(`GOOGLE_MAPS_ENABLED_TOOLS: ${filtered.length}/${tools.length} tools active`);
+  return filtered;
+}
 
 export default serverConfigs;

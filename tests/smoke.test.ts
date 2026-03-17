@@ -214,6 +214,9 @@ async function testListTools(session: McpSession): Promise<void> {
     "maps_static_map",
     "maps_batch_geocode",
     "maps_search_along_route",
+    "maps_explore_area",
+    "maps_plan_route",
+    "maps_compare_places",
   ];
 
   for (const name of expectedTools) {

@@ -93,6 +93,19 @@ Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports std
 }
 ```
 
+**Reduce context usage** — If you only need a subset of tools, set `GOOGLE_MAPS_ENABLED_TOOLS` to limit which tools are registered:
+
+```json
+{
+  "env": {
+    "GOOGLE_MAPS_API_KEY": "YOUR_API_KEY",
+    "GOOGLE_MAPS_ENABLED_TOOLS": "maps_geocode,maps_directions,maps_search_places"
+  }
+}
+```
+
+Omit or set to `*` for all 17 tools (default).
+
 ### Method 2: HTTP Server
 
 For multi-session deployments, per-request API key isolation, or remote access:
@@ -117,7 +130,7 @@ Then configure your MCP client:
 ### Server Information
 
 - **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
-- **Tools**: 16 Google Maps tools (14 atomic + 3 composite)
+- **Tools**: 17 Google Maps tools (14 atomic + 3 composite) — filterable via `GOOGLE_MAPS_ENABLED_TOOLS`
 
 ### CLI Exec Mode (Agent Skill)
 
@@ -282,22 +295,26 @@ For enterprise security reviews, see [Security Assessment Clarifications](./SECU
 
 ## Roadmap
 
-### New Tools
+### Recent Additions
 
-| Tool | What it unlocks | Status |
+| Tool / Feature | What it unlocks | Status |
 |------|----------------|--------|
-| `maps_static_map` | Return map images with pins/routes — multimodal AI can "see" the map | **Done** |
-| `maps_air_quality` | AQI, pollutants — health-aware travel, outdoor planning, real estate | **Done** |
-| `maps_validate_address` | Standardize and verify addresses — logistics/e-commerce | Planned |
-| `maps_isochrone` | "Show me everything within 30 min drive" — reachability analysis | Planned |
-| `maps_batch_geocode` | Geocode hundreds of addresses in one call — data enrichment | **Done** (CLI) |
+| `maps_static_map` | Map images with pins/routes — multimodal AI can "see" the map | **Done** |
+| `maps_air_quality` | AQI, pollutants — health-aware travel, outdoor planning | **Done** |
+| `maps_batch_geocode` | Geocode up to 50 addresses in one call — data enrichment | **Done** |
+| `maps_search_along_route` | Find places along a route ranked by detour time — trip planning | **Done** |
+| `maps_explore_area` | One-call neighborhood overview (composite) | **Done** |
+| `maps_plan_route` | Optimized multi-stop itinerary (composite) | **Done** |
+| `maps_compare_places` | Side-by-side place comparison (composite) | **Done** |
+| `GOOGLE_MAPS_ENABLED_TOOLS` | Filter tools to reduce context usage | **Done** |
 
-### Capabilities
+### Planned
 
 | Feature | What it unlocks | Status |
 |---------|----------------|--------|
-| Spatial Context | Agent remembers "the area we were just looking at" across turns | Research |
-| Geo Agent Template | One command to spin up a full geo-aware AI agent | Research |
+| `maps_place_photo` | Place photos for multimodal AI — "see" the restaurant ambiance | Planned |
+| Language parameter | Multi-language responses (ISO 639-1) across all tools | Planned |
+| MCP Prompt Templates | `/travel-planner`, `/neighborhood-scout` slash commands in Claude Desktop | Planned |
 | Geo-Reasoning Benchmark | 10-scenario test suite measuring LLM geospatial reasoning accuracy | Research |
 
 ### Use Cases We're Building Toward
