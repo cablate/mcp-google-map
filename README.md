@@ -12,7 +12,7 @@
   <img src="./assets/banner.webp" alt="MCP Google Maps — AI-Powered Geospatial Tools" width="800">
 </p>
 
-<h3 align="center">Give your AI agent the ability to understand the physical world —<br>geocode, route, search, and reason about locations.</h3>
+<h3 align="center"><b>Give your AI agent the ability to understand the physical world —<br>geocode, route, search, and reason about locations.</b></h3>
 
 <p align="center">
   <b>English</b> | <a href="./README.zh-TW.md">繁體中文</a>

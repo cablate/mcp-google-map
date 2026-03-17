@@ -12,7 +12,7 @@
   <img src="./assets/banner.webp" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
 </p>
 
-<h3 align="center">讓你的 AI 代理理解真實世界 —<br>地理編碼、路線規劃、地點搜尋、空間推理。</h3>
+<h3 align="center"><b>讓你的 AI 代理理解真實世界 —<br>地理編碼、路線規劃、地點搜尋、空間推理。</b></h3>
 
 <p align="center">
   <a href="./README.md">English</a> | <b>繁體中文</b>
