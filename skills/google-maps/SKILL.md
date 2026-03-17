@@ -35,7 +35,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 
 ## Tool Map
 
-16 tools in five categories — pick by scenario:
+17 tools in five categories — pick by scenario:
 
 ### Place Discovery
 | Tool | When to use | Example |
@@ -52,6 +52,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 |------|-------------|---------|
 | `directions` | How to get from A to B | "Route from Taipei Main Station to the airport" |
 | `distance-matrix` | Compare distances across multiple points | "Which of these 3 hotels is closest to the airport?" |
+| `search-along-route` | Find places along a route (meals, stops) ranked by detour time | "Restaurants between Fushimi Inari and Kiyomizu-dera" |
 
 ### Environment
 | Tool | When to use | Example |
@@ -102,3 +103,6 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 | File | Content | When to read |
 |------|---------|--------------|
 | `references/tools-api.md` | Full parameter specs, response formats, 7 scenario recipes, and decision guide | When you need exact parameters, response shapes, or multi-tool workflow patterns |
+| `references/travel-planning.md` | Travel planning methodology — 6-layer model, Search Along Route, anti-patterns | When planning multi-day trips — **read before Recipe 1** |
+
+> For **project development** knowledge (architecture, API guide, GIS domain, design decisions), see `skills/project-docs/SKILL.md`.

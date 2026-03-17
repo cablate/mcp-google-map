@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_plan_route";
 const DESCRIPTION =
-  "Plan an optimized multi-stop route in one call — geocodes all stops, finds the most efficient visit order using distance-matrix, and returns step-by-step directions between each stop. Use when the user says 'visit these 5 places efficiently', 'plan a route through A, B, C', or needs a multi-stop itinerary. Replaces the manual chain of geocode → distance-matrix → directions.";
+  "Plan an optimized multi-stop route in one call — geocodes all stops, finds the most efficient visit order using distance-matrix, and returns step-by-step directions between each stop. Use when the user says 'visit these 5 places efficiently', 'plan a route through A, B, C', or needs a multi-stop itinerary. Replaces the manual chain of geocode → distance-matrix → directions. For multi-day trips: create one plan_route call per day with stops that follow a geographic arc (e.g. east→west) rather than mixing distant areas. After results, call static_map to visualize the route.";
 
 const SCHEMA = {
   stops: z.array(z.string()).min(2).describe("List of addresses or landmarks to visit (minimum 2)"),

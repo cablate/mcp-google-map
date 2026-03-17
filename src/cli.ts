@@ -93,6 +93,7 @@ const EXEC_TOOLS = [
   "air-quality",
   "static-map",
   "batch-geocode-tool",
+  "search-along-route",
 ] as const;
 
 async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
@@ -197,8 +198,15 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
         })
       );
       const succeeded = results.filter((r) => r.success).length;
-      return { success: true, data: { total: params.addresses.length, succeeded, failed: params.addresses.length - succeeded, results } };
+      return {
+        success: true,
+        data: { total: params.addresses.length, succeeded, failed: params.addresses.length - succeeded, results },
+      };
     }
+
+    case "search-along-route":
+    case "maps_search_along_route":
+      return searcher.searchAlongRoute(params);
 
     default:
       throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);

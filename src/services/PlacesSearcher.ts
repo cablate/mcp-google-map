@@ -373,6 +373,24 @@ export class PlacesSearcher {
     }
   }
 
+  async searchAlongRoute(params: {
+    textQuery: string;
+    origin: string;
+    destination: string;
+    mode?: string;
+    maxResults?: number;
+  }): Promise<{ success: boolean; error?: string; data?: any }> {
+    try {
+      const result = await this.mapsTools.searchAlongRoute(params);
+      return { success: true, data: result };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "An error occurred while searching along route",
+      };
+    }
+  }
+
   // --------------- Composite Tools ---------------
 
   async exploreArea(params: { location: string; types?: string[]; radius?: number; topN?: number }): Promise<any> {
