@@ -275,7 +275,8 @@ skills/
 │   ├── SKILL.md                  # 工具對照表、場景食譜、呼叫方式
 │   └── references/
 │       ├── tools-api.md          # 工具參數 + 場景食譜
-│       └── travel-planning.md    # 旅行規劃方法論
+│       ├── travel-planning.md    # 旅行規劃方法論
+│       └── local-seo.md          # Local SEO / Google 商家排名分析
 └── project-docs/                 # Project Skill — 如何開發/維護
     ├── SKILL.md                  # 架構概覽 + 入門指南
     └── references/
@@ -339,6 +340,7 @@ skills/
 - **災害應變** — 「最近有開的醫院？我在洪水區嗎？」（search-nearby + elevation）
 - **內容創作** — 「Austin 前 5 社區的餐廳密度和機場距離」（explore-area + distance-matrix）
 - **無障礙** — 「輪椅可達的餐廳，避開陡坡路線」（search-nearby + place-details + elevation）
+- **Local SEO** — 「分析我的餐廳在 1 公里內跟競爭對手的排名差距」（search-places + compare-places + explore-area）
 
 ## 更新日誌
 
