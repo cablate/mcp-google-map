@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.43
+
+- feat: add photo URLs to maps_place_details (#59)
+
+
 ## 0.0.42
 
 - fix: trigger release pipeline (#58)
