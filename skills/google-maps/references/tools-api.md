@@ -122,15 +122,17 @@ Response: `{ success, data: [{ name, place_id, address, location, rating, total_
 
 ## maps_place_details
 
-Get full details for a place by its place_id (from search results). Returns reviews, phone, website, hours, photos.
+Get full details for a place by its place_id (from search results). Returns reviews, phone, website, hours. Set `maxPhotos` to include photo URLs (default: 0 = no photos, saves tokens).
 
 ```bash
 exec maps_place_details '{"placeId": "ChIJCewJkL2LGGAR3Qmk0vCTGkg"}'
+exec maps_place_details '{"placeId": "ChIJCewJkL2LGGAR3Qmk0vCTGkg", "maxPhotos": 3}'
 ```
 
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | placeId | string | yes | Google Maps place ID (from search results) |
+| maxPhotos | number | no | Number of photo URLs to include (0-10, default 0). Always returns `photo_count`. |
 
 ---
 

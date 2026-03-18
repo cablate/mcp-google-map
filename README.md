@@ -65,7 +65,7 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 |------|-------------|
 | `maps_search_nearby` | Find places near a location by type (restaurant, cafe, hotel, etc.). Supports filtering by radius, rating, and open status. |
 | `maps_search_places` | Free-text place search (e.g., "sushi restaurants in Tokyo"). Supports location bias, rating, open-now filters. |
-| `maps_place_details` | Get full details for a place by its place_id — reviews, phone, website, hours, photos. |
+| `maps_place_details` | Get full details for a place by its place_id — reviews, phone, website, hours. Optional `maxPhotos` param returns photo URLs. |
 | `maps_geocode` | Convert an address or landmark name into GPS coordinates. |
 | `maps_reverse_geocode` | Convert GPS coordinates into a street address. |
 | `maps_distance_matrix` | Calculate travel distances and times between multiple origins and destinations. |
