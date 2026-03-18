@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.44
+
+- docs: add Local SEO skill reference for Google Business Profile ranking analysis (#60)
+
+
 ## 0.0.43
 
 - feat: add photo URLs to maps_place_details (#59)
