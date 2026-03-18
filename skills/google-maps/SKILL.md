@@ -116,5 +116,6 @@ npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
 |------|---------|--------------|
 | `references/tools-api.md` | Full parameter specs, response formats, 7 scenario recipes, and decision guide | When you need exact parameters, response shapes, or multi-tool workflow patterns |
 | `references/travel-planning.md` | Travel planning methodology — 6-layer model, Search Along Route, anti-patterns | When planning multi-day trips — **read before Recipe 1** |
+| `references/local-seo.md` | Local SEO / Google Business Profile ranking analysis — competitor audit, keyword landscape, gap analysis | When analyzing business rankings, comparing competitors, or scouting locations |
 
 > For **project development** knowledge (architecture, API guide, GIS domain, design decisions), see `skills/project-docs/SKILL.md`.

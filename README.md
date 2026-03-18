@@ -277,7 +277,8 @@ skills/
 │   ├── SKILL.md                  # Tool map, recipes, invocation
 │   └── references/
 │       ├── tools-api.md          # Tool parameters + scenario recipes
-│       └── travel-planning.md    # Travel planning methodology
+│       ├── travel-planning.md    # Travel planning methodology
+│       └── local-seo.md          # Local SEO / Google Business Profile ranking analysis
 └── project-docs/                 # Project Skill — how to DEVELOP/MAINTAIN
     ├── SKILL.md                  # Architecture overview + onboarding
     └── references/
@@ -341,6 +342,7 @@ These are the real-world scenarios driving our tool decisions:
 - **Disaster response** — "Nearest open hospitals? Am I in a flood zone?" (search-nearby + elevation)
 - **Content creation** — "Top 5 neighborhoods in Austin with restaurant density and airport distance" (explore-area + distance-matrix)
 - **Accessibility** — "Wheelchair-accessible restaurants, avoid steep routes" (search-nearby + place-details + elevation)
+- **Local SEO** — "Audit my restaurant's ranking vs competitors within 1km" (search-places + compare-places + explore-area)
 
 ## Changelog
 
