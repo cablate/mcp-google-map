@@ -142,6 +142,20 @@ export class NewPlacesService {
     }
   }
 
+  async getPhotoUri(photoName: string, maxWidthPx: number = 800): Promise<string> {
+    try {
+      const [response] = await this.client.getPhotoMedia({
+        name: `${photoName}/media`,
+        maxWidthPx,
+        skipHttpRedirect: true,
+      });
+      return response.photoUri || "";
+    } catch (error: any) {
+      Logger.error("Error in getPhotoUri:", error);
+      throw new Error(`Failed to get photo URI: ${this.extractErrorMessage(error)}`);
+    }
+  }
+
   async getPlaceDetails(placeId: string) {
     try {
       const placeName = `places/${placeId}`;

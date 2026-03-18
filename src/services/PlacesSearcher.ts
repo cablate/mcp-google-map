@@ -194,9 +194,24 @@ export class PlacesSearcher {
     }
   }
 
-  async getPlaceDetails(placeId: string): Promise<PlaceDetailsResponse> {
+  async getPlaceDetails(placeId: string, maxPhotos: number = 0): Promise<PlaceDetailsResponse> {
     try {
       const details = await this.newPlacesService.getPlaceDetails(placeId);
+
+      // Resolve photo URLs if requested
+      let photos: Array<{ url: string; width: number; height: number }> | undefined;
+      if (maxPhotos > 0 && details.photos?.length > 0) {
+        const photosToFetch = details.photos.slice(0, maxPhotos);
+        photos = [];
+        for (const photo of photosToFetch) {
+          try {
+            const url = await this.newPlacesService.getPhotoUri(photo.photo_reference);
+            photos.push({ url, width: photo.width, height: photo.height });
+          } catch {
+            // Skip failed photos silently
+          }
+        }
+      }
 
       return {
         success: true,
@@ -210,6 +225,8 @@ export class PlacesSearcher {
           phone: details.formatted_phone_number,
           website: details.website,
           price_level: details.price_level,
+          photo_count: details.photos?.length || 0,
+          ...(photos && photos.length > 0 ? { photos } : {}),
           reviews: details.reviews?.map((review: any) => ({
             rating: review.rating,
             text: review.text,
