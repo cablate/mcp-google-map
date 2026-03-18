@@ -508,6 +508,45 @@ async function testToolCalls(session: McpSession): Promise<void> {
   }
 }
 
+async function testPlaceDetailsPhotos(session: McpSession): Promise<void> {
+  console.log("\n🧪 Test 4b: Place details with photos");
+
+  // First search for a place to get a place_id
+  const searchResult = await sendRequest(session, "tools/call", {
+    name: "maps_search_places",
+    arguments: { query: "Tokyo Tower" },
+  });
+  const searchContent = searchResult?.result?.content ?? [];
+  assert(searchContent.length > 0, "Search returns content for place_id");
+  const places = JSON.parse(searchContent[0].text);
+  const placeId = places[0]?.place_id;
+  assert(typeof placeId === "string" && placeId.length > 0, "Got valid place_id from search");
+
+  // Test without maxPhotos — should return photo_count but no photos array
+  const detailsNoPhoto = await sendRequest(session, "tools/call", {
+    name: "maps_place_details",
+    arguments: { placeId },
+  });
+  const noPhotoData = JSON.parse(detailsNoPhoto.result.content[0].text);
+  assert(typeof noPhotoData.photo_count === "number", "place_details returns photo_count");
+  assert(noPhotoData.photos === undefined, "place_details without maxPhotos omits photos array");
+  assert(typeof noPhotoData.name === "string", "place_details returns name");
+  assert(typeof noPhotoData.rating === "number", "place_details returns rating");
+
+  // Test with maxPhotos=1 — should return photos array with URLs
+  const detailsWithPhoto = await sendRequest(session, "tools/call", {
+    name: "maps_place_details",
+    arguments: { placeId, maxPhotos: 1 },
+  });
+  const withPhotoData = JSON.parse(detailsWithPhoto.result.content[0].text);
+  assert(withPhotoData.photo_count > 0, "place has photos available");
+  assert(Array.isArray(withPhotoData.photos), "maxPhotos=1 returns photos array");
+  assert(withPhotoData.photos.length === 1, "maxPhotos=1 returns exactly 1 photo");
+  assert(withPhotoData.photos[0].url.startsWith("https://"), "photo URL is a valid HTTPS URL");
+  assert(typeof withPhotoData.photos[0].width === "number", "photo has width");
+  assert(typeof withPhotoData.photos[0].height === "number", "photo has height");
+}
+
 async function testMultiSession(): Promise<void> {
   console.log("\n🧪 Test 5: Multiple concurrent sessions");
 
@@ -858,6 +897,7 @@ async function main() {
     await testListTools(session);
     await testGeocode(session);
     await testToolCalls(session);
+    await testPlaceDetailsPhotos(session);
     await testMultiSession();
   } catch (err) {
     console.error("\n💥 Fatal error:", err);

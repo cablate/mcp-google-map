@@ -65,7 +65,7 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 |------|------|
 | `maps_search_nearby` | 依類型搜尋附近地點（餐廳、咖啡廳、飯店等），支援半徑、評分、營業中篩選 |
 | `maps_search_places` | 自然語言地點搜尋（如「東京拉麵」），支援位置偏好、評分、營業中篩選 |
-| `maps_place_details` | 以 place_id 取得地點完整資訊 — 評論、電話、網站、營業時間、照片 |
+| `maps_place_details` | 以 place_id 取得地點完整資訊 — 評論、電話、網站、營業時間。可選 `maxPhotos` 參數取得照片 URL。 |
 | `maps_geocode` | 將地址或地標名稱轉換為 GPS 座標 |
 | `maps_reverse_geocode` | 將 GPS 座標轉換為街道地址 |
 | `maps_distance_matrix` | 計算多個起點與終點間的旅行距離和時間 |

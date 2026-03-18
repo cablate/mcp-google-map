@@ -124,7 +124,7 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
     case "place-details":
     case "get_place_details":
     case "maps_place_details":
-      return searcher.getPlaceDetails(params.placeId);
+      return searcher.getPlaceDetails(params.placeId, params.maxPhotos || 0);
 
     case "directions":
     case "maps_directions":

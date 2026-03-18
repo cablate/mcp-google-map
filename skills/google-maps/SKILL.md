@@ -44,7 +44,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | `maps_reverse_geocode` | Have coordinates, need an address | "What's at 35.65, 139.74?" |
 | `maps_search_nearby` | Know a location, find nearby places by type | "Coffee shops near my hotel" |
 | `maps_search_places` | Natural language place search | "Best ramen in Tokyo" |
-| `maps_place_details` | Have a place_id, need full info | "Opening hours and reviews for this restaurant?" |
+| `maps_place_details` | Have a place_id, need full info (+ optional photo URLs via `maxPhotos`) | "Opening hours and reviews for this restaurant?" |
 | `maps_batch_geocode` | Geocode multiple addresses at once (max 50) | "Get coordinates for all these offices" |
 
 ### Routing & Distance
