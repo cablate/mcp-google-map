@@ -1,6 +1,7 @@
-import { Client, Language, TravelMode } from "@googlemaps/google-maps-services-js";
+import { Client, Language } from "@googlemaps/google-maps-services-js";
 import dotenv from "dotenv";
 import { Logger } from "../index.js";
+import { RoutesService } from "./RoutesService.js";
 
 dotenv.config();
 
@@ -160,168 +161,6 @@ export class GoogleMapsTools {
     }
   }
 
-  async calculateDistanceMatrix(
-    origins: string[],
-    destinations: string[],
-    mode: "driving" | "walking" | "bicycling" | "transit" = "driving"
-  ): Promise<{
-    distances: any[][];
-    durations: any[][];
-    origin_addresses: string[];
-    destination_addresses: string[];
-  }> {
-    try {
-      const response = await this.client.distancematrix({
-        params: {
-          origins: origins,
-          destinations: destinations,
-          mode: mode as TravelMode,
-          language: this.defaultLanguage,
-          key: this.apiKey,
-        },
-      });
-
-      const result = response.data;
-
-      if (result.status !== "OK") {
-        throw new Error(`Distance matrix calculation failed with status: ${result.status}`);
-      }
-
-      const distances: any[][] = [];
-      const durations: any[][] = [];
-
-      result.rows.forEach((row: any) => {
-        const distanceRow: any[] = [];
-        const durationRow: any[] = [];
-
-        row.elements.forEach((element: any) => {
-          if (element.status === "OK") {
-            distanceRow.push({
-              value: element.distance.value,
-              text: element.distance.text,
-            });
-            durationRow.push({
-              value: element.duration.value,
-              text: element.duration.text,
-            });
-          } else {
-            distanceRow.push(null);
-            durationRow.push(null);
-          }
-        });
-
-        distances.push(distanceRow);
-        durations.push(durationRow);
-      });
-
-      return {
-        distances: distances,
-        durations: durations,
-        origin_addresses: result.origin_addresses,
-        destination_addresses: result.destination_addresses,
-      };
-    } catch (error: any) {
-      Logger.error("Error in calculateDistanceMatrix:", error);
-      throw new Error(`Failed to calculate distance matrix: ${extractErrorMessage(error)}`);
-    }
-  }
-
-  async getDirections(
-    origin: string,
-    destination: string,
-    mode: "driving" | "walking" | "bicycling" | "transit" = "driving",
-    departure_time?: Date,
-    arrival_time?: Date
-  ): Promise<{
-    routes: any[];
-    summary: string;
-    total_distance: { value: number; text: string };
-    total_duration: { value: number; text: string };
-    arrival_time: string;
-    departure_time: string;
-  }> {
-    try {
-      let apiArrivalTime: number | undefined = undefined;
-      if (arrival_time) {
-        apiArrivalTime = Math.floor(arrival_time.getTime() / 1000);
-      }
-
-      let apiDepartureTime: number | "now" | undefined = undefined;
-      if (!apiArrivalTime) {
-        if (departure_time instanceof Date) {
-          apiDepartureTime = Math.floor(departure_time.getTime() / 1000);
-        } else if (departure_time) {
-          apiDepartureTime = departure_time as unknown as "now";
-        } else {
-          apiDepartureTime = "now";
-        }
-      }
-
-      const response = await this.client.directions({
-        params: {
-          origin: origin,
-          destination: destination,
-          mode: mode as TravelMode,
-          language: this.defaultLanguage,
-          key: this.apiKey,
-          arrival_time: apiArrivalTime,
-          departure_time: apiDepartureTime,
-        },
-      });
-
-      const result = response.data;
-
-      if (result.status !== "OK") {
-        throw new Error(
-          `Failed to get directions with status: ${result.status} (arrival_time: ${apiArrivalTime}, departure_time: ${apiDepartureTime}`
-        );
-      }
-
-      if (result.routes.length === 0) {
-        throw new Error(`No route found from "${origin}" to "${destination}" with mode: ${mode}`);
-      }
-
-      const route = result.routes[0];
-      const legs = route.legs[0];
-
-      const formatTime = (timeInfo: any) => {
-        if (!timeInfo || typeof timeInfo.value !== "number") return "";
-        const date = new Date(timeInfo.value * 1000);
-        const options: Intl.DateTimeFormatOptions = {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        };
-        if (timeInfo.time_zone && typeof timeInfo.time_zone === "string") {
-          options.timeZone = timeInfo.time_zone;
-        }
-        return date.toLocaleString(this.defaultLanguage.toString(), options);
-      };
-
-      return {
-        routes: result.routes,
-        summary: route.summary,
-        total_distance: {
-          value: legs.distance.value,
-          text: legs.distance.text,
-        },
-        total_duration: {
-          value: legs.duration.value,
-          text: legs.duration.text,
-        },
-        arrival_time: formatTime(legs.arrival_time),
-        departure_time: formatTime(legs.departure_time),
-      };
-    } catch (error: any) {
-      Logger.error("Error in getDirections:", error);
-      throw new Error(`Failed to get directions from "${origin}" to "${destination}": ${extractErrorMessage(error)}`);
-    }
-  }
-
   async searchAlongRoute(params: {
     textQuery: string;
     origin: string;
@@ -330,10 +169,15 @@ export class GoogleMapsTools {
     maxResults?: number;
   }): Promise<{ places: any[]; route: { distance: string; duration: string; polyline: string } }> {
     try {
-      // Step 1: Get directions to obtain the encoded polyline
-      const directions = await this.getDirections(params.origin, params.destination, (params.mode as any) || "walking");
+      // Step 1: Get directions via Routes API to obtain the encoded polyline
+      const routesService = new RoutesService(this.apiKey);
+      const directions = await routesService.computeRoutes({
+        origin: params.origin,
+        destination: params.destination,
+        mode: params.mode || "walking",
+      });
 
-      const polyline = directions.routes[0]?.overview_polyline?.points;
+      const polyline = directions.routes[0]?.polyline?.encodedPolyline;
       if (!polyline) {
         throw new Error("Could not get route polyline");
       }

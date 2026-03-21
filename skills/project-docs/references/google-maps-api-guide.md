@@ -5,8 +5,8 @@
 | API | Endpoint | Tool(s) | GCP Service to Enable |
 |---|---|---|---|
 | Geocoding API | via `@googlemaps/google-maps-services-js` SDK | `maps_geocode`, `maps_reverse_geocode`, `maps_batch_geocode` | Geocoding API |
-| Directions API | via SDK | `maps_directions`, `maps_plan_route` (legs), `maps_search_along_route` (step 1) | Directions API |
-| Distance Matrix API | via SDK | `maps_distance_matrix`, `maps_plan_route` (optimization step) | Distance Matrix API |
+| Routes API (computeRoutes) | `https://routes.googleapis.com/directions/v2:computeRoutes` (REST fetch) | `maps_directions`, `maps_plan_route` (legs + waypoint optimization), `maps_search_along_route` (polyline) | Routes API |
+| Routes API (computeRouteMatrix) | `https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix` (REST fetch) | `maps_distance_matrix` | Routes API |
 | Elevation API | via SDK | `maps_elevation` | Elevation API |
 | Time Zone API | via SDK | `maps_timezone` | Time Zone API |
 | Places API (New) — Nearby Search | `https://places.googleapis.com/v1/places:searchNearby` (gRPC via `@googlemaps/places`) | `maps_search_nearby` | Places API (New) |
@@ -136,4 +136,4 @@ Body:
 | Photos | Returns `photo.name` resource path | Returns `photo_reference` string |
 | Error codes | gRPC status codes (7=PERMISSION_DENIED, 8=RESOURCE_EXHAUSTED) | HTTP status codes |
 
-**Note**: `maps_search_along_route` uses the Legacy Directions API for step 1 (polyline extraction) and Places API (New) REST for step 2 (search). Both APIs must be enabled for this tool to function.
+**Note**: `maps_search_along_route` uses the Routes API for step 1 (polyline extraction) and Places API (New) REST for step 2 (search). Both APIs must be enabled for this tool to function.

@@ -71,7 +71,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | Tool | When to use | Example |
 |------|-------------|---------|
 | `maps_explore_area` | Overview of a neighborhood | "What's around Tokyo Tower?" |
-| `maps_plan_route` | Multi-stop optimized itinerary | "Visit these 5 places efficiently" |
+| `maps_plan_route` | Multi-stop optimized itinerary (Routes API waypoint optimization, up to 25 stops) | "Visit these 5 places efficiently" |
 | `maps_compare_places` | Side-by-side comparison | "Which ramen shop near Shibuya?" |
 
 ---
@@ -81,7 +81,8 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | Tool | Limitation | Workaround |
 |------|-----------|------------|
 | `maps_weather` | Unsupported regions: Japan, China, South Korea, Cuba, Iran, North Korea, Syria | Use web search for weather in these regions |
-| `maps_distance_matrix` | Transit mode returns null in some regions (notably Japan) | Fall back to `driving` or `walking` mode, or use `maps_directions` for transit |
+| `maps_distance_matrix` | Transit mode may return null in some regions | Fall back to `driving` or `walking` mode, or use `maps_directions` for transit |
+| `maps_plan_route` | Transit mode does not support waypoint optimization | Set `optimize: false` for transit mode |
 | `maps_air_quality` | Works globally including Japan (unlike weather) | — |
 
 ---

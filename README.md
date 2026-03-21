@@ -79,12 +79,12 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_search_along_route` | Search for places along a route between two points — ranked by minimal detour time. |
 | **Composite Tools** | |
 | `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
-| `maps_plan_route` | Plan an optimized multi-stop route — geocodes, finds best order, returns directions. |
+| `maps_plan_route` | Plan an optimized multi-stop route — uses Routes API waypoint optimization (up to 25 stops) for efficient ordering. |
 | `maps_compare_places` | Compare places side-by-side — searches, gets details, and optionally calculates distances. |
 
 All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` — MCP clients can auto-approve these without user confirmation.
 
-> **Prerequisite**: Enable **Places API (New)** in [Google Cloud Console](https://console.cloud.google.com) before using place-related tools.
+> **Prerequisite**: Enable **Places API (New)** and **Routes API** in [Google Cloud Console](https://console.cloud.google.com) before using place-related and routing tools.
 
 ## Installation
 
@@ -247,7 +247,8 @@ src/
 ├── services/
 │   ├── NewPlacesService.ts       # Google Places API (New) client
 │   ├── PlacesSearcher.ts         # Service facade layer
-│   └── toolclass.ts              # Legacy Google Maps API client
+│   ├── RoutesService.ts          # Google Routes API client (directions, distance matrix, waypoint optimization)
+│   └── toolclass.ts              # Google Maps API client (geocoding, timezone, elevation, static map)
 ├── tools/
 │   └── maps/
 │       ├── searchNearby.ts       # maps_search_nearby tool
@@ -293,7 +294,8 @@ skills/
 - **TypeScript** - Type-safe development
 - **Node.js** - Runtime environment
 - **@googlemaps/places** - Google Places API (New) for place search and details
-- **@googlemaps/google-maps-services-js** - Legacy API for geocoding, directions, distance matrix, elevation
+- **Google Routes API** - Directions, distance matrix, and waypoint optimization via REST
+- **@googlemaps/google-maps-services-js** - Geocoding, timezone, elevation
 - **@modelcontextprotocol/sdk** - MCP protocol implementation (v1.27+)
 - **Express.js** - HTTP server framework
 - **Zod** - Schema validation

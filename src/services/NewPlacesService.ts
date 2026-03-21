@@ -11,6 +11,8 @@ export class NewPlacesService {
     "formattedAddress",
     "location",
     "utcOffsetMinutes",
+    "primaryType",
+    "types",
     "regularOpeningHours.periods",
     "regularOpeningHours.weekdayDescriptions",
     "currentOpeningHours.openNow",
@@ -19,6 +21,7 @@ export class NewPlacesService {
     "priceLevel",
     "rating",
     "userRatingCount",
+    "editorialSummary",
     "reviews.rating",
     "reviews.text",
     "reviews.publishTime",
@@ -26,6 +29,40 @@ export class NewPlacesService {
     "photos.heightPx",
     "photos.widthPx",
     "photos.name",
+    // Parking & Accessibility
+    "parkingOptions",
+    "accessibilityOptions",
+    // Food & Drink
+    "servesVegetarianFood",
+    "servesBeer",
+    "servesWine",
+    "servesCocktails",
+    "servesBreakfast",
+    "servesLunch",
+    "servesDinner",
+    "servesBrunch",
+    "servesCoffee",
+    "servesDessert",
+    // Dining options
+    "dineIn",
+    "delivery",
+    "takeout",
+    "curbsidePickup",
+    "reservable",
+    // Atmosphere
+    "goodForGroups",
+    "goodForChildren",
+    "goodForWatchingSports",
+    "liveMusic",
+    "outdoorSeating",
+    "allowsDogs",
+    "menuForChildren",
+    "restroom",
+    // Payment
+    "paymentOptions",
+    // AI Summaries (region-limited)
+    "reviewSummary",
+    "generativeSummary",
   ].join(",");
 
   private readonly searchNearbyFieldMask: string = [
@@ -37,6 +74,8 @@ export class NewPlacesService {
     "places.rating",
     "places.userRatingCount",
     "places.currentOpeningHours.openNow",
+    "places.primaryType",
+    "places.priceLevel",
   ].join(",");
   constructor(apiKey?: string) {
     this.client = new PlacesClient({
@@ -192,6 +231,8 @@ export class NewPlacesService {
           lng: place.location?.longitude || 0,
         },
       },
+      primary_type: place.primaryType || null,
+      price_level: place.priceLevel || null,
       rating: place.rating || 0,
       user_ratings_total: place.userRatingCount || 0,
       opening_hours: {
@@ -201,6 +242,48 @@ export class NewPlacesService {
   }
 
   private transformPlaceResponse(place: any) {
+    // Build parking info (only include truthy values)
+    const parking = place.parkingOptions
+      ? Object.fromEntries(Object.entries(place.parkingOptions).filter(([, v]) => v === true))
+      : undefined;
+
+    // Build accessibility info (only include truthy values)
+    const accessibility = place.accessibilityOptions
+      ? Object.fromEntries(Object.entries(place.accessibilityOptions).filter(([, v]) => v === true))
+      : undefined;
+
+    // Build dining_options (only include truthy values)
+    const diningOptions: Record<string, boolean> = {};
+    if (place.dineIn) diningOptions.dine_in = true;
+    if (place.delivery) diningOptions.delivery = true;
+    if (place.takeout) diningOptions.takeout = true;
+    if (place.curbsidePickup) diningOptions.curbside_pickup = true;
+    if (place.reservable) diningOptions.reservable = true;
+
+    // Build serves (only include truthy values)
+    const serves: Record<string, boolean> = {};
+    if (place.servesVegetarianFood) serves.vegetarian_food = true;
+    if (place.servesBeer) serves.beer = true;
+    if (place.servesWine) serves.wine = true;
+    if (place.servesCocktails) serves.cocktails = true;
+    if (place.servesBreakfast) serves.breakfast = true;
+    if (place.servesLunch) serves.lunch = true;
+    if (place.servesDinner) serves.dinner = true;
+    if (place.servesBrunch) serves.brunch = true;
+    if (place.servesCoffee) serves.coffee = true;
+    if (place.servesDessert) serves.dessert = true;
+
+    // Build atmosphere (only include truthy values)
+    const atmosphere: Record<string, boolean> = {};
+    if (place.goodForGroups) atmosphere.good_for_groups = true;
+    if (place.goodForChildren) atmosphere.good_for_children = true;
+    if (place.goodForWatchingSports) atmosphere.good_for_watching_sports = true;
+    if (place.liveMusic) atmosphere.live_music = true;
+    if (place.outdoorSeating) atmosphere.outdoor_seating = true;
+    if (place.allowsDogs) atmosphere.allows_dogs = true;
+    if (place.menuForChildren) atmosphere.menu_for_children = true;
+    if (place.restroom) atmosphere.restroom = true;
+
     return {
       name: place.displayName?.text || place.name || "",
       place_id: this.extractLegacyPlaceId(place),
@@ -211,6 +294,8 @@ export class NewPlacesService {
           lng: place.location?.longitude || 0,
         },
       },
+      primary_type: place.primaryType || null,
+      types: place.types || [],
       rating: place.rating || 0,
       user_ratings_total: place.userRatingCount || 0,
       opening_hours: place.regularOpeningHours
@@ -226,10 +311,20 @@ export class NewPlacesService {
       formatted_phone_number: place.nationalPhoneNumber || "",
       website: place.websiteUri || "",
       price_level: place.priceLevel || 0,
+      editorial_summary: place.editorialSummary?.text || null,
+      ...(Object.keys(parking || {}).length > 0 ? { parking } : {}),
+      ...(Object.keys(accessibility || {}).length > 0 ? { accessibility } : {}),
+      ...(Object.keys(diningOptions).length > 0 ? { dining_options: diningOptions } : {}),
+      ...(Object.keys(serves).length > 0 ? { serves } : {}),
+      ...(Object.keys(atmosphere).length > 0 ? { atmosphere } : {}),
+      ...(place.paymentOptions ? { payment_options: place.paymentOptions } : {}),
+      ...(place.reviewSummary?.text?.text ? { review_summary: place.reviewSummary.text.text } : {}),
+      ...(place.generativeSummary?.overview?.text ? { generative_summary: place.generativeSummary.overview.text } : {}),
       reviews:
         place.reviews?.map((review: any) => ({
           rating: review.rating || 0,
           text: review.text?.text || "",
+          language: review.text?.languageCode || null,
           time: review.publishTime?.seconds || 0,
           author_name: review.authorAttribution?.displayName || "",
         })) || [],
