@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.47
+
+- feat: dual-sort reviews — merge relevant + newest for ~10 reviews per place (#64)
+
+
 ## 0.0.46
 
 - feat: add departure_time to plan_route/distance_matrix + test coverage + payment fix (#63)
