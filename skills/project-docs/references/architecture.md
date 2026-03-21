@@ -12,9 +12,9 @@ CLI / HTTP / stdio
   Tool ACTION()          <- thin dispatch, calls PlacesSearcher
        |
   PlacesSearcher         <- service facade (composition, filtering, response shaping)
-      / \
-GoogleMapsTools    NewPlacesService
-(Legacy REST SDK)  (Places API New gRPC/REST client)
+      /|\
+GoogleMapsTools  RoutesService    NewPlacesService
+(geocode/tz/elev) (Routes API REST) (Places API New)
 ```
 
 | Layer | Files | Responsibility |
@@ -24,8 +24,9 @@ GoogleMapsTools    NewPlacesService
 | Tool | `src/tools/maps/*.ts` | Declare NAME, DESCRIPTION, SCHEMA, ACTION |
 | Config | `src/config.ts` | Assemble ToolConfig[], attach MAPS_TOOL_ANNOTATIONS |
 | Facade | `src/services/PlacesSearcher.ts` | Orchestrate multi-step / composite tools |
-| API client (legacy) | `src/services/toolclass.ts` | Wrap `@googlemaps/google-maps-services-js` SDK |
-| API client (new) | `src/services/NewPlacesService.ts` | Wrap `@googlemaps/places` gRPC client |
+| API client (routes) | `src/services/RoutesService.ts` | Routes API REST client (directions, distance matrix, waypoint optimization) |
+| API client (legacy) | `src/services/toolclass.ts` | Wrap `@googlemaps/google-maps-services-js` SDK (geocode, timezone, elevation) |
+| API client (places) | `src/services/NewPlacesService.ts` | Wrap `@googlemaps/places` gRPC client |
 | Auth | `src/utils/apiKeyManager.ts` | API key priority resolution |
 | Context | `src/utils/requestContext.ts` | Per-request AsyncLocalStorage propagation |
 
@@ -127,7 +128,8 @@ Missing any file causes doc/behavior mismatch. Verify all before opening a PR.
 | `src/core/BaseMcpServer.ts` | MCP server core — tool registration, HTTP session management, stdio transport |
 | `src/index.ts` | Package entry — exports Logger and re-exports public API |
 | `src/services/PlacesSearcher.ts` | Service facade — orchestrates multi-step composite tools (planRoute, exploreArea, comparePlaces, searchAlongRoute) |
-| `src/services/toolclass.ts` | Legacy Google Maps SDK wrapper — geocode, directions, distanceMatrix, elevation, timezone, weather, airQuality, staticMap |
+| `src/services/RoutesService.ts` | Routes API REST client — computeRoutes (directions), computeRouteMatrix (distance matrix), waypoint optimization |
+| `src/services/toolclass.ts` | Google Maps SDK wrapper — geocode, elevation, timezone, weather, airQuality, staticMap, searchAlongRoute |
 | `src/services/NewPlacesService.ts` | Places API (New) client — searchNearby, searchText, getPlaceDetails via gRPC |
 | `src/tools/maps/*.ts` | Individual tool definitions (17 files) — each exports NAME, DESCRIPTION, SCHEMA, ACTION |
 | `src/utils/apiKeyManager.ts` | Singleton — resolves API key priority from headers / session / env |

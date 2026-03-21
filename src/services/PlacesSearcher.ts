@@ -1,5 +1,6 @@
 import { GoogleMapsTools } from "./toolclass.js";
 import { NewPlacesService } from "./NewPlacesService.js";
+import { RoutesService, parseDuration, formatDistance, formatDuration } from "./RoutesService.js";
 
 interface SearchResponse {
   success: boolean;
@@ -102,10 +103,12 @@ interface ElevationResponse {
 export class PlacesSearcher {
   private mapsTools: GoogleMapsTools;
   private newPlacesService: NewPlacesService;
+  private routesService: RoutesService;
 
   constructor(apiKey?: string) {
     this.mapsTools = new GoogleMapsTools(apiKey);
     this.newPlacesService = new NewPlacesService(apiKey);
+    this.routesService = new RoutesService(apiKey);
   }
 
   async searchNearby(params: {
@@ -139,6 +142,8 @@ export class PlacesSearcher {
           place_id: place.place_id,
           address: place.formatted_address,
           location: place.geometry.location,
+          primary_type: place.primary_type || null,
+          price_level: place.price_level || null,
           rating: place.rating,
           total_ratings: place.user_ratings_total,
           open_now: place.opening_hours?.open_now,
@@ -181,6 +186,8 @@ export class PlacesSearcher {
           place_id: place.place_id,
           address: place.formatted_address,
           location: place.geometry.location,
+          primary_type: place.primary_type || null,
+          price_level: place.price_level || null,
           rating: place.rating,
           total_ratings: place.user_ratings_total,
           open_now: place.opening_hours?.open_now,
@@ -219,17 +226,29 @@ export class PlacesSearcher {
           name: details.name,
           address: details.formatted_address,
           location: details.geometry?.location,
+          primary_type: details.primary_type || null,
+          types: details.types || [],
           rating: details.rating,
           total_ratings: details.user_ratings_total,
-          open_now: details.opening_hours?.open_now,
+          opening_hours: details.opening_hours,
           phone: details.formatted_phone_number,
           website: details.website,
           price_level: details.price_level,
+          editorial_summary: details.editorial_summary || null,
+          ...(details.parking ? { parking: details.parking } : {}),
+          ...(details.accessibility ? { accessibility: details.accessibility } : {}),
+          ...(details.dining_options ? { dining_options: details.dining_options } : {}),
+          ...(details.serves ? { serves: details.serves } : {}),
+          ...(details.atmosphere ? { atmosphere: details.atmosphere } : {}),
+          ...(details.payment_options ? { payment_options: details.payment_options } : {}),
+          ...(details.review_summary ? { review_summary: details.review_summary } : {}),
+          ...(details.generative_summary ? { generative_summary: details.generative_summary } : {}),
           photo_count: details.photos?.length || 0,
           ...(photos && photos.length > 0 ? { photos } : {}),
           reviews: details.reviews?.map((review: any) => ({
             rating: review.rating,
             text: review.text,
+            language: review.language || null,
             time: review.time,
             author_name: review.author_name,
           })),
@@ -281,7 +300,7 @@ export class PlacesSearcher {
     mode: "driving" | "walking" | "bicycling" | "transit" = "driving"
   ): Promise<DistanceMatrixResponse> {
     try {
-      const result = await this.mapsTools.calculateDistanceMatrix(origins, destinations, mode);
+      const result = await this.routesService.computeRouteMatrix({ origins, destinations, mode });
 
       return {
         success: true,
@@ -305,7 +324,13 @@ export class PlacesSearcher {
     try {
       const departureTime = departure_time ? new Date(departure_time) : new Date();
       const arrivalTime = arrival_time ? new Date(arrival_time) : undefined;
-      const result = await this.mapsTools.getDirections(origin, destination, mode, departureTime, arrivalTime);
+      const result = await this.routesService.computeRoutes({
+        origin,
+        destination,
+        mode,
+        departureTime,
+        arrivalTime,
+      });
 
       return {
         success: true,
@@ -468,7 +493,7 @@ export class PlacesSearcher {
     const stops = params.stops;
     if (stops.length < 2) throw new Error("Need at least 2 stops");
 
-    // 1. Geocode all stops
+    // 1. Geocode all stops for display addresses
     const geocoded: Array<{ originalName: string; address: string; lat: number; lng: number }> = [];
     for (const stop of stops) {
       const geo = await this.geocode(stop);
@@ -481,50 +506,55 @@ export class PlacesSearcher {
       });
     }
 
-    // 2. If optimize requested and > 2 stops, use distance-matrix + nearest-neighbor
-    //    Use driving mode for optimization (transit matrix requires departure_time and often returns null)
-    let orderedStops = geocoded;
-    if (params.optimize !== false && geocoded.length > 2) {
-      const matrix = await this.calculateDistanceMatrix(stops, stops, "driving");
-      if (matrix.success && matrix.data) {
-        // Nearest-neighbor from first stop
-        const visited = new Set<number>([0]);
-        const order = [0];
-        let current = 0;
-        while (visited.size < geocoded.length) {
-          let bestIdx = -1;
-          let bestDuration = Infinity;
-          for (let i = 0; i < geocoded.length; i++) {
-            if (visited.has(i)) continue;
-            const dur = matrix.data.durations[current]?.[i]?.value ?? Infinity;
-            if (dur < bestDuration) {
-              bestDuration = dur;
-              bestIdx = i;
-            }
-          }
-          if (bestIdx === -1) break;
-          visited.add(bestIdx);
-          order.push(bestIdx);
-          current = bestIdx;
-        }
-        orderedStops = order.map((i) => geocoded[i]);
-      }
+    // 2. Single Routes API call handles optimization + all leg directions
+    const origin = stops[0];
+    const destination = stops[stops.length - 1];
+    const intermediates = stops.length > 2 ? stops.slice(1, -1) : undefined;
+    // Optimize if requested, > 2 stops, and not transit (transit doesn't support intermediates for optimization)
+    const shouldOptimize = params.optimize !== false && stops.length > 2 && mode !== "transit";
+
+    const routeResult = await this.routesService.computeRoutes({
+      origin,
+      destination,
+      mode,
+      intermediates,
+      optimizeWaypointOrder: shouldOptimize,
+    });
+
+    const route = routeResult.routes[0];
+    const routeLegs = route?.legs || [];
+
+    // 3. Determine ordered stops based on optimization result
+    let orderedStops: typeof geocoded;
+    if (shouldOptimize && routeResult.optimizedIntermediateWaypointIndex) {
+      const optimizedOrder = routeResult.optimizedIntermediateWaypointIndex;
+      const intermediateGeocoded = geocoded.slice(1, -1);
+      orderedStops = [
+        geocoded[0],
+        ...optimizedOrder.map((i: number) => intermediateGeocoded[i]),
+        geocoded[geocoded.length - 1],
+      ];
+    } else {
+      orderedStops = geocoded;
     }
 
-    // 3. Get directions between consecutive stops (use original names for reliable results)
+    // 4. Build legs from Routes API response
     const legs: any[] = [];
     let totalDistance = 0;
     let totalDuration = 0;
+
     for (let i = 0; i < orderedStops.length - 1; i++) {
-      const dir = await this.getDirections(orderedStops[i].originalName, orderedStops[i + 1].originalName, mode);
-      if (dir.success && dir.data) {
-        totalDistance += dir.data.total_distance.value;
-        totalDuration += dir.data.total_duration.value;
+      const leg = routeLegs[i];
+      if (leg) {
+        const distMeters = leg.distanceMeters || 0;
+        const durSeconds = parseDuration(leg.duration);
+        totalDistance += distMeters;
+        totalDuration += durSeconds;
         legs.push({
           from: orderedStops[i].originalName,
           to: orderedStops[i + 1].originalName,
-          distance: dir.data.total_distance.text,
-          duration: dir.data.total_duration.text,
+          distance: formatDistance(distMeters),
+          duration: formatDuration(durSeconds),
         });
       } else {
         legs.push({
@@ -532,7 +562,7 @@ export class PlacesSearcher {
           to: orderedStops[i + 1].originalName,
           distance: "unknown",
           duration: "unknown",
-          note: dir.error || "Directions unavailable for this segment",
+          note: "Directions unavailable for this segment",
         });
       }
     }
@@ -541,7 +571,7 @@ export class PlacesSearcher {
       success: true,
       data: {
         mode,
-        optimized: params.optimize !== false && geocoded.length > 2,
+        optimized: shouldOptimize,
         stops: orderedStops.map((s) => `${s.originalName} (${s.address})`),
         legs,
         total_distance: `${(totalDistance / 1000).toFixed(1)} km`,
@@ -570,12 +600,17 @@ export class PlacesSearcher {
       compared.push({
         name: place.name,
         address: place.address,
+        primary_type: details.data?.primary_type || place.primary_type || null,
         rating: place.rating,
         total_ratings: place.total_ratings,
-        open_now: place.open_now,
+        opening_hours: details.data?.opening_hours,
         phone: details.data?.phone,
         website: details.data?.website,
         price_level: details.data?.price_level,
+        ...(details.data?.parking ? { parking: details.data.parking } : {}),
+        ...(details.data?.serves ? { serves: details.data.serves } : {}),
+        ...(details.data?.atmosphere ? { atmosphere: details.data.atmosphere } : {}),
+        ...(details.data?.dining_options ? { dining_options: details.data.dining_options } : {}),
       });
     }
 

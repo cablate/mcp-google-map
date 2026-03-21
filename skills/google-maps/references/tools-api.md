@@ -96,7 +96,7 @@ exec maps_search_nearby '{"center": {"value": "35.6586,139.7454", "isCoordinates
 | openNow | boolean | no | Only show currently open places |
 | minRating | number | no | Minimum rating (0-5) |
 
-Response: `{ success, location, data: [{ name, place_id, formatted_address, geometry, rating, user_ratings_total, opening_hours }] }`
+Response: `{ success, location, data: [{ name, place_id, formatted_address, geometry, primary_type, price_level, rating, user_ratings_total, opening_hours }] }`
 
 ---
 
@@ -116,13 +116,13 @@ exec maps_search_places '{"query": "ramen in Tokyo"}'
 | minRating | number | no | Minimum rating (1.0-5.0) |
 | includedType | string | no | Place type filter |
 
-Response: `{ success, data: [{ name, place_id, address, location, rating, total_ratings, open_now }] }`
+Response: `{ success, data: [{ name, place_id, address, location, primary_type, price_level, rating, total_ratings, open_now }] }`
 
 ---
 
 ## maps_place_details
 
-Get full details for a place by its place_id (from search results). Returns reviews, phone, website, hours. Set `maxPhotos` to include photo URLs (default: 0 = no photos, saves tokens).
+Get full details for a place by its place_id (from search results). Returns reviews, phone, website, hours, and rich attribute data (parking, dining options, atmosphere, accessibility, AI summaries). Set `maxPhotos` to include photo URLs (default: 0 = no photos, saves tokens).
 
 ```bash
 exec maps_place_details '{"placeId": "ChIJCewJkL2LGGAR3Qmk0vCTGkg"}'
@@ -133,6 +133,23 @@ exec maps_place_details '{"placeId": "ChIJCewJkL2LGGAR3Qmk0vCTGkg", "maxPhotos":
 |-------|------|----------|-------------|
 | placeId | string | yes | Google Maps place ID (from search results) |
 | maxPhotos | number | no | Number of photo URLs to include (0-10, default 0). Always returns `photo_count`. |
+
+Response includes (when available from Google):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `primary_type` | string | Precise place type (e.g., `wine_bar`, `sushi_restaurant`) |
+| `types` | string[] | All place types |
+| `editorial_summary` | string | Google's editorial description |
+| `parking` | object | `{ freeParkingLot, paidParkingLot, freeStreetParking, valetParking, ... }` (truthy only) |
+| `accessibility` | object | `{ wheelchairAccessibleParking, wheelchairAccessibleEntrance, ... }` (truthy only) |
+| `dining_options` | object | `{ dine_in, delivery, takeout, curbside_pickup, reservable }` (truthy only) |
+| `serves` | object | `{ vegetarian_food, beer, wine, cocktails, breakfast, lunch, dinner, ... }` (truthy only) |
+| `atmosphere` | object | `{ good_for_groups, good_for_children, outdoor_seating, allows_dogs, live_music, ... }` (truthy only) |
+| `payment_options` | object | Payment methods accepted |
+| `review_summary` | string | AI-generated review summary (region-limited: US/UK/India/Japan) |
+| `generative_summary` | string | AI-generated place overview (region-limited: US/India) |
+| `reviews[].language` | string | Review language code (e.g., `en`, `zh-TW`) |
 
 ---
 
@@ -349,7 +366,7 @@ exec maps_explore_area '{"location": "Tokyo Tower", "types": ["restaurant", "caf
 
 ## maps_plan_route (composite)
 
-Plan an optimized multi-stop route. Internally chains geocode → distance-matrix → nearest-neighbor → directions.
+Plan an optimized multi-stop route. Internally geocodes all stops, then uses a single Routes API call with waypoint optimization (up to 25 intermediate stops) to find the most efficient visit order and return directions for each leg.
 
 ```bash
 exec maps_plan_route '{"stops": ["Tokyo Tower", "Shibuya Station", "Shinjuku Station", "Ueno Park"], "mode": "driving"}'
@@ -357,9 +374,9 @@ exec maps_plan_route '{"stops": ["Tokyo Tower", "Shibuya Station", "Shinjuku Sta
 
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
-| stops | string[] | yes | Addresses or landmarks (min 2) |
+| stops | string[] | yes | Addresses or landmarks (min 2, up to 27 total with origin + destination) |
 | mode | string | no | driving, walking, bicycling, transit (default: driving) |
-| optimize | boolean | no | Auto-optimize visit order (default: true) |
+| optimize | boolean | no | Auto-optimize visit order via Routes API (default: true). Not available for transit mode. |
 
 ---
 
@@ -546,15 +563,21 @@ Elevation: 45m (not a flood risk)
 
 User has a list of places and wants the optimal visit order.
 
-**Steps:**
+**Preferred: Use `maps_plan_route`** — handles everything in one call (geocode + Routes API waypoint optimization + directions for all legs).
+
+```
+maps_plan_route {"stops": ["Tokyo Tower", "Shibuya", "Shinjuku", "Ueno Park", "Asakusa"], "mode": "driving"}
+```
+
+**Manual alternative** (if you need more control):
 1. `maps_geocode` — Resolve all addresses to coordinates
 2. `maps_distance_matrix` — Calculate NxN matrix (all origins × all destinations)
-3. Use the matrix to determine the nearest-neighbor route order
-4. `maps_directions` — Generate route for the final order (chain waypoints)
+3. Determine optimal route order from the matrix
+4. `maps_directions` — Generate route for the final order
 
 **Key decisions:**
-- For ≤ 5 stops, nearest-neighbor heuristic is good enough
-- For the `maps_directions` call, set origin = first stop, destination = last stop, and mention intermediate stops in conversation
+- `maps_plan_route` supports up to 27 stops (origin + 25 intermediates + destination)
+- Transit mode does not support waypoint optimization — set `optimize: false`
 - If the user says "return to start", plan a round trip
 
 ---
