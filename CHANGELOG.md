@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.45
+
+- feat: migrate to Routes API and add rich place attributes (#62)
+
+
 ## 0.0.44
 
 - docs: add Local SEO skill reference for Google Business Profile ranking analysis (#60)

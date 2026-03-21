@@ -1,6 +1,6 @@
 {
   "name": "@cablate/mcp-google-map",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "mcpName": "io.github.cablate/google-map",
   "description": "17 Google Maps tools for AI agents — geocode, search, directions, weather, air quality, map images via MCP server or standalone CLI",
   "type": "module",
