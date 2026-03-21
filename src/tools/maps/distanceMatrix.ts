@@ -13,6 +13,12 @@ const SCHEMA = {
     .enum(["driving", "walking", "bicycling", "transit"])
     .default("driving")
     .describe("Travel mode for calculation"),
+  departure_time: z
+    .string()
+    .optional()
+    .describe(
+      "Departure time in ISO 8601 format (e.g. 2026-03-21T09:00:00Z). Enables traffic-aware duration estimates."
+    ),
 };
 
 export type DistanceMatrixParams = z.infer<z.ZodObject<typeof SCHEMA>>;
@@ -22,7 +28,12 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
     // Create a new PlacesSearcher instance with the current request's API key
     const apiKey = getCurrentApiKey();
     const placesSearcher = new PlacesSearcher(apiKey);
-    const result = await placesSearcher.calculateDistanceMatrix(params.origins, params.destinations, params.mode);
+    const result = await placesSearcher.calculateDistanceMatrix(
+      params.origins,
+      params.destinations,
+      params.mode,
+      params.departure_time
+    );
 
     if (!result.success) {
       return {

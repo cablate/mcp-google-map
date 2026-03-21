@@ -317,7 +317,13 @@ export class NewPlacesService {
       ...(Object.keys(diningOptions).length > 0 ? { dining_options: diningOptions } : {}),
       ...(Object.keys(serves).length > 0 ? { serves } : {}),
       ...(Object.keys(atmosphere).length > 0 ? { atmosphere } : {}),
-      ...(place.paymentOptions ? { payment_options: place.paymentOptions } : {}),
+      ...(place.paymentOptions
+        ? {
+            payment_options: Object.fromEntries(
+              Object.entries(place.paymentOptions).filter(([k]) => !k.startsWith("_"))
+            ),
+          }
+        : {}),
       ...(place.reviewSummary?.text?.text ? { review_summary: place.reviewSummary.text.text } : {}),
       ...(place.generativeSummary?.overview?.text ? { generative_summary: place.generativeSummary.overview.text } : {}),
       reviews:

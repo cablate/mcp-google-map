@@ -15,6 +15,10 @@ const SCHEMA = {
     .describe(
       "Auto-optimize visit order via Routes API waypoint optimization (default: true). Set false to keep original order. Not available for transit mode."
     ),
+  departure_time: z
+    .string()
+    .optional()
+    .describe("Departure time in ISO 8601 format (e.g. 2026-03-21T09:00:00Z). Enables traffic-aware routing."),
 };
 
 export type PlanRouteParams = z.infer<z.ZodObject<typeof SCHEMA>>;
