@@ -138,7 +138,7 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
 
     case "distance-matrix":
     case "maps_distance_matrix":
-      return searcher.calculateDistanceMatrix(params.origins, params.destinations, params.mode);
+      return searcher.calculateDistanceMatrix(params.origins, params.destinations, params.mode, params.departure_time);
 
     case "elevation":
     case "maps_elevation":
