@@ -241,6 +241,18 @@ async function testListTools(session: McpSession): Promise<void> {
       assert(tool.inputSchema !== undefined, `Tool "${tool.name}" has inputSchema`);
     }
   }
+
+  // Verify departure_time parameter exists in plan_route and distance_matrix
+  const planRoute = tools.find((t: any) => t.name === "maps_plan_route");
+  assert(
+    planRoute?.inputSchema?.properties?.departure_time !== undefined,
+    "maps_plan_route has departure_time parameter"
+  );
+  const distMatrix = tools.find((t: any) => t.name === "maps_distance_matrix");
+  assert(
+    distMatrix?.inputSchema?.properties?.departure_time !== undefined,
+    "maps_distance_matrix has departure_time parameter"
+  );
 }
 
 async function testGeocode(session: McpSession): Promise<void> {
@@ -521,6 +533,9 @@ async function testPlaceDetailsPhotos(session: McpSession): Promise<void> {
   const places = JSON.parse(searchContent[0].text);
   const placeId = places[0]?.place_id;
   assert(typeof placeId === "string" && placeId.length > 0, "Got valid place_id from search");
+  // Verify search results include primary_type
+  assert("primary_type" in places[0], "search results include primary_type");
+  assert("price_level" in places[0], "search results include price_level");
 
   // Test without maxPhotos — should return photo_count but no photos array
   const detailsNoPhoto = await sendRequest(session, "tools/call", {
@@ -532,6 +547,25 @@ async function testPlaceDetailsPhotos(session: McpSession): Promise<void> {
   assert(noPhotoData.photos === undefined, "place_details without maxPhotos omits photos array");
   assert(typeof noPhotoData.name === "string", "place_details returns name");
   assert(typeof noPhotoData.rating === "number", "place_details returns rating");
+
+  // Verify new place attribute fields
+  assert(Array.isArray(noPhotoData.types), "place_details returns types array");
+  assert(
+    noPhotoData.primary_type === null || typeof noPhotoData.primary_type === "string",
+    "place_details returns primary_type"
+  );
+  assert(
+    noPhotoData.editorial_summary === null || typeof noPhotoData.editorial_summary === "string",
+    "place_details returns editorial_summary"
+  );
+  // opening_hours should be an object with weekday_text when available
+  if (noPhotoData.opening_hours) {
+    assert(typeof noPhotoData.opening_hours === "object", "place_details opening_hours is object");
+  }
+  // reviews should have language field
+  if (noPhotoData.reviews?.length > 0) {
+    assert("language" in noPhotoData.reviews[0], "reviews include language field");
+  }
 
   // Test with maxPhotos=1 — should return photos array with URLs
   const detailsWithPhoto = await sendRequest(session, "tools/call", {
