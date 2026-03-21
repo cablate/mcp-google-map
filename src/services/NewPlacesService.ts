@@ -243,14 +243,14 @@ export class NewPlacesService {
 
   private transformPlaceResponse(place: any) {
     // Build parking info (only include truthy values)
-    const parking = place.parkingOptions ? Object.fromEntries(
-      Object.entries(place.parkingOptions).filter(([, v]) => v === true)
-    ) : undefined;
+    const parking = place.parkingOptions
+      ? Object.fromEntries(Object.entries(place.parkingOptions).filter(([, v]) => v === true))
+      : undefined;
 
     // Build accessibility info (only include truthy values)
-    const accessibility = place.accessibilityOptions ? Object.fromEntries(
-      Object.entries(place.accessibilityOptions).filter(([, v]) => v === true)
-    ) : undefined;
+    const accessibility = place.accessibilityOptions
+      ? Object.fromEntries(Object.entries(place.accessibilityOptions).filter(([, v]) => v === true))
+      : undefined;
 
     // Build dining_options (only include truthy values)
     const diningOptions: Record<string, boolean> = {};

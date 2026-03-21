@@ -12,7 +12,9 @@ const SCHEMA = {
   optimize: z
     .boolean()
     .optional()
-    .describe("Auto-optimize visit order via Routes API waypoint optimization (default: true). Set false to keep original order. Not available for transit mode."),
+    .describe(
+      "Auto-optimize visit order via Routes API waypoint optimization (default: true). Set false to keep original order. Not available for transit mode."
+    ),
 };
 
 export type PlanRouteParams = z.infer<z.ZodObject<typeof SCHEMA>>;

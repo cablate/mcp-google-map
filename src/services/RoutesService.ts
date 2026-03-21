@@ -30,8 +30,7 @@ const COMPUTE_ROUTES_FIELD_MASK = [
 ].join(",");
 
 /** FieldMask for computeRouteMatrix */
-const COMPUTE_ROUTE_MATRIX_FIELD_MASK =
-  "originIndex,destinationIndex,distanceMeters,duration,status,condition";
+const COMPUTE_ROUTE_MATRIX_FIELD_MASK = "originIndex,destinationIndex,distanceMeters,duration,status,condition";
 
 /**
  * Parse Routes API duration string ("1234s") to seconds.
@@ -209,11 +208,7 @@ export class RoutesService {
    * Compute route matrix using Routes API.
    * Returns response compatible with existing DistanceMatrixResponse.data interface.
    */
-  async computeRouteMatrix(params: {
-    origins: string[];
-    destinations: string[];
-    mode?: string;
-  }): Promise<{
+  async computeRouteMatrix(params: { origins: string[]; destinations: string[]; mode?: string }): Promise<{
     distances: any[][];
     durations: any[][];
     origin_addresses: string[];
