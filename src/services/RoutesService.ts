@@ -208,7 +208,12 @@ export class RoutesService {
    * Compute route matrix using Routes API.
    * Returns response compatible with existing DistanceMatrixResponse.data interface.
    */
-  async computeRouteMatrix(params: { origins: string[]; destinations: string[]; mode?: string }): Promise<{
+  async computeRouteMatrix(params: {
+    origins: string[];
+    destinations: string[];
+    mode?: string;
+    departureTime?: Date;
+  }): Promise<{
     distances: any[][];
     durations: any[][];
     origin_addresses: string[];
@@ -225,6 +230,10 @@ export class RoutesService {
     // routingPreference only valid for DRIVE mode
     if (travelMode === "DRIVE") {
       requestBody.routingPreference = "TRAFFIC_AWARE";
+    }
+
+    if (params.departureTime) {
+      requestBody.departureTime = params.departureTime.toISOString();
     }
 
     const response = await fetch(`${ROUTES_API_BASE}/distanceMatrix/v2:computeRouteMatrix`, {

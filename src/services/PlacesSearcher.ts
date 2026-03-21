@@ -297,10 +297,16 @@ export class PlacesSearcher {
   async calculateDistanceMatrix(
     origins: string[],
     destinations: string[],
-    mode: "driving" | "walking" | "bicycling" | "transit" = "driving"
+    mode: "driving" | "walking" | "bicycling" | "transit" = "driving",
+    departure_time?: string
   ): Promise<DistanceMatrixResponse> {
     try {
-      const result = await this.routesService.computeRouteMatrix({ origins, destinations, mode });
+      const result = await this.routesService.computeRouteMatrix({
+        origins,
+        destinations,
+        mode,
+        ...(departure_time ? { departureTime: new Date(departure_time) } : {}),
+      });
 
       return {
         success: true,
@@ -488,6 +494,7 @@ export class PlacesSearcher {
     stops: string[];
     mode?: "driving" | "walking" | "bicycling" | "transit";
     optimize?: boolean;
+    departure_time?: string;
   }): Promise<any> {
     const mode = params.mode || "driving";
     const stops = params.stops;
@@ -519,6 +526,7 @@ export class PlacesSearcher {
       mode,
       intermediates,
       optimizeWaypointOrder: shouldOptimize,
+      ...(params.departure_time ? { departureTime: new Date(params.departure_time) } : {}),
     });
 
     const route = routeResult.routes[0];
