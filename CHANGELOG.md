@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.46
+
+- feat: add departure_time to plan_route/distance_matrix + test coverage + payment fix (#63)
+
+
 ## 0.0.45
 
 - feat: migrate to Routes API and add rich place attributes (#62)
