@@ -3,6 +3,7 @@ import { Logger } from "../index.js";
 
 export class NewPlacesService {
   private client: PlacesClient;
+  private readonly apiKey: string;
   private readonly defaultLanguage: string = "en";
   private readonly placeFieldMask: string = [
     "displayName",
@@ -78,11 +79,10 @@ export class NewPlacesService {
     "places.priceLevel",
   ].join(",");
   constructor(apiKey?: string) {
-    this.client = new PlacesClient({
-      apiKey: apiKey || process.env.GOOGLE_MAPS_API_KEY || "",
-    });
+    this.apiKey = apiKey || process.env.GOOGLE_MAPS_API_KEY || "";
+    this.client = new PlacesClient({ apiKey: this.apiKey });
 
-    if (!apiKey && !process.env.GOOGLE_MAPS_API_KEY) {
+    if (!this.apiKey) {
       throw new Error("Google Maps API Key is required");
     }
   }
@@ -213,11 +213,59 @@ export class NewPlacesService {
         }
       );
 
-      return this.transformPlaceResponse(place);
+      // Fetch newest reviews via REST (gRPC SDK doesn't support reviews_sort)
+      const newestReviews = await this.fetchNewestReviews(placeId);
+
+      // Merge: relevant (default) + newest, deduplicate by author+time
+      const allReviews = this.mergeReviews(place?.reviews || [], newestReviews);
+      const merged = { ...place, reviews: allReviews };
+
+      return this.transformPlaceResponse(merged);
     } catch (error: any) {
       Logger.error("Error in getPlaceDetails (New API):", error);
       throw new Error(`Failed to get place details for ${placeId}: ${this.extractErrorMessage(error)}`);
     }
+  }
+
+  private async fetchNewestReviews(placeId: string): Promise<any[]> {
+    try {
+      // Use Legacy Place Details API which supports reviews_sort=newest
+      // (Places API New does not support this parameter)
+      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&reviews_sort=newest&language=${this.defaultLanguage}&key=${this.apiKey}`;
+      const response = await fetch(url);
+      if (!response.ok) return [];
+      const data = await response.json();
+      if (data.status !== "OK") return [];
+      // Transform Legacy format to match New API format for mergeReviews
+      return (data.result?.reviews || []).map((r: any) => ({
+        rating: r.rating,
+        text: { text: r.text || "", languageCode: r.language || null },
+        publishTime: { seconds: r.time },
+        authorAttribution: { displayName: r.author_name || "" },
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  private mergeReviews(relevant: any[], newest: any[]): any[] {
+    const seen = new Set<string>();
+    const merged: any[] = [];
+
+    for (const review of [...relevant, ...newest]) {
+      const author = review?.authorAttribution?.displayName || "";
+      const time = String(review?.publishTime?.seconds || "");
+      const key = `${author}|${time}`;
+      if (!key || key === "|") {
+        merged.push(review);
+        continue;
+      }
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(review);
+    }
+
+    return merged;
   }
 
   private transformSearchResult(place: any) {
