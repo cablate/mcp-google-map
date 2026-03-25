@@ -398,21 +398,30 @@ exec maps_compare_places '{"query": "ramen near Shibuya", "limit": 3}'
 
 ## maps_local_rank_tracker (composite)
 
-Track a business's local search ranking across a geographic grid (like LocalFalcon). Searches the same keyword from multiple coordinates to see how rank varies by location.
+Track a business's local search ranking across a geographic grid (like LocalFalcon). Searches the same keyword(s) from multiple coordinates to see how rank varies by location. Supports up to 3 keywords for batch scanning.
 
 ```bash
+# Single keyword
 exec maps_local_rank_tracker '{"keyword":"dentist","placeId":"ChIJ...","center":{"latitude":25.033,"longitude":121.564}}'
+
+# Multi-keyword batch scan
+exec maps_local_rank_tracker '{"keywords":["dentist","dental clinic","teeth cleaning"],"placeId":"ChIJ...","center":{"latitude":25.033,"longitude":121.564}}'
 ```
 
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
-| keyword | string | yes | Search keyword to track (e.g., "dentist", "coffee shop") |
+| keyword | string | no* | Single search keyword (e.g., "dentist"). Use `keywords` for multi-keyword. |
+| keywords | string[] | no* | Array of 1-3 keywords for batch scanning. Overrides `keyword`. |
 | placeId | string | yes | Target business place_id |
 | center | object | yes | `{ latitude, longitude }` — grid center coordinate |
 | gridSize | number | no | Grid dimension (3–7, default: 3 → 3×3 = 9 points) |
 | gridSpacing | number | no | Distance between points in meters (100–10000, default: 1000) |
 
-**Returns**: `target`, `grid_size`, `keyword`, `metrics` (ARP, ATRP, SoLV, found_in), `grid[]` (row, col, lat, lng, rank, top3)
+*Either `keyword` or `keywords` must be provided.
+
+**Returns (single keyword)**: `target`, `grid_size`, `keyword`, `metrics` (ARP, ATRP, SoLV, found_in), `grid[]` (row, col, lat, lng, rank, top3)
+
+**Returns (multi-keyword)**: `target`, `grid_size`, `keywords[]` — each with `keyword`, `metrics`, `grid[]`
 
 **Metrics**:
 - **ARP** (Average Ranked Position) — average rank across points where the business was found

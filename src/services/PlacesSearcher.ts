@@ -655,7 +655,7 @@ export class PlacesSearcher {
   }
 
   async localRankTracker(params: {
-    keyword: string;
+    keywords: string[];
     placeId: string;
     center: { latitude: number; longitude: number };
     gridSize?: number;
@@ -685,97 +685,52 @@ export class PlacesSearcher {
         }
       }
 
-      // Search from each grid point (concurrency-limited)
-      const concurrency = 5;
-      const gridResults: Array<{
-        row: number;
-        col: number;
-        lat: number;
-        lng: number;
-        rank: number | null;
-        top3: string[];
-      }> = [];
-
-      const searchOne = async (point: (typeof gridPoints)[0]) => {
-        try {
-          const places = await this.newPlacesService.searchText({
-            textQuery: params.keyword,
-            locationBias: { lat: point.lat, lng: point.lng, radius: spacingMeters / 2 },
-            maxResultCount: 20,
-          });
-
-          const rank = places.findIndex((p: any) => p.place_id === params.placeId);
-          const top3 = places.slice(0, 3).map((p: any) => p.name || "");
-
-          return {
-            row: point.row,
-            col: point.col,
-            lat: Math.round(point.lat * 1e6) / 1e6,
-            lng: Math.round(point.lng * 1e6) / 1e6,
-            rank: rank >= 0 ? rank + 1 : null,
-            top3,
-          };
-        } catch {
-          return {
-            row: point.row,
-            col: point.col,
-            lat: Math.round(point.lat * 1e6) / 1e6,
-            lng: Math.round(point.lng * 1e6) / 1e6,
-            rank: null,
-            top3: [] as string[],
-          };
-        }
-      };
-
-      // Execute with concurrency limit
-      for (let i = 0; i < gridPoints.length; i += concurrency) {
-        const batch = gridPoints.slice(i, i + concurrency);
-        const results = await Promise.all(batch.map(searchOne));
-        gridResults.push(...results);
-      }
-
-      // Calculate metrics
-      const rankedPoints = gridResults.filter((r) => r.rank !== null);
-      const totalPoints = gridResults.length;
-      const inTop3 = rankedPoints.filter((r) => r.rank! <= 3).length;
-
-      const arp =
-        rankedPoints.length > 0
-          ? Math.round((rankedPoints.reduce((sum, r) => sum + r.rank!, 0) / rankedPoints.length) * 10) / 10
-          : null;
-
-      const atrp = Math.round((gridResults.reduce((sum, r) => sum + (r.rank ?? 21), 0) / totalPoints) * 10) / 10;
-
-      const solv = Math.round((inTop3 / totalPoints) * 1000) / 10;
-
-      // Get target business name from first found result or place details
+      // Get target business name
       let targetName = "";
-      const foundPoint = gridResults.find((r) => r.rank !== null);
-      if (foundPoint) {
-        try {
-          const details = await this.getPlaceDetails(params.placeId);
-          if (details.success && details.data) {
-            targetName = details.data.name;
-          }
-        } catch {
-          // ignore
+      try {
+        const details = await this.getPlaceDetails(params.placeId);
+        if (details.success && details.data) {
+          targetName = details.data.name;
         }
+      } catch {
+        // ignore
       }
 
+      // Scan each keyword across the grid
+      const keywordResults = [];
+      for (const keyword of params.keywords) {
+        const gridResults = await this.scanKeywordGrid(keyword, params.placeId, gridPoints, spacingMeters);
+        keywordResults.push({ keyword, ...gridResults });
+      }
+
+      // Single keyword: flat response (backward compatible)
+      if (keywordResults.length === 1) {
+        const kr = keywordResults[0];
+        return {
+          success: true,
+          data: {
+            target: { name: targetName, place_id: params.placeId },
+            grid_size: `${gridSize}x${gridSize}`,
+            grid_spacing_m: spacingMeters,
+            keyword: kr.keyword,
+            metrics: kr.metrics,
+            grid: kr.grid,
+          },
+        };
+      }
+
+      // Multi-keyword: array of results
       return {
         success: true,
         data: {
           target: { name: targetName, place_id: params.placeId },
           grid_size: `${gridSize}x${gridSize}`,
           grid_spacing_m: spacingMeters,
-          keyword: params.keyword,
-          metrics: {
-            arp,
-            atrp,
-            solv,
-            found_in: `${rankedPoints.length}/${totalPoints}`,
-          },
-          grid: gridResults,
+          keywords: keywordResults.map((kr) => ({
+            keyword: kr.keyword,
+            metrics: kr.metrics,
+            grid: kr.grid,
+          })),
         },
       };
     } catch (error) {
@@ -784,5 +739,82 @@ export class PlacesSearcher {
         error: error instanceof Error ? error.message : "An error occurred during local rank tracking",
       };
     }
+  }
+
+  private async scanKeywordGrid(
+    keyword: string,
+    placeId: string,
+    gridPoints: Array<{ row: number; col: number; lat: number; lng: number }>,
+    spacingMeters: number
+  ) {
+    const concurrency = 5;
+    const gridResults: Array<{
+      row: number;
+      col: number;
+      lat: number;
+      lng: number;
+      rank: number | null;
+      top3: string[];
+    }> = [];
+
+    const searchOne = async (point: (typeof gridPoints)[0]) => {
+      try {
+        const places = await this.newPlacesService.searchText({
+          textQuery: keyword,
+          locationBias: { lat: point.lat, lng: point.lng, radius: spacingMeters / 2 },
+          maxResultCount: 20,
+        });
+
+        const rank = places.findIndex((p: any) => p.place_id === placeId);
+        const top3 = places.slice(0, 3).map((p: any) => p.name || "");
+
+        return {
+          row: point.row,
+          col: point.col,
+          lat: Math.round(point.lat * 1e6) / 1e6,
+          lng: Math.round(point.lng * 1e6) / 1e6,
+          rank: rank >= 0 ? rank + 1 : null,
+          top3,
+        };
+      } catch {
+        return {
+          row: point.row,
+          col: point.col,
+          lat: Math.round(point.lat * 1e6) / 1e6,
+          lng: Math.round(point.lng * 1e6) / 1e6,
+          rank: null,
+          top3: [] as string[],
+        };
+      }
+    };
+
+    for (let i = 0; i < gridPoints.length; i += concurrency) {
+      const batch = gridPoints.slice(i, i + concurrency);
+      const results = await Promise.all(batch.map(searchOne));
+      gridResults.push(...results);
+    }
+
+    const rankedPoints = gridResults.filter((r) => r.rank !== null);
+    const totalPoints = gridResults.length;
+    const inTop3 = rankedPoints.filter((r) => r.rank! <= 3).length;
+
+    const arp =
+      rankedPoints.length > 0
+        ? Math.round((rankedPoints.reduce((sum, r) => sum + r.rank!, 0) / rankedPoints.length) * 10) / 10
+        : null;
+
+    const atrp = Math.round((gridResults.reduce((sum, r) => sum + (r.rank ?? 21), 0) / totalPoints) * 10) / 10;
+
+    const solv = Math.round((inTop3 / totalPoints) * 1000) / 10;
+
+    return {
+      metrics: {
+        arp,
+        atrp,
+        solv,
+        found_in: `${rankedPoints.length}/${totalPoints}`,
+      },
+      grid: gridResults,
+    };
   }
 }

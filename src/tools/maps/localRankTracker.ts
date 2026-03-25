@@ -4,10 +4,21 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_local_rank_tracker";
 const DESCRIPTION =
-  "Track a business's local search ranking across a geographic grid (like LocalFalcon). Searches the same keyword from multiple coordinates around a center point to see how rank varies by location. Returns rank at each grid point, top-3 competitors per point, and summary metrics (ARP, ATRP, SoLV). Useful for local SEO analysis.";
+  "Track a business's local search ranking across a geographic grid (like LocalFalcon). Searches the same keyword(s) from multiple coordinates around a center point to see how rank varies by location. Supports up to 3 keywords for batch scanning. Returns rank at each grid point, top-3 competitors per point, and summary metrics (ARP, ATRP, SoLV). Useful for local SEO analysis.";
 
 const SCHEMA = {
-  keyword: z.string().describe("Search keyword to track ranking for (e.g., 'dentist', 'coffee shop', 'pizza')"),
+  keyword: z
+    .string()
+    .optional()
+    .describe("Single search keyword (e.g., 'dentist'). Use 'keywords' for multi-keyword scanning."),
+  keywords: z
+    .array(z.string())
+    .min(1)
+    .max(3)
+    .optional()
+    .describe(
+      "Array of 1-3 keywords to scan (e.g., ['dentist', 'dental clinic', 'teeth cleaning']). Overrides 'keyword'."
+    ),
   placeId: z.string().describe("Google Maps place_id of the target business to track"),
   center: z
     .object({
@@ -34,9 +45,18 @@ export type LocalRankTrackerParams = z.infer<z.ZodObject<typeof SCHEMA>>;
 
 async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean }> {
   try {
+    // Resolve keywords: keywords array takes priority, fallback to keyword string
+    const resolvedKeywords: string[] = params.keywords || (params.keyword ? [params.keyword] : []);
+    if (resolvedKeywords.length === 0) {
+      return {
+        content: [{ type: "text", text: "Either 'keyword' or 'keywords' must be provided." }],
+        isError: true,
+      };
+    }
+
     const apiKey = getCurrentApiKey();
     const placesSearcher = new PlacesSearcher(apiKey);
-    const result = await placesSearcher.localRankTracker(params);
+    const result = await placesSearcher.localRankTracker({ ...params, keywords: resolvedKeywords });
 
     if (!result.success) {
       return {

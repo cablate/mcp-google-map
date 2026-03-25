@@ -81,7 +81,7 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 | `maps_explore_area` | 一次呼叫探索某地周邊 — 搜尋多種地點類型並取得詳情 |
 | `maps_plan_route` | 規劃最佳化多站路線 — 地理編碼、最佳順序、回傳導航 |
 | `maps_compare_places` | 並排比較地點 — 搜尋、取得詳情，可選計算距離 |
-| `maps_local_rank_tracker` | 地理網格排名追蹤（類似 LocalFalcon）— 追蹤商家在不同位置的搜尋排名，回傳 ARP、ATRP、SoLV 指標 |
+| `maps_local_rank_tracker` | 地理網格排名追蹤（類似 LocalFalcon）— 支援最多 3 個關鍵字批量掃描，回傳 ARP、ATRP、SoLV 指標 |
 
 所有工具標註 `readOnlyHint: true` 和 `destructiveHint: false` — MCP 客戶端可自動核准，無需使用者確認。
 
