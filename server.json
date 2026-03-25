@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.cablate/google-map",
   "title": "Google Maps MCP Server",
-  "description": "18 Google Maps tools for AI agents — geocode, search, directions, weather, air quality, local rank tracking, and more.",
+  "description": "18 Google Maps tools for AI agents — geocode, search, directions, weather, and more.",
   "repository": {
     "url": "https://github.com/cablate/mcp-google-map",
     "source": "github"
