@@ -81,7 +81,7 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
 | `maps_plan_route` | Plan an optimized multi-stop route — uses Routes API waypoint optimization (up to 25 stops) for efficient ordering. |
 | `maps_compare_places` | Compare places side-by-side — searches, gets details, and optionally calculates distances. |
-| `maps_local_rank_tracker` | Track a business's local search ranking across a geographic grid — like LocalFalcon. Returns rank at each point, top-3 competitors, and metrics (ARP, ATRP, SoLV). |
+| `maps_local_rank_tracker` | Track a business's local search ranking across a geographic grid — like LocalFalcon. Supports up to 3 keywords for batch scanning. Returns rank at each point, top-3 competitors, and metrics (ARP, ATRP, SoLV). |
 
 All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` — MCP clients can auto-approve these without user confirmation.
 
