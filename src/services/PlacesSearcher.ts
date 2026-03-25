@@ -744,8 +744,7 @@ export class PlacesSearcher {
           ? Math.round((rankedPoints.reduce((sum, r) => sum + r.rank!, 0) / rankedPoints.length) * 10) / 10
           : null;
 
-      const atrp =
-        Math.round((gridResults.reduce((sum, r) => sum + (r.rank ?? 21), 0) / totalPoints) * 10) / 10;
+      const atrp = Math.round((gridResults.reduce((sum, r) => sum + (r.rank ?? 21), 0) / totalPoints) * 10) / 10;
 
       const solv = Math.round((inTop3 / totalPoints) * 1000) / 10;
 

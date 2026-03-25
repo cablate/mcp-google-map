@@ -524,7 +524,10 @@ async function testToolCalls(session: McpSession): Promise<void> {
   // First get a place_id via search
   const rankSearchResult = await sendRequest(session, "tools/call", {
     name: "maps_search_places",
-    arguments: { query: "restaurant near Tokyo Tower", locationBias: { latitude: 35.6586, longitude: 139.7454, radius: 500 } },
+    arguments: {
+      query: "restaurant near Tokyo Tower",
+      locationBias: { latitude: 35.6586, longitude: 139.7454, radius: 500 },
+    },
   });
   const rankSearchContent = rankSearchResult?.result?.content ?? [];
   if (rankSearchContent.length > 0) {
