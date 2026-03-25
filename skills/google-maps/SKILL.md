@@ -73,6 +73,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | `maps_explore_area` | Overview of a neighborhood | "What's around Tokyo Tower?" |
 | `maps_plan_route` | Multi-stop optimized itinerary (Routes API waypoint optimization, up to 25 stops) | "Visit these 5 places efficiently" |
 | `maps_compare_places` | Side-by-side comparison | "Which ramen shop near Shibuya?" |
+| `maps_local_rank_tracker` | Local SEO grid rank tracking | "How does this dentist rank across the area?" |
 
 ---
 

@@ -32,7 +32,7 @@ export async function startServer(port?: number, apiKey?: string): Promise<void>
   }
 
   Logger.log("🚀 Starting Google Maps MCP Server...");
-  Logger.log("📍 17 tools registered (set GOOGLE_MAPS_ENABLED_TOOLS to limit)");
+  Logger.log("📍 18 tools registered (set GOOGLE_MAPS_ENABLED_TOOLS to limit)");
   Logger.log(
     "ℹ️  Reminder: enable Places API (New) in https://console.cloud.google.com before using the new Place features."
   );
@@ -92,6 +92,7 @@ const EXEC_TOOLS = [
   "static-map",
   "batch-geocode-tool",
   "search-along-route",
+  "local-rank-tracker",
 ] as const;
 
 async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
@@ -205,6 +206,10 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
     case "search-along-route":
     case "maps_search_along_route":
       return searcher.searchAlongRoute(params);
+
+    case "local-rank-tracker":
+    case "maps_local_rank_tracker":
+      return searcher.localRankTracker(params);
 
     default:
       throw new Error(`Unknown tool: ${toolName}. Available: ${EXEC_TOOLS.join(", ")}`);

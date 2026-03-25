@@ -19,7 +19,7 @@
   <img src="./assets/demo-grid-en.png" alt="Travel planning demo — Kyoto 2-day, Tokyo outdoor, Japan 5-day, Bangkok budget" width="800">
 </p>
 
-- **17 tools** — 14 atomic + 3 composite (explore-area, plan-route, compare-places)
+- **18 tools** — 14 atomic + 4 composite (explore-area, plan-route, compare-places, local-rank-tracker)
 - **3 modes** — stdio, StreamableHTTP, standalone exec CLI
 - **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
 
@@ -27,7 +27,7 @@
 
 | | This project | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
 |---|---|---|
-| Tools | **17** | 3 |
+| Tools | **18** | 3 |
 | Geocoding | Yes | No |
 | Step-by-step directions | Yes | No |
 | Elevation | Yes | No |
@@ -81,6 +81,7 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
 | `maps_plan_route` | Plan an optimized multi-stop route — uses Routes API waypoint optimization (up to 25 stops) for efficient ordering. |
 | `maps_compare_places` | Compare places side-by-side — searches, gets details, and optionally calculates distances. |
+| `maps_local_rank_tracker` | Track a business's local search ranking across a geographic grid — like LocalFalcon. Returns rank at each point, top-3 competitors, and metrics (ARP, ATRP, SoLV). |
 
 All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` — MCP clients can auto-approve these without user confirmation.
 
@@ -117,7 +118,7 @@ Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports std
 }
 ```
 
-Omit or set to `*` for all 17 tools (default).
+Omit or set to `*` for all 18 tools (default).
 
 ### Method 2: HTTP Server
 
@@ -143,7 +144,7 @@ Then configure your MCP client:
 ### Server Information
 
 - **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
-- **Tools**: 17 Google Maps tools (14 atomic + 3 composite) — filterable via `GOOGLE_MAPS_ENABLED_TOOLS`
+- **Tools**: 18 Google Maps tools (14 atomic + 4 composite) — filterable via `GOOGLE_MAPS_ENABLED_TOOLS`
 
 ### CLI Exec Mode (Agent Skill)
 
@@ -154,7 +155,7 @@ npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
 npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
 ```
 
-All 17 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `batch-geocode-tool`, `search-along-route`, `explore-area`, `plan-route`, `compare-places`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
+All 18 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `batch-geocode-tool`, `search-along-route`, `explore-area`, `plan-route`, `compare-places`, `local-rank-tracker`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
 ### Batch Geocode
 
@@ -267,7 +268,8 @@ src/
 │       ├── searchAlongRoute.ts   # maps_search_along_route tool
 │       ├── exploreArea.ts        # maps_explore_area (composite)
 │       ├── planRoute.ts          # maps_plan_route (composite)
-│       └── comparePlaces.ts      # maps_compare_places (composite)
+│       ├── comparePlaces.ts      # maps_compare_places (composite)
+│       └── localRankTracker.ts   # maps_local_rank_tracker (composite)
 └── utils/
     ├── apiKeyManager.ts          # API key management
     └── requestContext.ts         # Per-request context (API key isolation)
@@ -322,6 +324,7 @@ For enterprise security reviews, see [Security Assessment Clarifications](./SECU
 | `maps_explore_area` | One-call neighborhood overview (composite) | **Done** |
 | `maps_plan_route` | Optimized multi-stop itinerary (composite) | **Done** |
 | `maps_compare_places` | Side-by-side place comparison (composite) | **Done** |
+| `maps_local_rank_tracker` | Geographic grid rank tracking — local SEO analysis (composite) | **Done** |
 | `GOOGLE_MAPS_ENABLED_TOOLS` | Filter tools to reduce context usage | **Done** |
 
 ### Planned
