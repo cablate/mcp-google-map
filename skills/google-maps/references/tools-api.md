@@ -396,6 +396,31 @@ exec maps_compare_places '{"query": "ramen near Shibuya", "limit": 3}'
 
 ---
 
+## maps_local_rank_tracker (composite)
+
+Track a business's local search ranking across a geographic grid (like LocalFalcon). Searches the same keyword from multiple coordinates to see how rank varies by location.
+
+```bash
+exec maps_local_rank_tracker '{"keyword":"dentist","placeId":"ChIJ...","center":{"latitude":25.033,"longitude":121.564}}'
+```
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| keyword | string | yes | Search keyword to track (e.g., "dentist", "coffee shop") |
+| placeId | string | yes | Target business place_id |
+| center | object | yes | `{ latitude, longitude }` — grid center coordinate |
+| gridSize | number | no | Grid dimension (3–7, default: 3 → 3×3 = 9 points) |
+| gridSpacing | number | no | Distance between points in meters (100–10000, default: 1000) |
+
+**Returns**: `target`, `grid_size`, `keyword`, `metrics` (ARP, ATRP, SoLV, found_in), `grid[]` (row, col, lat, lng, rank, top3)
+
+**Metrics**:
+- **ARP** (Average Ranked Position) — average rank across points where the business was found
+- **ATRP** (Average Total Ranked Position) — average rank across all points (unfound = 21)
+- **SoLV** (Share of Local Voice) — % of grid points where business ranks in top 3
+
+---
+
 ## Chaining Patterns
 
 ### Basic Patterns

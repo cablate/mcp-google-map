@@ -19,7 +19,7 @@
   <img src="./assets/demo-grid-zh.png" alt="旅行規劃展示 — 京都二日遊、東京戶外一日、日本五日、曼谷背包客" width="800">
 </p>
 
-- **17 個工具** — 14 個原子工具 + 3 個組合工具（explore-area、plan-route、compare-places）
+- **18 個工具** — 14 個原子工具 + 4 個組合工具（explore-area、plan-route、compare-places、local-rank-tracker）
 - **3 種模式** — stdio、StreamableHTTP、獨立 exec CLI
 - **Agent Skill** — 內建技能定義，教 AI 如何串接地理工具（[`skills/google-maps/`](./skills/google-maps/)）
 
@@ -27,7 +27,7 @@
 
 | | 本專案 | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
 |---|---|---|
-| 工具數 | **17** | 3 |
+| 工具數 | **18** | 3 |
 | 地理編碼 | 有 | 無 |
 | 逐步導航 | 有 | 無 |
 | 海拔查詢 | 有 | 無 |
@@ -81,6 +81,7 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 | `maps_explore_area` | 一次呼叫探索某地周邊 — 搜尋多種地點類型並取得詳情 |
 | `maps_plan_route` | 規劃最佳化多站路線 — 地理編碼、最佳順序、回傳導航 |
 | `maps_compare_places` | 並排比較地點 — 搜尋、取得詳情，可選計算距離 |
+| `maps_local_rank_tracker` | 地理網格排名追蹤（類似 LocalFalcon）— 追蹤商家在不同位置的搜尋排名，回傳 ARP、ATRP、SoLV 指標 |
 
 所有工具標註 `readOnlyHint: true` 和 `destructiveHint: false` — MCP 客戶端可自動核准，無需使用者確認。
 
@@ -117,7 +118,7 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 }
 ```
 
-不設定或設為 `*` 即啟用全部 17 個工具（預設）。
+不設定或設為 `*` 即啟用全部 18 個工具（預設）。
 
 ### 方法二：HTTP Server
 
@@ -143,7 +144,7 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 ### Server 資訊
 
 - **傳輸方式**：stdio（`--stdio`）或 Streamable HTTP（預設）
-- **工具數**：17 個 Google Maps 工具（14 原子 + 3 組合）— 可透過 `GOOGLE_MAPS_ENABLED_TOOLS` 篩選
+- **工具數**：18 個 Google Maps 工具（14 原子 + 4 組合）— 可透過 `GOOGLE_MAPS_ENABLED_TOOLS` 篩選
 
 ### CLI Exec 模式（Agent Skill）
 
@@ -154,7 +155,7 @@ npx @cablate/mcp-google-map exec geocode '{"address":"台北101"}'
 npx @cablate/mcp-google-map exec search-places '{"query":"東京拉麵"}'
 ```
 
-全部 17 個工具可用：`geocode`、`reverse-geocode`、`search-nearby`、`search-places`、`place-details`、`directions`、`distance-matrix`、`elevation`、`timezone`、`weather`、`air-quality`、`static-map`、`batch-geocode-tool`、`search-along-route`、`explore-area`、`plan-route`、`compare-places`。完整參數文件見 [`skills/google-maps/`](./skills/google-maps/)。
+全部 18 個工具可用：`geocode`、`reverse-geocode`、`search-nearby`、`search-places`、`place-details`、`directions`、`distance-matrix`、`elevation`、`timezone`、`weather`、`air-quality`、`static-map`、`batch-geocode-tool`、`search-along-route`、`explore-area`、`plan-route`、`compare-places`、`local-rank-tracker`。完整參數文件見 [`skills/google-maps/`](./skills/google-maps/)。
 
 ### 批次地理編碼
 
@@ -264,7 +265,8 @@ src/
 │       ├── searchAlongRoute.ts   # maps_search_along_route 工具
 │       ├── exploreArea.ts        # maps_explore_area（組合）
 │       ├── planRoute.ts          # maps_plan_route（組合）
-│       └── comparePlaces.ts      # maps_compare_places（組合）
+│       ├── comparePlaces.ts      # maps_compare_places（組合）
+│       └── localRankTracker.ts   # maps_local_rank_tracker（組合）
 └── utils/
     ├── apiKeyManager.ts          # API key 管理
     └── requestContext.ts         # Per-request context（API key 隔離）
@@ -318,6 +320,7 @@ skills/
 | `maps_explore_area` | 一次呼叫的社區概覽（組合工具） | **完成** |
 | `maps_plan_route` | 最佳化多站行程（組合工具） | **完成** |
 | `maps_compare_places` | 並排地點比較（組合工具） | **完成** |
+| `maps_local_rank_tracker` | 地理網格排名追蹤 — Local SEO 分析（組合工具） | **完成** |
 | `GOOGLE_MAPS_ENABLED_TOOLS` | 篩選工具以減少上下文用量 | **完成** |
 
 ### 計畫中

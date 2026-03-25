@@ -19,6 +19,7 @@ import { AirQuality, AirQualityParams } from "./tools/maps/airQuality.js";
 import { StaticMap, StaticMapParams } from "./tools/maps/staticMap.js";
 import { BatchGeocode, BatchGeocodeParams } from "./tools/maps/batchGeocode.js";
 import { SearchAlongRoute, SearchAlongRouteParams } from "./tools/maps/searchAlongRoute.js";
+import { LocalRankTracker, LocalRankTrackerParams } from "./tools/maps/localRankTracker.js";
 
 // All Google Maps tools are read-only API queries
 const MAPS_TOOL_ANNOTATIONS = {
@@ -157,6 +158,13 @@ const serverConfigs: ServerInstanceConfig[] = [
         schema: SearchAlongRoute.SCHEMA,
         annotations: MAPS_TOOL_ANNOTATIONS,
         action: (params: SearchAlongRouteParams) => SearchAlongRoute.ACTION(params),
+      },
+      {
+        name: LocalRankTracker.NAME,
+        description: LocalRankTracker.DESCRIPTION,
+        schema: LocalRankTracker.SCHEMA,
+        annotations: MAPS_TOOL_ANNOTATIONS,
+        action: (params: LocalRankTrackerParams) => LocalRankTracker.ACTION(params),
       },
     ],
   },

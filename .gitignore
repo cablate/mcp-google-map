@@ -5,3 +5,4 @@ credentials.json
 .agents/*
 .mcpregistry_*
 .mcp.json
+output/
