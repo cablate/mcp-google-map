@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.49
+
+- Add community health files and improve docs
+- feat: batch keyword scanning for local rank tracker (#68)
+- fix: shorten server.json description to fit MCP Registry 100-char limit (#66)
+- feat: add maps_local_rank_tracker for local SEO grid ranking (#65)
+
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
