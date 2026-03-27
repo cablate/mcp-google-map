@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.50
+
+- docs: add CODE_OF_CONDUCT.md
+
+
 ## 0.0.49
 
 - Add community health files and improve docs
