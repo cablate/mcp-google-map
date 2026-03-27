@@ -311,6 +311,8 @@ skills/
 
 For enterprise security reviews, see [Security Assessment Clarifications](./SECURITY_ASSESSMENT.md) — a 23-item checklist covering licensing, data protection, credential management, tool contamination, and AI agent execution environment verification.
 
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
+
 ## Roadmap
 
 ### Recent Additions
@@ -359,7 +361,7 @@ MIT
 
 ## Contributing
 
-Community participation and contributions are welcome!
+Community participation and contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding guidelines, and the pull request process.
 
 - Submit Issues: Report bugs or provide suggestions
 - Create Pull Requests: Submit code improvements

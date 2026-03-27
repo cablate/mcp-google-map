@@ -1,5 +1,16 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.0.48]
+
+- feat: batch keyword scanning for local rank tracker (#68)
+
 ## 0.0.47
 
 - feat: dual-sort reviews — merge relevant + newest for ~10 reviews per place (#64)
@@ -170,3 +181,19 @@
 - Enhanced error handling and logging
 - Added comprehensive tool descriptions for LLM integration
 - Updated to latest MCP SDK version
+
+## [0.0.1] - 2025-02-22
+
+### Added
+
+- Initial release of mcp-google-map MCP server
+- `search_nearby` tool: search for places near a location by keyword, radius, open-now filter, and minimum rating
+- `get_place_details` tool: retrieve detailed information for a place by its Google Maps Place ID
+- `@googlemaps/google-maps-services-js` integration
+- `@modelcontextprotocol/sdk` integration
+- `GOOGLE_MAPS_API_KEY` environment variable support via `dotenv`
+- npm global install support (`@cablate/mcp-google-map`)
+
+[Unreleased]: https://github.com/cablate/mcp-google-map/compare/v0.0.48...HEAD
+[0.0.48]: https://github.com/cablate/mcp-google-map/compare/v0.0.1...v0.0.48
+[0.0.1]: https://github.com/cablate/mcp-google-map/releases/tag/v0.0.1
