@@ -176,8 +176,16 @@ export class RoutesService {
     const data = await response.json();
 
     if (!data.routes || data.routes.length === 0) {
+      const mode = params.mode || "driving";
+      if (mode === "transit") {
+        throw new Error(
+          `No transit route found from "${params.origin}" to "${params.destination}". ` +
+            `The Google Routes API does not support transit directions in some regions (notably Japan and India). ` +
+            `Try using mode "driving" or "walking" instead, or use a regional transit service for public transportation details.`
+        );
+      }
       throw new Error(
-        `No route found from "${params.origin}" to "${params.destination}" with mode: ${params.mode || "driving"}`
+        `No route found from "${params.origin}" to "${params.destination}" with mode: ${mode}`
       );
     }
 
@@ -218,6 +226,7 @@ export class RoutesService {
     durations: any[][];
     origin_addresses: string[];
     destination_addresses: string[];
+    warning?: string;
   }> {
     const travelMode = TRAVEL_MODE_MAP[params.mode || "driving"] || "DRIVE";
 
@@ -260,11 +269,15 @@ export class RoutesService {
     const distances: any[][] = Array.from({ length: rowCount }, () => Array(colCount).fill(null));
     const durations: any[][] = Array.from({ length: rowCount }, () => Array(colCount).fill(null));
 
+    let routeNotFoundCount = 0;
     for (const element of elements) {
       const i = element.originIndex;
       const j = element.destinationIndex;
       if (i === undefined || j === undefined) continue;
-      if (element.condition === "ROUTE_NOT_FOUND") continue;
+      if (element.condition === "ROUTE_NOT_FOUND") {
+        routeNotFoundCount++;
+        continue;
+      }
 
       const distMeters = element.distanceMeters || 0;
       const durSeconds = parseDuration(element.duration);
@@ -279,12 +292,28 @@ export class RoutesService {
       };
     }
 
+    const totalPairs = rowCount * colCount;
+
+    // All pairs failed — likely a regional transit limitation
+    if (routeNotFoundCount === totalPairs && travelMode === "TRANSIT") {
+      throw new Error(
+        `No transit routes found for any origin/destination pair. ` +
+          `The Google Routes API does not support transit directions in some regions (notably Japan and India). ` +
+          `Try using mode "driving" or "walking" instead, or use a regional transit service for public transportation details.`
+      );
+    }
+
     // Routes API doesn't return resolved addresses; use input strings
     return {
       distances,
       durations,
       origin_addresses: params.origins,
       destination_addresses: params.destinations,
+      ...(routeNotFoundCount > 0 && travelMode === "TRANSIT"
+        ? {
+            warning: `${routeNotFoundCount} of ${totalPairs} origin/destination pairs returned no transit route. The Google Routes API has limited transit coverage in some regions.`,
+          }
+        : {}),
     };
   }
 }

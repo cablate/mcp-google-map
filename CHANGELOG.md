@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.51
+
+- fix: improve transit error messages for unsupported regions (Japan, India) (#74)
+
 ## 0.0.50
 
 - docs: add CODE_OF_CONDUCT.md
