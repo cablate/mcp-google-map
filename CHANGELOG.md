@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.51
+
+- fix: improve transit error messages for unsupported regions (Japan, India) (#74)
+- fix: avoid passing default departureTime to Routes API (sporadic "Timestamp must be set to a future time" errors)
+
 ## 0.0.50
 
 - docs: add CODE_OF_CONDUCT.md
