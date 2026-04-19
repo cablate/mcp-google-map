@@ -184,9 +184,7 @@ export class RoutesService {
             `Try using mode "driving" or "walking" instead, or use a regional transit service for public transportation details.`
         );
       }
-      throw new Error(
-        `No route found from "${params.origin}" to "${params.destination}" with mode: ${mode}`
-      );
+      throw new Error(`No route found from "${params.origin}" to "${params.destination}" with mode: ${mode}`);
     }
 
     const route = data.routes[0];
