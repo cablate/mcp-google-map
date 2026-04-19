@@ -991,13 +991,8 @@ async function testTransitErrorMessages(session: McpSession): Promise<void> {
   if (driveContent.length > 0) {
     const text = driveContent[0]?.text ?? "";
     const isError = driveResult?.result?.isError === true;
-    if (isError) {
-      console.log(`  ⚠️  Driving directions failed (may be rate-limited): ${text.slice(0, 150)}`);
-      // Don't fail the test — driving works in general, this is likely a transient API issue
-      assert(true, "Driving directions callable (transient API issue)");
-      assert(true, "Driving directions skipped JSON check");
-    } else {
-      assert(true, "Driving directions in Japan works (no error)");
+    assert(!isError, "Driving directions in Japan works (no error)", isError ? text.slice(0, 150) : undefined);
+    if (!isError) {
       try {
         const parsed = JSON.parse(text);
         assert(parsed?.total_distance !== undefined, "Driving returns total_distance");

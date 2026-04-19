@@ -328,14 +328,14 @@ export class PlacesSearcher {
     arrival_time?: string
   ): Promise<DirectionsResponse> {
     try {
-      const departureTime = departure_time ? new Date(departure_time) : new Date();
+      const departureTime = departure_time ? new Date(departure_time) : undefined;
       const arrivalTime = arrival_time ? new Date(arrival_time) : undefined;
       const result = await this.routesService.computeRoutes({
         origin,
         destination,
         mode,
-        departureTime,
-        arrivalTime,
+        ...(departureTime ? { departureTime } : {}),
+        ...(arrivalTime ? { arrivalTime } : {}),
       });
 
       return {
