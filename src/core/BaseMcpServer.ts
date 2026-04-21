@@ -74,7 +74,7 @@ export class BaseMcpServer {
     Logger.log(`${this.serverName} connected and ready to process requests`);
   }
 
-  async startHttpServer(port: number): Promise<void> {
+  async startHttpServer(port: number, host: string = "0.0.0.0"): Promise<void> {
     const app = express();
     app.use(express.json());
 
@@ -174,9 +174,10 @@ export class BaseMcpServer {
     // Handle DELETE requests for session termination
     app.delete("/mcp", handleSessionRequest);
 
-    this.httpServer = app.listen(port, () => {
-      Logger.log(`[${this.serverName}] HTTP server listening on port ${port}`);
-      Logger.log(`[${this.serverName}] MCP endpoint available at http://localhost:${port}/mcp`);
+    const displayHost = host === "0.0.0.0" ? "localhost" : host;
+    this.httpServer = app.listen(port, host, () => {
+      Logger.log(`[${this.serverName}] HTTP server listening on ${host}:${port}`);
+      Logger.log(`[${this.serverName}] MCP endpoint available at http://${displayHost}:${port}/mcp`);
     });
   }
 

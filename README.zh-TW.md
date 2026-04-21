@@ -126,6 +126,9 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 
 ```bash
 npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
+
+# 綁定所有網路介面以支援遠端存取（例如 Docker、區域網路）
+npx @cablate/mcp-google-map --host 0.0.0.0 --port 3000 --apikey "YOUR_API_KEY"
 ```
 
 然後設定你的 MCP 客戶端：
@@ -196,6 +199,7 @@ API key 可透過三種方式提供（優先順序）：
    ```env
    GOOGLE_MAPS_API_KEY=your_api_key_here
    MCP_SERVER_PORT=3000
+   MCP_SERVER_HOST=0.0.0.0
    ```
 
 ## 開發
