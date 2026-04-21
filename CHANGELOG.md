@@ -2,6 +2,11 @@
 
 ## 0.0.52
 
+- feat: add --host CLI option to bind server to a specific hostname (#76) (#77)
+
+
+## 0.0.52
+
 - feat: add `--host` CLI option to bind server to a specific hostname (#76)
 
 ## 0.0.51
