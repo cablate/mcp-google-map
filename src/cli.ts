@@ -22,13 +22,16 @@ dotenvConfig({ path: resolve(process.cwd(), ".env") });
 // Also try to load from the package installation directory
 dotenvConfig({ path: resolve(__dirname, "../.env") });
 
-export async function startServer(port?: number, apiKey?: string): Promise<void> {
+export async function startServer(port?: number, apiKey?: string, host?: string): Promise<void> {
   // Override environment variables with CLI arguments if provided
   if (port) {
     process.env.MCP_SERVER_PORT = port.toString();
   }
   if (apiKey) {
     process.env.GOOGLE_MAPS_API_KEY = apiKey;
+  }
+  if (host) {
+    process.env.MCP_SERVER_HOST = host;
   }
 
   Logger.log("🚀 Starting Google Maps MCP Server...");
@@ -55,10 +58,12 @@ export async function startServer(port?: number, apiKey?: string): Promise<void>
 
     try {
       const server = new BaseMcpServer(config.name, filterTools(config.tools));
-      Logger.log(`🔧 [${config.name}] Initializing MCP Server in HTTP mode on port ${serverPort}...`);
-      await server.startHttpServer(serverPort);
+      const serverHost = process.env.MCP_SERVER_HOST || "0.0.0.0";
+      Logger.log(`🔧 [${config.name}] Initializing MCP Server in HTTP mode on ${serverHost}:${serverPort}...`);
+      await server.startHttpServer(serverPort, serverHost);
+      const displayHost = serverHost === "0.0.0.0" ? "localhost" : serverHost;
       Logger.log(`✅ [${config.name}] MCP Server started successfully!`);
-      Logger.log(`   🌐 Endpoint: http://localhost:${serverPort}/mcp`);
+      Logger.log(`   🌐 Endpoint: http://${displayHost}:${serverPort}/mcp`);
       Logger.log(`   📚 Tools: ${config.tools.length} available`);
     } catch (error) {
       Logger.error(`❌ [${config.name}] Failed to start MCP Server on port ${serverPort}:`, error);
@@ -423,6 +428,11 @@ if (isRunDirectly || isMainModule) {
             description: "Port to run the MCP server on",
             default: process.env.MCP_SERVER_PORT ? parseInt(process.env.MCP_SERVER_PORT) : 3000,
           })
+          .option("host", {
+            type: "string",
+            description: "Hostname to bind the server to (e.g. 0.0.0.0 for all interfaces)",
+            default: process.env.MCP_SERVER_HOST || "0.0.0.0",
+          })
           .option("apikey", {
             alias: "k",
             type: "string",
@@ -437,6 +447,7 @@ if (isRunDirectly || isMainModule) {
           .example([
             ["$0", "Start HTTP server with default settings"],
             ['$0 --port 3000 --apikey "your_api_key"', "Start HTTP with custom port and API key"],
+            ["$0 --host 0.0.0.0 --port 3000", "Start HTTP accessible from all interfaces"],
             ["$0 --stdio", "Start in stdio mode (for Claude Desktop, Cursor, etc.)"],
           ]);
       },
@@ -463,7 +474,7 @@ if (isRunDirectly || isMainModule) {
             Logger.log("");
           }
 
-          startServer(argv.port as number, argv.apikey as string).catch((error) => {
+          startServer(argv.port as number, argv.apikey as string, argv.host as string).catch((error) => {
             Logger.error("❌ Failed to start server:", error);
             process.exit(1);
           });

@@ -126,6 +126,9 @@ For multi-session deployments, per-request API key isolation, or remote access:
 
 ```bash
 npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
+
+# Bind to all interfaces for remote access (e.g. Docker, LAN)
+npx @cablate/mcp-google-map --host 0.0.0.0 --port 3000 --apikey "YOUR_API_KEY"
 ```
 
 Then configure your MCP client:
@@ -198,6 +201,7 @@ API keys can be provided in three ways (priority order):
    ```env
    GOOGLE_MAPS_API_KEY=your_api_key_here
    MCP_SERVER_PORT=3000
+   MCP_SERVER_HOST=0.0.0.0
    ```
 
 ## Development
