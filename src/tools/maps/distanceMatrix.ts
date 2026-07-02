@@ -19,6 +19,11 @@ const SCHEMA = {
     .describe(
       "Departure time in ISO 8601 format (e.g. 2026-03-21T09:00:00Z). Enables traffic-aware duration estimates."
     ),
+  avoid_tolls: z.boolean().optional().describe('Avoid toll roads where reasonable. Only supported with mode "driving".'),
+  avoid_highways: z
+    .boolean()
+    .optional()
+    .describe('Avoid highways where reasonable. Only supported with mode "driving".'),
 };
 
 export type DistanceMatrixParams = z.infer<z.ZodObject<typeof SCHEMA>>;
@@ -32,7 +37,9 @@ async function ACTION(params: any): Promise<{ content: any[]; isError?: boolean 
       params.origins,
       params.destinations,
       params.mode,
-      params.departure_time
+      params.departure_time,
+      params.avoid_tolls,
+      params.avoid_highways
     );
 
     if (!result.success) {

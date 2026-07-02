@@ -243,16 +243,35 @@ async function testListTools(session: McpSession): Promise<void> {
     }
   }
 
-  // Verify departure_time parameter exists in plan_route and distance_matrix
+  // Verify routing parameters exist in route tools
   const planRoute = tools.find((t: any) => t.name === "maps_plan_route");
   assert(
     planRoute?.inputSchema?.properties?.departure_time !== undefined,
     "maps_plan_route has departure_time parameter"
   );
+  assert(planRoute?.inputSchema?.properties?.avoid_tolls !== undefined, "maps_plan_route has avoid_tolls parameter");
+  assert(
+    planRoute?.inputSchema?.properties?.avoid_highways !== undefined,
+    "maps_plan_route has avoid_highways parameter"
+  );
+  const directions = tools.find((t: any) => t.name === "maps_directions");
+  assert(directions?.inputSchema?.properties?.avoid_tolls !== undefined, "maps_directions has avoid_tolls parameter");
+  assert(
+    directions?.inputSchema?.properties?.avoid_highways !== undefined,
+    "maps_directions has avoid_highways parameter"
+  );
   const distMatrix = tools.find((t: any) => t.name === "maps_distance_matrix");
   assert(
     distMatrix?.inputSchema?.properties?.departure_time !== undefined,
     "maps_distance_matrix has departure_time parameter"
+  );
+  assert(
+    distMatrix?.inputSchema?.properties?.avoid_tolls !== undefined,
+    "maps_distance_matrix has avoid_tolls parameter"
+  );
+  assert(
+    distMatrix?.inputSchema?.properties?.avoid_highways !== undefined,
+    "maps_distance_matrix has avoid_highways parameter"
   );
 }
 
@@ -1058,6 +1077,28 @@ async function testTransitErrorMessages(session: McpSession): Promise<void> {
         assert(false, "Distance matrix returns valid JSON", text.slice(0, 200));
       }
     }
+  }
+
+  const avoidResult = await sendRequest(session, "tools/call", {
+    name: "maps_directions",
+    arguments: {
+      origin: "Tokyo Station",
+      destination: "Nagoya Station",
+      mode: "walking",
+      avoid_highways: true,
+    },
+  });
+  const avoidContent = avoidResult?.result?.content ?? [];
+  assert(avoidContent.length > 0, "Invalid route modifiers returns content");
+  if (avoidContent.length > 0) {
+    const text = avoidContent[0]?.text ?? "";
+    const isError = avoidResult?.result?.isError === true;
+    assert(isError, "Non-driving route modifiers return isError=true");
+    assert(
+      text.includes('only supported with mode "driving"'),
+      "Non-driving route modifiers return clear error",
+      `got: ${text.slice(0, 200)}`
+    );
   }
 }
 

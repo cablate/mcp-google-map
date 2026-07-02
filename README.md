@@ -68,8 +68,8 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_place_details` | Get full details for a place by its place_id — reviews, phone, website, hours. Optional `maxPhotos` param returns photo URLs. |
 | `maps_geocode` | Convert an address or landmark name into GPS coordinates. |
 | `maps_reverse_geocode` | Convert GPS coordinates into a street address. |
-| `maps_distance_matrix` | Calculate travel distances and times between multiple origins and destinations. |
-| `maps_directions` | Get step-by-step navigation between two points with route details. |
+| `maps_distance_matrix` | Calculate travel distances and times between multiple origins and destinations. Driving mode supports `avoid_tolls` and `avoid_highways`. |
+| `maps_directions` | Get step-by-step navigation between two points with route details. Driving mode supports `avoid_tolls` and `avoid_highways`. |
 | `maps_elevation` | Get elevation (meters above sea level) for geographic coordinates. |
 | `maps_timezone` | Get timezone ID, name, UTC/DST offsets, and local time for coordinates. |
 | `maps_weather` | Get current weather conditions or forecast — temperature, humidity, wind, UV, precipitation. |
@@ -79,7 +79,7 @@ Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add sup
 | `maps_search_along_route` | Search for places along a route between two points — ranked by minimal detour time. |
 | **Composite Tools** | |
 | `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
-| `maps_plan_route` | Plan an optimized multi-stop route — uses Routes API waypoint optimization (up to 25 stops) for efficient ordering. |
+| `maps_plan_route` | Plan an optimized multi-stop route — uses Routes API waypoint optimization (up to 25 stops) for efficient ordering. Driving mode supports `avoid_tolls` and `avoid_highways`. |
 | `maps_compare_places` | Compare places side-by-side — searches, gets details, and optionally calculates distances. |
 | `maps_local_rank_tracker` | Track a business's local search ranking across a geographic grid — like LocalFalcon. Supports up to 3 keywords for batch scanning. Returns rank at each point, top-3 competitors, and metrics (ARP, ATRP, SoLV). |
 

@@ -298,7 +298,9 @@ export class PlacesSearcher {
     origins: string[],
     destinations: string[],
     mode: "driving" | "walking" | "bicycling" | "transit" = "driving",
-    departure_time?: string
+    departure_time?: string,
+    avoid_tolls?: boolean,
+    avoid_highways?: boolean
   ): Promise<DistanceMatrixResponse> {
     try {
       const result = await this.routesService.computeRouteMatrix({
@@ -306,6 +308,8 @@ export class PlacesSearcher {
         destinations,
         mode,
         ...(departure_time ? { departureTime: new Date(departure_time) } : {}),
+        ...(avoid_tolls !== undefined ? { avoidTolls: avoid_tolls } : {}),
+        ...(avoid_highways !== undefined ? { avoidHighways: avoid_highways } : {}),
       });
 
       return {
@@ -325,7 +329,9 @@ export class PlacesSearcher {
     destination: string,
     mode: "driving" | "walking" | "bicycling" | "transit" = "driving",
     departure_time?: string,
-    arrival_time?: string
+    arrival_time?: string,
+    avoid_tolls?: boolean,
+    avoid_highways?: boolean
   ): Promise<DirectionsResponse> {
     try {
       const departureTime = departure_time ? new Date(departure_time) : undefined;
@@ -336,6 +342,8 @@ export class PlacesSearcher {
         mode,
         ...(departureTime ? { departureTime } : {}),
         ...(arrivalTime ? { arrivalTime } : {}),
+        ...(avoid_tolls !== undefined ? { avoidTolls: avoid_tolls } : {}),
+        ...(avoid_highways !== undefined ? { avoidHighways: avoid_highways } : {}),
       });
 
       return {
@@ -495,6 +503,8 @@ export class PlacesSearcher {
     mode?: "driving" | "walking" | "bicycling" | "transit";
     optimize?: boolean;
     departure_time?: string;
+    avoid_tolls?: boolean;
+    avoid_highways?: boolean;
   }): Promise<any> {
     const mode = params.mode || "driving";
     const stops = params.stops;
@@ -527,6 +537,8 @@ export class PlacesSearcher {
       intermediates,
       optimizeWaypointOrder: shouldOptimize,
       ...(params.departure_time ? { departureTime: new Date(params.departure_time) } : {}),
+      ...(params.avoid_tolls !== undefined ? { avoidTolls: params.avoid_tolls } : {}),
+      ...(params.avoid_highways !== undefined ? { avoidHighways: params.avoid_highways } : {}),
     });
 
     const route = routeResult.routes[0];

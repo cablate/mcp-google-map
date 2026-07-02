@@ -50,8 +50,8 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 ### Routing & Distance
 | Tool | When to use | Example |
 |------|-------------|---------|
-| `maps_directions` | How to get from A to B | "Route from Taipei Main Station to the airport" |
-| `maps_distance_matrix` | Compare distances across multiple points | "Which of these 3 hotels is closest to the airport?" |
+| `maps_directions` | How to get from A to B, including drive-only avoid-tolls/highways controls | "Route from Taipei Main Station to airport avoiding tolls" |
+| `maps_distance_matrix` | Compare distances across multiple points, including drive-only avoid-tolls/highways controls | "Which of these 3 hotels is closest to airport without highways?" |
 | `maps_search_along_route` | Find places along a route (meals, stops) ranked by detour time | "Restaurants between Fushimi Inari and Kiyomizu-dera" |
 
 ### Environment
@@ -71,7 +71,7 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | Tool | When to use | Example |
 |------|-------------|---------|
 | `maps_explore_area` | Overview of a neighborhood | "What's around Tokyo Tower?" |
-| `maps_plan_route` | Multi-stop optimized itinerary (Routes API waypoint optimization, up to 25 stops) | "Visit these 5 places efficiently" |
+| `maps_plan_route` | Multi-stop optimized itinerary (Routes API waypoint optimization, up to 25 stops) with drive-only avoid-tolls/highways controls | "Visit these 5 places efficiently without tolls" |
 | `maps_compare_places` | Side-by-side comparison | "Which ramen shop near Shibuya?" |
 | `maps_local_rank_tracker` | Local SEO grid rank tracking | "How does this dentist rank across the area?" |
 

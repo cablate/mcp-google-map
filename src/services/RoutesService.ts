@@ -84,6 +84,27 @@ function toWaypoint(location: string): any {
   return { address: location };
 }
 
+function buildRouteModifiers(params: { avoidTolls?: boolean; avoidHighways?: boolean }, travelMode: string): any {
+  const routeModifiers: Record<string, boolean> = {};
+
+  if (params.avoidTolls) {
+    routeModifiers.avoidTolls = true;
+  }
+  if (params.avoidHighways) {
+    routeModifiers.avoidHighways = true;
+  }
+
+  if (Object.keys(routeModifiers).length === 0) {
+    return undefined;
+  }
+
+  if (travelMode !== "DRIVE") {
+    throw new Error('Route modifiers "avoid_tolls" and "avoid_highways" are only supported with mode "driving".');
+  }
+
+  return routeModifiers;
+}
+
 /**
  * Routes API REST client.
  *
@@ -112,6 +133,8 @@ export class RoutesService {
     arrivalTime?: Date;
     intermediates?: string[];
     optimizeWaypointOrder?: boolean;
+    avoidTolls?: boolean;
+    avoidHighways?: boolean;
   }): Promise<{
     routes: any[];
     summary: string;
@@ -133,6 +156,11 @@ export class RoutesService {
     // routingPreference only valid for DRIVE mode
     if (travelMode === "DRIVE") {
       requestBody.routingPreference = "TRAFFIC_AWARE";
+    }
+
+    const routeModifiers = buildRouteModifiers(params, travelMode);
+    if (routeModifiers) {
+      requestBody.routeModifiers = routeModifiers;
     }
 
     // Departure/arrival time (only set if explicitly provided — Routes API rejects past timestamps)
@@ -219,6 +247,8 @@ export class RoutesService {
     destinations: string[];
     mode?: string;
     departureTime?: Date;
+    avoidTolls?: boolean;
+    avoidHighways?: boolean;
   }): Promise<{
     distances: any[][];
     durations: any[][];
@@ -237,6 +267,11 @@ export class RoutesService {
     // routingPreference only valid for DRIVE mode
     if (travelMode === "DRIVE") {
       requestBody.routingPreference = "TRAFFIC_AWARE";
+    }
+
+    const routeModifiers = buildRouteModifiers(params, travelMode);
+    if (routeModifiers) {
+      requestBody.routeModifiers = routeModifiers;
     }
 
     if (params.departureTime) {

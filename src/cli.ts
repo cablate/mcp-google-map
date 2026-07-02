@@ -139,12 +139,21 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
         params.destination,
         params.mode,
         params.departure_time,
-        params.arrival_time
+        params.arrival_time,
+        params.avoid_tolls,
+        params.avoid_highways
       );
 
     case "distance-matrix":
     case "maps_distance_matrix":
-      return searcher.calculateDistanceMatrix(params.origins, params.destinations, params.mode, params.departure_time);
+      return searcher.calculateDistanceMatrix(
+        params.origins,
+        params.destinations,
+        params.mode,
+        params.departure_time,
+        params.avoid_tolls,
+        params.avoid_highways
+      );
 
     case "elevation":
     case "maps_elevation":

@@ -168,6 +168,8 @@ exec maps_directions '{"origin": "Tokyo Tower", "destination": "Shibuya Station"
 | mode | string | no | Travel mode: driving, walking, bicycling, transit |
 | departure_time | string | no | Departure time (ISO 8601 or "now") |
 | arrival_time | string | no | Desired arrival time (transit only) |
+| avoid_tolls | boolean | no | Avoid toll roads where reasonable. Driving only |
+| avoid_highways | boolean | no | Avoid highways where reasonable. Driving only |
 
 ---
 
@@ -186,6 +188,9 @@ exec maps_distance_matrix '{"origins": ["Tokyo Tower"], "destinations": ["Shibuy
 | origins | string[] | yes | List of origin addresses |
 | destinations | string[] | yes | List of destination addresses |
 | mode | string | no | Travel mode: driving, walking, bicycling, transit |
+| departure_time | string | no | Departure time in ISO 8601 format for traffic-aware driving estimates |
+| avoid_tolls | boolean | no | Avoid toll roads where reasonable. Driving only |
+| avoid_highways | boolean | no | Avoid highways where reasonable. Driving only |
 
 ---
 
@@ -377,6 +382,9 @@ exec maps_plan_route '{"stops": ["Tokyo Tower", "Shibuya Station", "Shinjuku Sta
 | stops | string[] | yes | Addresses or landmarks (min 2, up to 27 total with origin + destination) |
 | mode | string | no | driving, walking, bicycling, transit (default: driving) |
 | optimize | boolean | no | Auto-optimize visit order via Routes API (default: true). Not available for transit mode. |
+| departure_time | string | no | Departure time in ISO 8601 format for traffic-aware driving routes |
+| avoid_tolls | boolean | no | Avoid toll roads where reasonable. Driving only |
+| avoid_highways | boolean | no | Avoid highways where reasonable. Driving only |
 
 ---
 
