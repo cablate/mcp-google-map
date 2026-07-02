@@ -869,6 +869,7 @@ async function testExecMode(): Promise<void> {
       return execFileSync("node", [cliPath, "exec", tool, params, "--apikey", API_KEY], {
         encoding: "utf-8",
         timeout: 30000,
+        maxBuffer: 10 * 1024 * 1024,
       }).trim();
     } catch (err: any) {
       return err.stdout?.trim() ?? err.message;
