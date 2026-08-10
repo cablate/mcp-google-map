@@ -450,7 +450,9 @@ export class PlacesSearcher {
   // --------------- Composite Tools ---------------
 
   async exploreArea(params: { location: string; types?: string[]; radius?: number; topN?: number }): Promise<any> {
-    const types = params.types || ["restaurant", "cafe", "attraction"];
+    // "tourist_attraction" is the Places API (New) type name; a bare
+    // "attraction" is rejected with INVALID_ARGUMENT: Unsupported types.
+    const types = params.types || ["restaurant", "cafe", "tourist_attraction"];
     const radius = params.radius || 1000;
     const topN = params.topN || 3;
 

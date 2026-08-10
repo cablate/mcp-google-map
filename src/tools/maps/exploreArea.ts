@@ -11,7 +11,9 @@ const SCHEMA = {
   types: z
     .array(z.string())
     .optional()
-    .describe("Place types to search (default: restaurant, cafe, attraction). Examples: hotel, bar, park, museum"),
+    .describe(
+      "Place types to search (default: restaurant, cafe, tourist_attraction). Must be Places API (New) type names. Examples: hotel, bar, park, museum"
+    ),
   radius: z.number().optional().describe("Search radius in meters (default: 1000)"),
   topN: z.number().optional().describe("Number of top results per type to get details for (default: 3)"),
 };
