@@ -19,6 +19,7 @@
     "start": "node dist/cli.js",
     "dev": "cross-env NODE_ENV=development tsup --watch",
     "test": "tsx tests/smoke.test.ts",
+    "test:unit": "tsx --test tests/*.unit.test.ts",
     "test:e2e": "tsx tests/smoke.test.ts",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
