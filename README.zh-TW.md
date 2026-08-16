@@ -376,4 +376,4 @@ MIT
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@cablate/mcp-google-map/badge" alt="Google Map Server MCP server" />
 </a>
 
-[![Star History Chart](https://api.star-history.com/svg?repos=cablate/mcp-google-map&type=Date)](https://www.star-history.com/#cablate/mcp-google-map&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=cablate/mcp-google-map&type=Date)](https://star-history.dera.page/#cablate/mcp-google-map&Date)
