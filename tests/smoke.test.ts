@@ -1148,6 +1148,94 @@ async function testTransitDetailsField(session: McpSession): Promise<void> {
   );
 }
 
+async function testPlanRoute(session: McpSession): Promise<void> {
+  console.log("\n🧪 Test 9: Plan route (waypoint optimization thresholds)");
+
+  if (!API_KEY) {
+    console.log("  ⏭️  Skipped (no GOOGLE_MAPS_API_KEY)");
+    return;
+  }
+
+  // Case A: 3 stops (1 intermediate) — optimization must be bypassed.
+  // Regression guard: the Routes API returns an unusable
+  // optimizedIntermediateWaypointIndex of [-1] for a single intermediate, which
+  // previously crashed with "Cannot read properties of undefined (reading 'originalName')".
+  const threeStops = ["Shibuya Station, Tokyo", "Tokyo Tower", "Shinjuku Station, Tokyo"];
+  const threeStopResult = await sendRequest(session, "tools/call", {
+    name: "maps_plan_route",
+    arguments: { stops: threeStops, mode: "driving", optimize: true },
+  });
+
+  const threeContent = threeStopResult?.result?.content ?? [];
+  assert(threeContent.length > 0, "plan_route (3 stops) returns content");
+
+  if (threeContent.length > 0) {
+    const text = threeContent[0]?.text ?? "";
+    const isError = threeStopResult?.result?.isError === true;
+
+    assert(!isError, "plan_route (3 stops, optimize: true) succeeds", `got: ${text.slice(0, 200)}`);
+    assert(!text.includes("originalName"), "plan_route (3 stops) does not surface an originalName crash");
+
+    if (!isError) {
+      let parsed: any;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        assert(false, "plan_route (3 stops) returns valid JSON", `got: ${text.slice(0, 200)}`);
+        return;
+      }
+
+      assert(parsed?.optimized === false, "plan_route (3 stops) skips optimization", `optimized: ${parsed?.optimized}`);
+      assert(parsed?.stops?.length === 3, "plan_route (3 stops) returns 3 stops", `got: ${parsed?.stops?.length}`);
+      assert(parsed?.legs?.length === 2, "plan_route (3 stops) returns 2 legs", `got: ${parsed?.legs?.length}`);
+      assert(
+        threeStops.every((stop, i) => (parsed?.stops?.[i] ?? "").startsWith(stop)),
+        "plan_route (3 stops) preserves the original stop order",
+        `got: ${JSON.stringify(parsed?.stops)}`
+      );
+    }
+  }
+
+  // Case B: 4 stops (2 intermediates) — optimization must engage.
+  const fourStops = ["Tokyo Station", "Ueno Park", "Asakusa", "Shibuya Crossing"];
+  const fourStopResult = await sendRequest(session, "tools/call", {
+    name: "maps_plan_route",
+    arguments: { stops: fourStops, mode: "driving", optimize: true },
+  });
+
+  const fourContent = fourStopResult?.result?.content ?? [];
+  assert(fourContent.length > 0, "plan_route (4 stops) returns content");
+  if (fourContent.length === 0) return;
+
+  const fourText = fourContent[0]?.text ?? "";
+  const fourIsError = fourStopResult?.result?.isError === true;
+  assert(!fourIsError, "plan_route (4 stops, optimize: true) succeeds", `got: ${fourText.slice(0, 200)}`);
+  if (fourIsError) return;
+
+  let fourParsed: any;
+  try {
+    fourParsed = JSON.parse(fourText);
+  } catch {
+    assert(false, "plan_route (4 stops) returns valid JSON", `got: ${fourText.slice(0, 200)}`);
+    return;
+  }
+
+  assert(
+    fourParsed?.optimized === true,
+    "plan_route (4 stops) applies waypoint optimization",
+    `optimized: ${fourParsed?.optimized}`
+  );
+  assert(fourParsed?.stops?.length === 4, "plan_route (4 stops) returns 4 stops", `got: ${fourParsed?.stops?.length}`);
+  assert(fourParsed?.legs?.length === 3, "plan_route (4 stops) returns 3 legs", `got: ${fourParsed?.legs?.length}`);
+  // The optimized order is decided by Google, so only assert every stop survived
+  // the geocode → optimized-order remap (no dropped or undefined entries).
+  assert(
+    fourStops.every((stop) => (fourParsed?.stops ?? []).some((s: string) => s.startsWith(stop))),
+    "plan_route (4 stops) retains every requested stop after optimization",
+    `got: ${JSON.stringify(fourParsed?.stops)}`
+  );
+}
+
 // --------------- Main ---------------
 
 async function main() {
@@ -1173,6 +1261,7 @@ async function main() {
     await testPlaceDetailsPhotos(session);
     await testTransitErrorMessages(session);
     await testTransitDetailsField(session);
+    await testPlanRoute(session);
     await testMultiSession();
   } catch (err) {
     console.error("\n💥 Fatal error:", err);

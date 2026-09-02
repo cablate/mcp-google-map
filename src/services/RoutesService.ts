@@ -204,11 +204,11 @@ export class RoutesService {
       requestBody.intermediates = params.intermediates.map(toWaypoint);
     }
 
-    // Waypoint optimization (not supported for TRANSIT)
+    // Waypoint optimization (not supported for TRANSIT, requires at least 2 intermediates)
     if (
       params.optimizeWaypointOrder &&
       params.intermediates &&
-      params.intermediates.length > 0 &&
+      params.intermediates.length > 1 &&
       travelMode !== "TRANSIT"
     ) {
       requestBody.optimizeWaypointOrder = true;

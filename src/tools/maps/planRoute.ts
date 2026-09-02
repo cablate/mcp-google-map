@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_plan_route";
 const DESCRIPTION =
-  "Plan an optimized multi-stop route in one call — geocodes all stops, uses Routes API waypoint optimization (up to 25 intermediate stops) to find the most efficient visit order, and returns directions for each leg. Use when the user says 'visit these 5 places efficiently', 'plan a route through A, B, C', or needs a multi-stop itinerary. Replaces the manual chain of geocode → distance-matrix → directions. For multi-day trips: create one plan_route call per day with stops that follow a geographic arc (e.g. east→west) rather than mixing distant areas. After results, call static_map to visualize the route.";
+  "Plan an optimized multi-stop route in one call — geocodes all stops, uses Routes API waypoint optimization (2 to 25 intermediate stops) to find the most efficient visit order, and returns directions for each leg. Use when the user says 'visit these 5 places efficiently', 'plan a route through A, B, C', or needs a multi-stop itinerary. Replaces the manual chain of geocode → distance-matrix → directions. Waypoint optimization requires at least 4 stops (2 intermediates); with 2 or 3 stops the route is returned in the original order. For multi-day trips: create one plan_route call per day with stops that follow a geographic arc (e.g. east→west) rather than mixing distant areas. After results, call static_map to visualize the route.";
 
 const SCHEMA = {
   stops: z.array(z.string()).min(2).describe("List of addresses or landmarks to visit (minimum 2)"),
@@ -13,7 +13,7 @@ const SCHEMA = {
     .boolean()
     .optional()
     .describe(
-      "Auto-optimize visit order via Routes API waypoint optimization (default: true). Set false to keep original order. Not available for transit mode."
+      "Auto-optimize visit order via Routes API waypoint optimization (default: true). Requires at least 4 stops (2 intermediates) — ignored for 2-3 stops. Set false to keep original order. Not available for transit mode."
     ),
   departure_time: z
     .string()
