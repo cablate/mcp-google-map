@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.56
+
+- test: skip live place photos without API key
+- test: cover waypoint threshold in CI
+- fix: require at least 2 intermediates for waypoint optimization
+- fix: route plan_route stops by resolved waypoints and add text-search fallback
+
 ## 0.0.55
 
 - fix: restore broken star history chart (#84)

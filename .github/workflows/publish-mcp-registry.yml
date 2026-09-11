@@ -1,0 +1,36 @@
+name: Publish MCP Registry
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: publish-mcp-registry
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish to MCP Registry
+        run: |
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+
+          for attempt in 1 2 3 4 5 6; do
+            if ./mcp-publisher publish; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 6 ]; then
+              echo "MCP Registry publish failed after $attempt attempts"
+              exit 1
+            fi
+
+            echo "MCP Registry has not observed the npm release yet; retrying in 20 seconds"
+            sleep 20
+          done
