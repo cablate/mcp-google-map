@@ -598,6 +598,11 @@ async function testToolCalls(session: McpSession): Promise<void> {
 async function testPlaceDetailsPhotos(session: McpSession): Promise<void> {
   console.log("\n🧪 Test 4b: Place details with photos");
 
+  if (!API_KEY) {
+    console.log("  ⏭️  Skipped (no GOOGLE_MAPS_API_KEY)");
+    return;
+  }
+
   // First search for a place to get a place_id
   const searchResult = await sendRequest(session, "tools/call", {
     name: "maps_search_places",
