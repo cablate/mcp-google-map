@@ -55,6 +55,37 @@ test("structured waypoints forward unchanged", async () => {
   }
 });
 
+test("waypoint optimization requires at least two intermediates", async () => {
+  const originalFetch = globalThis.fetch;
+  const capturedBodies: any[] = [];
+
+  globalThis.fetch = async (_url: any, init: any) => {
+    capturedBodies.push(JSON.parse(init.body));
+    return new Response(JSON.stringify(MOCK_ROUTES_RESPONSE), { status: 200 });
+  };
+
+  try {
+    const service = new RoutesService("test-api-key");
+    await service.computeRoutes({
+      origin: { placeId: "origin" },
+      destination: { placeId: "destination" },
+      intermediates: [{ placeId: "only-intermediate" }],
+      optimizeWaypointOrder: true,
+    });
+    await service.computeRoutes({
+      origin: { placeId: "origin" },
+      destination: { placeId: "destination" },
+      intermediates: [{ placeId: "intermediate-1" }, { placeId: "intermediate-2" }],
+      optimizeWaypointOrder: true,
+    });
+
+    assert.equal(capturedBodies[0].optimizeWaypointOrder, undefined);
+    assert.equal(capturedBodies[1].optimizeWaypointOrder, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("plain strings still work", async () => {
   const originalFetch = globalThis.fetch;
   let capturedBody: any = null;
