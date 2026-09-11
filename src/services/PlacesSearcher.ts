@@ -1,6 +1,13 @@
 import { GoogleMapsTools } from "./toolclass.js";
 import { NewPlacesService } from "./NewPlacesService.js";
-import { RoutesService, parseDuration, formatDistance, formatDuration } from "./RoutesService.js";
+import {
+  RoutesService,
+  parseDuration,
+  formatDistance,
+  formatDuration,
+  COORDINATE_STRING_PATTERN,
+  type RouteWaypoint,
+} from "./RoutesService.js";
 
 interface SearchResponse {
   success: boolean;
@@ -98,6 +105,44 @@ interface ElevationResponse {
     elevation: number;
     location: { lat: number; lng: number };
   }>;
+}
+
+interface ResolvedLocation {
+  originalName: string;
+  address: string;
+  lat: number;
+  lng: number;
+  placeId: string;
+}
+
+/**
+ * Parse a "latitude,longitude" input, or null when it is not one or is out of range.
+ */
+function parseCoordinateInput(input: string): { lat: number; lng: number } | null {
+  const match = input.match(COORDINATE_STRING_PATTERN);
+  if (!match) {
+    return null;
+  }
+  const lat = parseFloat(match[1]);
+  const lng = parseFloat(match[2]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return null;
+  }
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return null;
+  }
+  return { lat, lng };
+}
+
+/**
+ * Place ID over coordinates: Routes snaps coordinates to the nearest road, which
+ * may not be an entrance. Text Search can return a result without a place ID.
+ */
+function toRouteWaypoint(loc: ResolvedLocation): RouteWaypoint {
+  if (loc.placeId) {
+    return { placeId: loc.placeId };
+  }
+  return { latLng: { latitude: loc.lat, longitude: loc.lng } };
 }
 
 export class PlacesSearcher {
@@ -449,6 +494,65 @@ export class PlacesSearcher {
 
   // --------------- Composite Tools ---------------
 
+  /**
+   * Resolve a location string to one concrete place, exactly once: geocoding
+   * first, then Places Text Search for informal names it does not index.
+   *
+   * Throws rather than returning { success: false } — the plan_route and
+   * explore_area actions JSON.stringify(result.data) without checking the flag,
+   * so a failure object would surface as an empty success.
+   */
+  private async resolveLocation(input: string): Promise<ResolvedLocation> {
+    if (COORDINATE_STRING_PATTERN.test(input)) {
+      const coordinates = parseCoordinateInput(input);
+      if (!coordinates) {
+        throw new Error(`Failed to resolve location: ${input} (not a valid "latitude,longitude" pair)`);
+      }
+      // Already exact, so geocoding only supplies a display address and its failure
+      // must not fail the stop. No place ID: the nearest addressable place would
+      // silently move the caller's point. geocode() over reverseGeocode() because it
+      // labels sparse areas better — "Canada" rather than a bare Plus Code.
+      const displayGeocode = await this.geocode(input);
+      return {
+        originalName: input,
+        address: displayGeocode.success && displayGeocode.data ? displayGeocode.data.formatted_address : input,
+        lat: coordinates.lat,
+        lng: coordinates.lng,
+        placeId: "",
+      };
+    }
+
+    const geo = await this.geocode(input);
+    if (geo.success && geo.data) {
+      return {
+        originalName: input,
+        address: geo.data.formatted_address,
+        lat: geo.data.location.lat,
+        lng: geo.data.location.lng,
+        placeId: geo.data.place_id,
+      };
+    }
+
+    // Any geocoding failure falls through, not just zero results: geocode() flattens
+    // every error into { success: false } with no status code. A systemic failure
+    // (bad key, exhausted quota) fails the text search too, and both errors are thrown.
+    const textSearch = await this.searchText({ query: input });
+    if (textSearch.success && textSearch.data && textSearch.data.length > 0) {
+      const topMatch = textSearch.data[0];
+      return {
+        originalName: input,
+        address: topMatch.address || topMatch.name,
+        lat: topMatch.location.lat,
+        lng: topMatch.location.lng,
+        placeId: topMatch.place_id || "",
+      };
+    }
+
+    throw new Error(
+      `Failed to resolve location: ${input} (geocoding: ${geo.error || "no result"}; places text search: ${textSearch.error || "no result"})`
+    );
+  }
+
   async exploreArea(params: { location: string; types?: string[]; radius?: number; topN?: number }): Promise<any> {
     // "tourist_attraction" is the Places API (New) type name; a bare
     // "attraction" is rejected with INVALID_ARGUMENT: Unsupported types.
@@ -456,10 +560,9 @@ export class PlacesSearcher {
     const radius = params.radius || 1000;
     const topN = params.topN || 3;
 
-    // 1. Geocode
-    const geo = await this.geocode(params.location);
-    if (!geo.success || !geo.data) throw new Error(geo.error || "Geocode failed");
-    const { lat, lng } = geo.data.location;
+    // 1. Resolve location
+    const resolved = await this.resolveLocation(params.location);
+    const { lat, lng } = resolved;
 
     // 2. Search each type
     const categories: any[] = [];
@@ -493,7 +596,7 @@ export class PlacesSearcher {
     return {
       success: true,
       data: {
-        location: { address: geo.data.formatted_address, lat, lng },
+        location: { address: resolved.address, lat, lng },
         radius,
         categories,
       },
@@ -512,25 +615,18 @@ export class PlacesSearcher {
     const stops = params.stops;
     if (stops.length < 2) throw new Error("Need at least 2 stops");
 
-    // 1. Geocode all stops for display addresses
-    const geocoded: Array<{ originalName: string; address: string; lat: number; lng: number }> = [];
+    // 1. Resolve all stops for display addresses and waypoints
+    const resolvedStops: ResolvedLocation[] = [];
     for (const stop of stops) {
-      const geo = await this.geocode(stop);
-      if (!geo.success || !geo.data) throw new Error(`Failed to geocode: ${stop}`);
-      geocoded.push({
-        originalName: stop,
-        address: geo.data.formatted_address,
-        lat: geo.data.location.lat,
-        lng: geo.data.location.lng,
-      });
+      resolvedStops.push(await this.resolveLocation(stop));
     }
 
     // 2. Single Routes API call handles optimization + all leg directions
-    const origin = stops[0];
-    const destination = stops[stops.length - 1];
-    const intermediates = stops.length > 2 ? stops.slice(1, -1) : undefined;
-    // Optimize if requested, > 2 stops, and not transit (transit doesn't support intermediates for optimization)
-    const shouldOptimize = params.optimize !== false && stops.length > 2 && mode !== "transit";
+    const origin = toRouteWaypoint(resolvedStops[0]);
+    const destination = toRouteWaypoint(resolvedStops[resolvedStops.length - 1]);
+    const intermediates = stops.length > 2 ? resolvedStops.slice(1, -1).map((s) => toRouteWaypoint(s)) : undefined;
+    // Optimize if requested, > 3 stops (at least 2 intermediates), and not transit (transit doesn't support intermediates for optimization)
+    const shouldOptimize = params.optimize !== false && stops.length > 3 && mode !== "transit";
 
     const routeResult = await this.routesService.computeRoutes({
       origin,
@@ -538,6 +634,8 @@ export class PlacesSearcher {
       mode,
       intermediates,
       optimizeWaypointOrder: shouldOptimize,
+      originLabel: stops[0],
+      destinationLabel: stops[stops.length - 1],
       ...(params.departure_time ? { departureTime: new Date(params.departure_time) } : {}),
       ...(params.avoid_tolls !== undefined ? { avoidTolls: params.avoid_tolls } : {}),
       ...(params.avoid_highways !== undefined ? { avoidHighways: params.avoid_highways } : {}),
@@ -547,17 +645,17 @@ export class PlacesSearcher {
     const routeLegs = route?.legs || [];
 
     // 3. Determine ordered stops based on optimization result
-    let orderedStops: typeof geocoded;
+    let orderedStops: typeof resolvedStops;
     if (shouldOptimize && routeResult.optimizedIntermediateWaypointIndex) {
       const optimizedOrder = routeResult.optimizedIntermediateWaypointIndex;
-      const intermediateGeocoded = geocoded.slice(1, -1);
+      const intermediateResolved = resolvedStops.slice(1, -1);
       orderedStops = [
-        geocoded[0],
-        ...optimizedOrder.map((i: number) => intermediateGeocoded[i]),
-        geocoded[geocoded.length - 1],
+        resolvedStops[0],
+        ...optimizedOrder.map((i: number) => intermediateResolved[i]),
+        resolvedStops[resolvedStops.length - 1],
       ];
     } else {
-      orderedStops = geocoded;
+      orderedStops = resolvedStops;
     }
 
     // 4. Build legs from Routes API response
