@@ -67,11 +67,36 @@ export function formatDuration(seconds: number): string {
   return `${mins} min${mins !== 1 ? "s" : ""}`;
 }
 
+export const COORDINATE_STRING_PATTERN = /^\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*$/;
+
+export type RouteWaypoint = { latLng: { latitude: number; longitude: number } } | { placeId: string };
+export type WaypointInput = string | RouteWaypoint;
+
 /**
- * Convert address/coordinates string to Routes API Waypoint.
+ * Format a waypoint for human-readable error messages.
  */
-function toWaypoint(location: string): any {
-  const coordMatch = location.match(/^\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*$/);
+function describeWaypoint(waypoint: WaypointInput): string {
+  if (typeof waypoint === "string") {
+    return waypoint;
+  }
+  if ("placeId" in waypoint) {
+    return `placeId:${waypoint.placeId}`;
+  }
+  return `${waypoint.latLng.latitude},${waypoint.latLng.longitude}`;
+}
+
+/**
+ * Convert address/coordinates string or structured waypoint to Routes API Waypoint.
+ *
+ * NOTE: must stay synchronous and take exactly one argument. computeRoutes below
+ * calls params.intermediates.map(toWaypoint), so a second parameter would silently
+ * bind the array index, and returning a promise would serialise as {}.
+ */
+function toWaypoint(location: WaypointInput): any {
+  if (typeof location !== "string") {
+    return "placeId" in location ? { placeId: location.placeId } : { location: { latLng: location.latLng } };
+  }
+  const coordMatch = location.match(COORDINATE_STRING_PATTERN);
   if (coordMatch) {
     return {
       location: {
@@ -127,15 +152,18 @@ export class RoutesService {
    * Returns response compatible with existing DirectionsResponse.data interface.
    */
   async computeRoutes(params: {
-    origin: string;
-    destination: string;
+    origin: WaypointInput;
+    destination: WaypointInput;
     mode?: string;
     departureTime?: Date;
     arrivalTime?: Date;
-    intermediates?: string[];
+    intermediates?: WaypointInput[];
     optimizeWaypointOrder?: boolean;
     avoidTolls?: boolean;
     avoidHighways?: boolean;
+    /** What to call the endpoints in error messages. Defaults to the waypoints themselves. */
+    originLabel?: string;
+    destinationLabel?: string;
   }): Promise<{
     routes: any[];
     summary: string;
@@ -208,12 +236,16 @@ export class RoutesService {
       const mode = params.mode || "driving";
       if (mode === "transit") {
         throw new Error(
-          `No transit route found from "${params.origin}" to "${params.destination}". ` +
+          `No transit route found from "${params.originLabel ?? describeWaypoint(params.origin)}" ` +
+            `to "${params.destinationLabel ?? describeWaypoint(params.destination)}". ` +
             `The Google Routes API does not support transit directions in some regions (notably Japan and India). ` +
             `Try using mode "driving" or "walking" instead, or use a regional transit service for public transportation details.`
         );
       }
-      throw new Error(`No route found from "${params.origin}" to "${params.destination}" with mode: ${mode}`);
+      throw new Error(
+        `No route found from "${params.originLabel ?? describeWaypoint(params.origin)}" ` +
+          `to "${params.destinationLabel ?? describeWaypoint(params.destination)}" with mode: ${mode}`
+      );
     }
 
     const route = data.routes[0];
