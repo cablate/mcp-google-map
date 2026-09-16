@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.59
+
+- fix: skip duplicate release events for tagged main
+
+
 ## 0.0.58
 
 - fix: preserve per-session API keys with a server default
