@@ -1,23 +1,14 @@
 ---
 name: google-maps
-description: Geospatial query capabilities — geocoding, nearby search, routing, place details, elevation. Trigger when the user mentions locations, addresses, coordinates, navigation, "what's nearby", "how to get there", distance/duration, or any question that inherently involves geographic information — even if they don't explicitly say "map". Update when new tools are added or tool parameters change.
+description: Use Google Maps-backed geocoding, place search, routing, and geographic analysis through the standalone @cablate/mcp-google-map CLI when a user asks about real-world locations. No MCP connection is required.
 license: MIT
-version: 0.0.38
-compatibility:
-  - claude-code
-  - cursor
-  - vscode-copilot
-  - openai-codex
-  - gemini-cli
 ---
 
 # Google Maps - Geospatial Query Capabilities
 
 ## Overview
 
-Gives an AI Agent the ability to reason about physical space — understand locations, distances, routes, and elevation, and naturally weave that information into conversation.
-
-Without this Skill, the agent can only guess or refuse when asked "how do I get from Taipei 101 to the National Palace Museum?". With it, the agent returns exact coordinates, step-by-step routes, and travel times.
+Use the package's `exec` CLI to answer location questions without starting an MCP server. The Skill supplies tool-selection and chaining guidance; the npm package makes the API calls. The user must provide their own Google Maps Platform API key.
 
 ---
 
@@ -29,13 +20,13 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 | Match recipe to intent | Map the user's question to a recipe (Trip Planning, Local Discovery, Route Comparison, Neighborhood Analysis, Multi-Stop, Place Comparison, Along the Route) before calling any tool. |
 | Precise input saves trouble | Use coordinates over address strings when available. Use place_id over name search. More precise input = more reliable output. |
 | Output is structured | Every tool returns JSON. Use it directly for downstream computation or comparison — no extra parsing needed. |
-| Present as tables | Users prefer comparison tables and scorecards over raw JSON. Format results for readability. |
+| Present results clearly | Summarize comparisons in a table when it helps; do not pass raw JSON through as the final answer. |
 
 ---
 
 ## Tool Map
 
-17 tools in five categories — pick by scenario:
+18 tools in five categories — pick by scenario:
 
 ### Place Discovery
 | Tool | When to use | Example |
@@ -91,14 +82,13 @@ Without this Skill, the agent can only guess or refuse when asked "how do I get 
 ## Invocation
 
 ```bash
-npx @cablate/mcp-google-map exec <tool> '<json_params>' [-k API_KEY]
+npx -y @cablate/mcp-google-map exec <tool> '<json_params>'
 ```
 
-- **API Key**: `-k` flag or `GOOGLE_MAPS_API_KEY` environment variable
-- **Output**: JSON to stdout, errors to stderr
+- **API Key**: Set `GOOGLE_MAPS_API_KEY` in the environment. The `-k` flag also works, but may expose the key in shell history or process listings. If no key is available, ask the user to configure one; do not invent results.
+- **Output**: Successful calls return JSON on stdout. A failed call exits nonzero with error details on stderr; report the failure rather than treating it as map data.
 - **Stateless**: each call is independent
 - **Tool names**: CLI accepts both `maps_geocode` and `geocode` short forms
-- **Tool filtering**: Set `GOOGLE_MAPS_ENABLED_TOOLS` env var to a comma-separated list of tool names to limit registered tools (reduces MCP client context usage). Omit or set to `*` for all tools.
 
 ---
 

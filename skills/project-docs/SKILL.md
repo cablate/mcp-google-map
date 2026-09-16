@@ -24,7 +24,7 @@ For the **agent skill** (how to USE the tools), see `skills/google-maps/SKILL.md
 |--------|---------|
 | **What** | MCP server providing Google Maps tools for AI agents |
 | **Stack** | TypeScript, Node.js, Express, MCP SDK, Zod |
-| **Tools** | 17 tools (14 atomic + 3 composite) |
+| **Tools** | 18 tools (14 atomic + 4 composite) |
 | **Transports** | stdio, Streamable HTTP, standalone exec CLI |
 | **APIs** | Places API (New), Directions, Geocoding, Elevation, Timezone, Weather, Air Quality, Static Maps, Search Along Route |
 

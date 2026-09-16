@@ -160,6 +160,14 @@ npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
 
 All 18 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `batch-geocode-tool`, `search-along-route`, `explore-area`, `plan-route`, `compare-places`, `local-rank-tracker`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
 
+To use the **Agent Skill without MCP**:
+
+1. Install the entire [`skills/google-maps/`](./skills/google-maps/) folder in your agent's Skills directory, following that client's instructions. Keep `SKILL.md` and `references/` together. Clients that support `.skill` imports can use the bundled [`SKILL.skill`](./skills/google-maps/SKILL.skill) archive instead. Installing the npm package alone does not register a Skill with an agent.
+2. Make Node.js 18+ and `npx` available to the agent, and set `GOOGLE_MAPS_API_KEY` in its environment. Prefer the environment variable to `--apikey`, which can expose a key in shell history or process listings.
+3. Ask the agent a location question. The Skill guides it to call the standalone CLI, for example `npx -y @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'`. No MCP server or MCP client configuration is needed.
+
+You can verify the CLI is available with `npx -y @cablate/mcp-google-map exec --help` before making a billable API call.
+
 ### Batch Geocode
 
 Geocode hundreds of addresses from a file:
@@ -282,6 +290,7 @@ tests/
 skills/
 ├── google-maps/                  # Agent Skill — how to USE the tools
 │   ├── SKILL.md                  # Tool map, recipes, invocation
+│   ├── SKILL.skill               # Importable archive of this Skill
 │   └── references/
 │       ├── tools-api.md          # Tool parameters + scenario recipes
 │       ├── travel-planning.md    # Travel planning methodology

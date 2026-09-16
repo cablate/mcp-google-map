@@ -160,6 +160,14 @@ npx @cablate/mcp-google-map exec search-places '{"query":"東京拉麵"}'
 
 全部 18 個工具可用：`geocode`、`reverse-geocode`、`search-nearby`、`search-places`、`place-details`、`directions`、`distance-matrix`、`elevation`、`timezone`、`weather`、`air-quality`、`static-map`、`batch-geocode-tool`、`search-along-route`、`explore-area`、`plan-route`、`compare-places`、`local-rank-tracker`。完整參數文件見 [`skills/google-maps/`](./skills/google-maps/)。
 
+若要**不透過 MCP、只用 Agent Skill**：
+
+1. 依你的代理工具說明，將整個 [`skills/google-maps/`](./skills/google-maps/) 資料夾安裝到它的 Skills 目錄；`SKILL.md` 與 `references/` 必須放在一起。支援匯入 `.skill` 的工具也可使用隨附的 [`SKILL.skill`](./skills/google-maps/SKILL.skill)。只安裝 npm 套件不會自動把 Skill 註冊到代理工具。
+2. 讓代理工具可使用 Node.js 18+、`npx`，並在其環境設定 `GOOGLE_MAPS_API_KEY`。建議使用環境變數；`--apikey` 可能讓金鑰出現在 shell 歷史或程序清單。
+3. 直接向代理工具提問地點問題。Skill 會引導它呼叫獨立 CLI，例如 `npx -y @cablate/mcp-google-map exec geocode '{"address":"台北101"}'`；不必啟動 MCP server 或設定 MCP client。
+
+呼叫可能計費的 API 前，可先用 `npx -y @cablate/mcp-google-map exec --help` 確認 CLI 可用。
+
 ### 批次地理編碼
 
 從檔案批次地理編碼：
@@ -279,6 +287,7 @@ tests/
 skills/
 ├── google-maps/                  # Agent Skill — 如何使用工具
 │   ├── SKILL.md                  # 工具對照表、場景食譜、呼叫方式
+│   ├── SKILL.skill               # 可匯入的 Skill 封裝檔
 │   └── references/
 │       ├── tools-api.md          # 工具參數 + 場景食譜
 │       ├── travel-planning.md    # 旅行規劃方法論
