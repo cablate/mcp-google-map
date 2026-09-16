@@ -1,0 +1,17 @@
+.git
+**/.git
+.env
+.env.*
+**/.env
+**/.env.*
+.npmrc
+**/.npmrc
+credentials.json
+**/credentials.json
+node_modules
+**/node_modules
+dist
+output
+.agents
+.mcpregistry_*
+.mcp.json
