@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -117,5 +118,13 @@ jobs:
             NOTES="Initial release"
           fi
           gh release create "v${VERSION}" --title "v${VERSION}" --notes "$NOTES"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release Docker images
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          gh workflow run docker.yml --ref main
+          gh workflow run docker.yml --ref "v${VERSION}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
