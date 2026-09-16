@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.63
+
+- Preserve Places attributions and refresh trust guidance (#96)
+
+
 ## 0.0.62
 
 - Productize standalone Google Maps Agent Skill and exec CLI (#95)
