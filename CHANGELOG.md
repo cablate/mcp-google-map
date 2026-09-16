@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.58
+
+- fix: preserve per-session API keys with a server default
+
+
 ## 0.0.57
 
 - fix: harden GHCR image publishing
