@@ -85,7 +85,7 @@ export class BaseMcpServer {
 
       // Extract API key from headers if provided
       const apiKeyManager = ApiKeyManager.getInstance();
-      const requestApiKey = apiKeyManager.getApiKey(req);
+      const requestApiKey = apiKeyManager.getApiKey(req, sessionId ? this.sessions[sessionId]?.apiKey : undefined);
 
       Logger.log(`${this.serverName} API key received from request context`);
 
@@ -157,7 +157,7 @@ export class BaseMcpServer {
 
       // Check for updated API key in headers
       const apiKeyManager = ApiKeyManager.getInstance();
-      const requestApiKey = apiKeyManager.getApiKey(req);
+      const requestApiKey = apiKeyManager.getApiKey(req, context.apiKey);
       if (requestApiKey) {
         context.apiKey = requestApiKey;
       }
