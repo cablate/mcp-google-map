@@ -93,7 +93,22 @@ jobs:
           mv "$TMPFILE" CHANGELOG.md
 
       - name: Publish to npm
-        run: npm publish --access public
+        run: |
+          PACKAGE=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "${PACKAGE}@${VERSION}" version --json >/dev/null 2>&1; then
+            # npm may have accepted a previous attempt before the registry or
+            # version tag succeeded. Resume only if the packed bytes are identical.
+            PUBLISHED_INTEGRITY=$(npm view "${PACKAGE}@${VERSION}" dist.integrity --json | jq -r '.')
+            LOCAL_INTEGRITY=$(npm pack --dry-run --json | jq -r '.[0].integrity')
+            if [ "$PUBLISHED_INTEGRITY" != "$LOCAL_INTEGRITY" ]; then
+              echo "${PACKAGE}@${VERSION} already exists with different package contents" >&2
+              exit 1
+            fi
+            echo "${PACKAGE}@${VERSION} was already published with identical contents"
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -104,14 +119,37 @@ jobs:
 
       - name: Publish to MCP Registry
         run: |
+          VERSION=$(node -p "require('./package.json').version")
+          SERVER_NAME=$(jq -r '.name' server.json)
+          ENCODED_SERVER_NAME=${SERVER_NAME//\//%2F}
+          REGISTRY_RESPONSE="$RUNNER_TEMP/mcp-registry-version.json"
+          STATUS=$(curl -sS --retry 3 -o "$REGISTRY_RESPONSE" -w '%{http_code}' \
+            "https://registry.modelcontextprotocol.io/v0.1/servers/${ENCODED_SERVER_NAME}/versions/${VERSION}")
+          if [ "$STATUS" = 200 ]; then
+            # The registry omits optional false fields; compare after normalizing them.
+            if ! jq -e -s '
+              def strip_false: walk(if type == "object" then with_entries(select(.value != false)) else . end);
+              (.[0].server | strip_false) == (.[1] | strip_false)
+            ' "$REGISTRY_RESPONSE" server.json >/dev/null; then
+              echo "MCP Registry already has a different ${SERVER_NAME}@${VERSION}" >&2
+              exit 1
+            fi
+            echo "${SERVER_NAME}@${VERSION} was already published to MCP Registry"
+            exit 0
+          fi
+          if [ "$STATUS" != 404 ]; then
+            echo "Could not check MCP Registry version: HTTP ${STATUS}" >&2
+            exit 1
+          fi
+
           curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
           ./mcp-publisher login github-oidc
-          for attempt in 1 2 3 4 5 6; do
+          for attempt in {1..30}; do
             if ./mcp-publisher publish; then
               exit 0
             fi
 
-            if [ "$attempt" -eq 6 ]; then
+            if [ "$attempt" -eq 30 ]; then
               echo "MCP Registry publish failed after $attempt attempts"
               exit 1
             fi

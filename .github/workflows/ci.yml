@@ -25,6 +25,15 @@ jobs:
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
+      # Temporary PR-only probe; remove before merge.
+      - name: Verify v0.0.61 retry package matches npm
+        if: github.head_ref == 'codex/retry-release-publication'
+        run: |
+          npm version patch --no-git-tag-version
+          REMOTE=$(npm view @cablate/mcp-google-map@0.0.61 dist.integrity --json | jq -r '.')
+          LOCAL=$(npm pack --dry-run --json | jq -r '.[0].integrity')
+          test "$REMOTE" = "$LOCAL"
+
   node18:
     runs-on: ubuntu-latest
     steps:
