@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.57
+
+- fix: harden GHCR image publishing
+- ci: build and publish Docker image to GHCR
+
+
 ## 0.0.56
 
 - test: skip live place photos without API key
