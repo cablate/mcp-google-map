@@ -79,7 +79,7 @@ export async function startServer(port?: number, apiKey?: string, host?: string)
 
 // --------------- Exec Mode ---------------
 
-const EXEC_TOOLS = [
+export const EXEC_TOOLS = [
   "geocode",
   "reverse-geocode",
   "search-nearby",
@@ -100,7 +100,42 @@ const EXEC_TOOLS = [
   "local-rank-tracker",
 ] as const;
 
-async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
+type ExecFailureResponse = {
+  success: false;
+  error?: unknown;
+};
+
+interface ExecOutput {
+  write(chunk: string): unknown;
+}
+
+interface ExecStreams {
+  stdout: ExecOutput;
+  stderr: ExecOutput;
+}
+
+type ExecToolRunner = (toolName: string, params: any, apiKey: string) => Promise<unknown>;
+
+function isExecFailureResponse(result: unknown): result is ExecFailureResponse {
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "success" in result &&
+    (result as { success?: unknown }).success === false
+  );
+}
+
+function getExecFailureMessage(toolName: string, result: ExecFailureResponse): string {
+  if (typeof result.error === "string" && result.error.trim().length > 0) {
+    return result.error;
+  }
+  if (result.error !== undefined && result.error !== null) {
+    return String(result.error);
+  }
+  return `Tool "${toolName}" returned a failure response`;
+}
+
+export async function execTool(toolName: string, params: any, apiKey: string): Promise<any> {
   const searcher = new PlacesSearcher(apiKey);
 
   switch (toolName) {
@@ -230,6 +265,38 @@ async function execTool(toolName: string, params: any, apiKey: string): Promise<
   }
 }
 
+/**
+ * Run an exec-mode tool and route its result to the appropriate stream.
+ *
+ * Service methods report API failures as `{ success: false, error }` rather
+ * than throwing. Treat those responses as command failures so scripts can
+ * rely on the exit code while successful responses remain machine-readable
+ * JSON on stdout.
+ */
+export async function runExecCommand(
+  toolName: string,
+  params: any,
+  apiKey: string,
+  runner: ExecToolRunner = execTool,
+  streams: ExecStreams = { stdout: process.stdout, stderr: process.stderr }
+): Promise<number> {
+  try {
+    const result = await runner(toolName, params, apiKey);
+    if (isExecFailureResponse(result)) {
+      streams.stderr.write(JSON.stringify({ error: getExecFailureMessage(toolName, result) }, null, 2) + "\n");
+      return 1;
+    }
+
+    streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    return 0;
+  } catch (error: unknown) {
+    streams.stderr.write(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }, null, 2) + "\n"
+    );
+    return 1;
+  }
+}
+
 // --------------- Entry Point ---------------
 
 // Check if this script is being run directly
@@ -297,8 +364,7 @@ if (isRunDirectly || isMainModule) {
         }
         try {
           const params = argv.params ? JSON.parse(argv.params as string) : {};
-          const result = await execTool(argv.tool as string, params, argv.apikey as string);
-          process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+          process.exitCode = await runExecCommand(argv.tool as string, params, argv.apikey as string);
         } catch (error: any) {
           process.stderr.write(JSON.stringify({ error: error.message }, null, 2) + "\n");
           process.exitCode = 1;

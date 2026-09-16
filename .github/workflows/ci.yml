@@ -35,5 +35,6 @@ jobs:
           node-version: 18
 
       - run: npm ci
+      - run: python3 scripts/package-skill.py --check
       - run: npm run build
       - run: npm run test:unit
