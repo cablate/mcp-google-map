@@ -12,7 +12,8 @@
     "dist",
     "dist/**/*.map",
     "README.md",
-    "skills"
+    "skills",
+    "examples"
   ],
   "scripts": {
     "build": "tsup --dts",

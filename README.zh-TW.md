@@ -168,6 +168,8 @@ npx @cablate/mcp-google-map exec search-places '{"query":"東京拉麵"}'
 
 呼叫可能計費的 API 前，可先用 `npx -y @cablate/mcp-google-map exec --help` 確認 CLI 可用。
 
+完整的非 MCP 操作步驟見 [Agent Skill 示範](./examples/agent-skill-demo.md)。若代理工具或應用程式會呈現 Places 評論、照片或 AI 摘要，請遵照[內容署名與保存指引](./skills/google-maps/references/content-attribution.md)；工具會保留來源及揭露欄位，但不會替你的介面完成署名呈現。
+
 ### 批次地理編碼
 
 從檔案批次地理編碼：

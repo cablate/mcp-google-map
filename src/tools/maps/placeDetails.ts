@@ -4,7 +4,7 @@ import { getCurrentApiKey } from "../../utils/requestContext.js";
 
 const NAME = "maps_place_details";
 const DESCRIPTION =
-  "Get comprehensive details for a specific place using its Google Maps place_id. Use after search_nearby or maps_search_places to get full information including reviews, phone number, website, and opening hours. Set maxPhotos (1-10) to include photo URLs — omit or set to 0 for no photos (saves tokens).";
+  "Get comprehensive details for a specific place using its Google Maps place_id. Use after search_nearby or maps_search_places to get reviews, phone, website, and hours. Reviews, photos, and AI summaries include source/disclosure metadata that must accompany end-user display. Set maxPhotos (1-10) to include photo URLs; omit or set 0 for none.";
 
 const SCHEMA = {
   placeId: z.string().describe("Google Maps place ID"),

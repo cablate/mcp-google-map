@@ -251,14 +251,30 @@ export class PlacesSearcher {
       const details = await this.newPlacesService.getPlaceDetails(placeId);
 
       // Resolve photo URLs if requested
-      let photos: Array<{ url: string; width: number; height: number }> | undefined;
+      let photos:
+        | Array<{
+            url: string;
+            width: number;
+            height: number;
+            google_maps_uri: string;
+            flag_content_uri: string;
+            author_attributions: Array<{ display_name: string; uri: string; photo_uri: string }>;
+          }>
+        | undefined;
       if (maxPhotos > 0 && details.photos?.length > 0) {
         const photosToFetch = details.photos.slice(0, maxPhotos);
         photos = [];
         for (const photo of photosToFetch) {
           try {
             const url = await this.newPlacesService.getPhotoUri(photo.photo_reference);
-            photos.push({ url, width: photo.width, height: photo.height });
+            photos.push({
+              url,
+              width: photo.width,
+              height: photo.height,
+              google_maps_uri: photo.google_maps_uri,
+              flag_content_uri: photo.flag_content_uri,
+              author_attributions: photo.author_attributions,
+            });
           } catch {
             // Skip failed photos silently
           }
@@ -270,6 +286,7 @@ export class PlacesSearcher {
         data: {
           name: details.name,
           address: details.formatted_address,
+          google_maps_uri: details.google_maps_uri,
           location: details.geometry?.location,
           primary_type: details.primary_type || null,
           types: details.types || [],
@@ -287,7 +304,13 @@ export class PlacesSearcher {
           ...(details.atmosphere ? { atmosphere: details.atmosphere } : {}),
           ...(details.payment_options ? { payment_options: details.payment_options } : {}),
           ...(details.review_summary ? { review_summary: details.review_summary } : {}),
+          ...(details.review_summary_attribution
+            ? { review_summary_attribution: details.review_summary_attribution }
+            : {}),
           ...(details.generative_summary ? { generative_summary: details.generative_summary } : {}),
+          ...(details.generative_summary_attribution
+            ? { generative_summary_attribution: details.generative_summary_attribution }
+            : {}),
           photo_count: details.photos?.length || 0,
           ...(photos && photos.length > 0 ? { photos } : {}),
           reviews: details.reviews?.map((review: any) => ({
@@ -296,6 +319,11 @@ export class PlacesSearcher {
             language: review.language || null,
             time: review.time,
             author_name: review.author_name,
+            author_uri: review.author_uri,
+            author_photo_uri: review.author_photo_uri,
+            google_maps_uri: review.google_maps_uri,
+            flag_content_uri: review.flag_content_uri,
+            relative_publish_time_description: review.relative_publish_time_description,
           })),
         },
       };
