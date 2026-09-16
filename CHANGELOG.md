@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.61
+
+- test: remove temporary release fingerprint probe
+- fix: safely resume partially published releases
+- ci: verify declared Node 18 support
+
+
 ## 0.0.60
 
 - fix: publish latest Docker image only after release
