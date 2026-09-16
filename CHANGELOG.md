@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.62
+
+- Productize standalone Google Maps Agent Skill and exec CLI (#95)
+
+
 ## 0.0.61
 
 - test: remove temporary release fingerprint probe
