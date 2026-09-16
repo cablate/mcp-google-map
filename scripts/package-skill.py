@@ -22,8 +22,10 @@ REFERENCE_HEADING = re.compile(r"^## (maps_[a-z_]+)(?:\s|$)", re.MULTILINE)
 
 
 def skill_files() -> dict[str, bytes]:
+    # Git may check out text with CRLF on Windows; package canonical LF bytes so
+    # the same archive validates on Linux CI and Windows development machines.
     return {
-        path.relative_to(SKILL_DIR).as_posix(): path.read_bytes()
+        path.relative_to(SKILL_DIR).as_posix(): path.read_bytes().replace(b"\r\n", b"\n")
         for path in sorted(SKILL_DIR.rglob("*"))
         if path.is_file() and path != ARCHIVE
     }
