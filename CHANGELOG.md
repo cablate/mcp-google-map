@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.60
+
+- fix: publish latest Docker image only after release
+
+
 ## 0.0.59
 
 - fix: skip duplicate release events for tagged main
