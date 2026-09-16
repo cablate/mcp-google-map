@@ -627,6 +627,7 @@ async function testPlaceDetailsPhotos(session: McpSession): Promise<void> {
   assert(noPhotoData.photos === undefined, "place_details without maxPhotos omits photos array");
   assert(typeof noPhotoData.name === "string", "place_details returns name");
   assert(typeof noPhotoData.rating === "number", "place_details returns rating");
+  assert(typeof noPhotoData.google_maps_uri === "string", "place_details returns Google Maps source field");
 
   // Verify new place attribute fields
   assert(Array.isArray(noPhotoData.types), "place_details returns types array");
@@ -645,6 +646,14 @@ async function testPlaceDetailsPhotos(session: McpSession): Promise<void> {
   // reviews should have language field
   if (noPhotoData.reviews?.length > 0) {
     assert("language" in noPhotoData.reviews[0], "reviews include language field");
+    assert(typeof noPhotoData.reviews[0].google_maps_uri === "string", "reviews include source link field");
+    assert(typeof noPhotoData.reviews[0].author_uri === "string", "reviews include author profile field");
+  }
+  if (noPhotoData.review_summary) {
+    assert(
+      typeof noPhotoData.review_summary_attribution?.disclosure_text === "string",
+      "review summary includes disclosure"
+    );
   }
 
   // Test with maxPhotos=1 — should return photos array with URLs
@@ -659,6 +668,8 @@ async function testPlaceDetailsPhotos(session: McpSession): Promise<void> {
   assert(withPhotoData.photos[0].url.startsWith("https://"), "photo URL is a valid HTTPS URL");
   assert(typeof withPhotoData.photos[0].width === "number", "photo has width");
   assert(typeof withPhotoData.photos[0].height === "number", "photo has height");
+  assert(typeof withPhotoData.photos[0].google_maps_uri === "string", "photo includes source link field");
+  assert(Array.isArray(withPhotoData.photos[0].author_attributions), "photo includes author attribution field");
 }
 
 async function testMultiSession(): Promise<void> {

@@ -148,8 +148,15 @@ Response includes (when available from Google):
 | `atmosphere` | object | `{ good_for_groups, good_for_children, outdoor_seating, allows_dogs, live_music, ... }` (truthy only) |
 | `payment_options` | object | Payment methods accepted |
 | `review_summary` | string | AI-generated review summary (region-limited: US/UK/India/Japan) |
+| `review_summary_attribution` | object | Disclosure text, reporting URL, and source reviews URL; display with the summary |
 | `generative_summary` | string | AI-generated place overview (region-limited: US/India) |
+| `generative_summary_attribution` | object | Disclosure text and reporting URL; display with the summary |
+| `google_maps_uri` | string | Source place link on Google Maps |
 | `reviews[].language` | string | Review language code (e.g., `en`, `zh-TW`) |
+| `reviews[].author_uri`, `author_photo_uri`, `google_maps_uri` | string | Author profile/avatar and individual review source |
+| `photos[].author_attributions`, `google_maps_uri` | object[], string | Photo credits and individual photo source, returned with `maxPhotos > 0` |
+
+Before showing reviews, photos, or AI summaries to end users, read [`content-attribution.md`](./content-attribution.md). The old legacy-review merge was removed because it could not supply a per-review Google Maps source link; reviews now come from Places API (New) only.
 
 ---
 

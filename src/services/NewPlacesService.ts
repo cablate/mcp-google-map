@@ -27,9 +27,18 @@ export class NewPlacesService {
     "reviews.text",
     "reviews.publishTime",
     "reviews.authorAttribution.displayName",
+    "reviews.authorAttribution.uri",
+    "reviews.authorAttribution.photoUri",
+    "reviews.googleMapsUri",
+    "reviews.flagContentUri",
+    "reviews.relativePublishTimeDescription",
     "photos.heightPx",
     "photos.widthPx",
     "photos.name",
+    "photos.authorAttributions",
+    "photos.googleMapsUri",
+    "photos.flagContentUri",
+    "googleMapsUri",
     // Parking & Accessibility
     "parkingOptions",
     "accessibilityOptions",
@@ -213,59 +222,13 @@ export class NewPlacesService {
         }
       );
 
-      // Fetch newest reviews via REST (gRPC SDK doesn't support reviews_sort)
-      const newestReviews = await this.fetchNewestReviews(placeId);
-
-      // Merge: relevant (default) + newest, deduplicate by author+time
-      const allReviews = this.mergeReviews(place?.reviews || [], newestReviews);
-      const merged = { ...place, reviews: allReviews };
-
-      return this.transformPlaceResponse(merged);
+      // Use only Places (New) reviews: the legacy reviews endpoint does not
+      // provide the per-review Google Maps source link required for display.
+      return this.transformPlaceResponse(place);
     } catch (error: any) {
       Logger.error("Error in getPlaceDetails (New API):", error);
       throw new Error(`Failed to get place details for ${placeId}: ${this.extractErrorMessage(error)}`);
     }
-  }
-
-  private async fetchNewestReviews(placeId: string): Promise<any[]> {
-    try {
-      // Use Legacy Place Details API which supports reviews_sort=newest
-      // (Places API New does not support this parameter)
-      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&reviews_sort=newest&language=${this.defaultLanguage}&key=${this.apiKey}`;
-      const response = await fetch(url);
-      if (!response.ok) return [];
-      const data = await response.json();
-      if (data.status !== "OK") return [];
-      // Transform Legacy format to match New API format for mergeReviews
-      return (data.result?.reviews || []).map((r: any) => ({
-        rating: r.rating,
-        text: { text: r.text || "", languageCode: r.language || null },
-        publishTime: { seconds: r.time },
-        authorAttribution: { displayName: r.author_name || "" },
-      }));
-    } catch {
-      return [];
-    }
-  }
-
-  private mergeReviews(relevant: any[], newest: any[]): any[] {
-    const seen = new Set<string>();
-    const merged: any[] = [];
-
-    for (const review of [...relevant, ...newest]) {
-      const author = review?.authorAttribution?.displayName || "";
-      const time = String(review?.publishTime?.seconds || "");
-      const key = `${author}|${time}`;
-      if (!key || key === "|") {
-        merged.push(review);
-        continue;
-      }
-      if (seen.has(key)) continue;
-      seen.add(key);
-      merged.push(review);
-    }
-
-    return merged;
   }
 
   private transformSearchResult(place: any) {
@@ -336,6 +299,7 @@ export class NewPlacesService {
       name: place.displayName?.text || place.name || "",
       place_id: this.extractLegacyPlaceId(place),
       formatted_address: place.formattedAddress || "",
+      google_maps_uri: place.googleMapsUri || "",
       geometry: {
         location: {
           lat: place.location?.latitude || 0,
@@ -372,8 +336,25 @@ export class NewPlacesService {
             ),
           }
         : {}),
-      ...(place.reviewSummary?.text?.text ? { review_summary: place.reviewSummary.text.text } : {}),
-      ...(place.generativeSummary?.overview?.text ? { generative_summary: place.generativeSummary.overview.text } : {}),
+      ...(place.reviewSummary?.text?.text
+        ? {
+            review_summary: place.reviewSummary.text.text,
+            review_summary_attribution: {
+              disclosure_text: place.reviewSummary.disclosureText?.text || "",
+              flag_content_uri: place.reviewSummary.flagContentUri || "",
+              reviews_uri: place.reviewSummary.reviewsUri || "",
+            },
+          }
+        : {}),
+      ...(place.generativeSummary?.overview?.text
+        ? {
+            generative_summary: place.generativeSummary.overview.text,
+            generative_summary_attribution: {
+              disclosure_text: place.generativeSummary.disclosureText?.text || "",
+              flag_content_uri: place.generativeSummary.flagContentUri || "",
+            },
+          }
+        : {}),
       reviews:
         place.reviews?.map((review: any) => ({
           rating: review.rating || 0,
@@ -381,12 +362,25 @@ export class NewPlacesService {
           language: review.text?.languageCode || null,
           time: review.publishTime?.seconds || 0,
           author_name: review.authorAttribution?.displayName || "",
+          author_uri: review.authorAttribution?.uri || "",
+          author_photo_uri: review.authorAttribution?.photoUri || "",
+          google_maps_uri: review.googleMapsUri || "",
+          flag_content_uri: review.flagContentUri || "",
+          relative_publish_time_description: review.relativePublishTimeDescription || "",
         })) || [],
       photos:
         place.photos?.map((photo: any) => ({
           photo_reference: photo.name || "",
           height: photo.heightPx || 0,
           width: photo.widthPx || 0,
+          google_maps_uri: photo.googleMapsUri || "",
+          flag_content_uri: photo.flagContentUri || "",
+          author_attributions:
+            photo.authorAttributions?.map((author: any) => ({
+              display_name: author.displayName || "",
+              uri: author.uri || "",
+              photo_uri: author.photoUri || "",
+            })) || [],
         })) || [],
     };
   }

@@ -21,6 +21,7 @@ Use the package's `exec` CLI to answer location questions without starting an MC
 | Precise input saves trouble | Use coordinates over address strings when available. Use place_id over name search. More precise input = more reliable output. |
 | Output is structured | Every tool returns JSON. Use it directly for downstream computation or comparison — no extra parsing needed. |
 | Present results clearly | Summarize comparisons in a table when it helps; do not pass raw JSON through as the final answer. |
+| Preserve source context | Google Maps content has display, attribution, and retention conditions. Read `references/content-attribution.md` before presenting place reviews, photos, or AI summaries. |
 
 ---
 
@@ -109,5 +110,6 @@ npx -y @cablate/mcp-google-map exec <tool> '<json_params>'
 | `references/tools-api.md` | Full parameter specs, response formats, 7 scenario recipes, and decision guide | When you need exact parameters, response shapes, or multi-tool workflow patterns |
 | `references/travel-planning.md` | Travel planning methodology — 6-layer model, Search Along Route, anti-patterns | When planning multi-day trips — **read before Recipe 1** |
 | `references/local-seo.md` | Local SEO / Google Business Profile ranking analysis — competitor audit, keyword landscape, gap analysis | When analyzing business rankings, comparing competitors, or scouting locations |
+| `references/content-attribution.md` | Google Maps content attribution, source links, AI disclosure, and storage limits | Before presenting reviews, photos, or AI summaries from Places |
 
 > For **project development** knowledge (architecture, API guide, GIS domain, design decisions), see `skills/project-docs/SKILL.md`.

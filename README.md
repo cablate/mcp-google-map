@@ -168,6 +168,8 @@ To use the **Agent Skill without MCP**:
 
 You can verify the CLI is available with `npx -y @cablate/mcp-google-map exec --help` before making a billable API call.
 
+For a reproducible no-MCP walkthrough, see the [Agent Skill demo](./examples/agent-skill-demo.md). If your agent or app displays Places reviews, photos, or AI summaries, follow the [content attribution and storage guidance](./skills/google-maps/references/content-attribution.md); the tool preserves source/disclosure metadata but does not render a compliant UI for you.
+
 ### Batch Geocode
 
 Geocode hundreds of addresses from a file:
