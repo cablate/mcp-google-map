@@ -1,0 +1,20 @@
+{
+  "name": "cablate-maps",
+  "description": "Google Maps tools and workflows for AI agents",
+  "owner": { "name": "CabLate", "url": "https://github.com/cablate" },
+  "plugins": [
+    {
+      "name": "mcp-google-map",
+      "displayName": "Google Maps CLI",
+      "description": "Place research, travel planning, and local SEO without an MCP connection.",
+      "source": {
+        "source": "npm",
+        "package": "@cablate/mcp-google-map",
+        "version": "latest",
+        "registry": "https://registry.npmjs.org"
+      },
+      "category": "Productivity",
+      "tags": ["google-maps", "travel", "local-seo"]
+    }
+  ]
+}

@@ -11,3 +11,4 @@ credentials.json
 .mcpregistry_*
 .mcp.json
 output/
+artifacts/

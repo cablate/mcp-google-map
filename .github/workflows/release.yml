@@ -70,6 +70,20 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           jq --arg v "$VERSION" '.version = $v' plugin.json > plugin.tmp && mv plugin.tmp plugin.json
           jq --arg v "$VERSION" '.version = $v' .codex-plugin/plugin.json > plugin.tmp && mv plugin.tmp .codex-plugin/plugin.json
+          jq --arg v "$VERSION" '.version = $v' .claude-plugin/plugin.json > plugin.tmp && mv plugin.tmp .claude-plugin/plugin.json
+
+      - name: Package Claude plugin
+        run: npm run package:claude-plugin
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Validate Claude plugin
+        run: |
+          npx -y @anthropic-ai/claude-code@2.1.283 plugin validate artifacts/claude-plugin/mcp-google-map --strict
+          npx -y @anthropic-ai/claude-code@2.1.283 plugin validate . --strict
 
       - name: Update CHANGELOG
         run: |
@@ -165,7 +179,7 @@ jobs:
       - name: Commit version bump & tag
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          git add package.json package-lock.json CHANGELOG.md server.json plugin.json .codex-plugin/plugin.json
+          git add package.json package-lock.json CHANGELOG.md server.json plugin.json .codex-plugin/plugin.json .claude-plugin/plugin.json
           git commit -m "chore: release v${VERSION}"
           git tag "v${VERSION}"
           git pull --rebase
@@ -181,7 +195,9 @@ jobs:
           else
             NOTES="Initial release"
           fi
-          gh release create "v${VERSION}" --title "v${VERSION}" --notes "$NOTES"
+          gh release create "v${VERSION}" --title "v${VERSION}" --notes "$NOTES" \
+            artifacts/claude-plugin/*.zip \
+            artifacts/claude-plugin/*.sha256
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
