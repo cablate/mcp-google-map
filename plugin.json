@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mcp-google-map",
-  "version": "0.0.65",
-  "description": "Use focused Skills for Google Maps place research, travel planning, and local SEO through a standalone CLI.",
+  "version": "0.0.66",
+  "description": "Use Google Maps for place research, travel planning, and local SEO through focused Skills and a standalone CLI—no MCP setup required.",
   "author": {
     "name": "CabLate",
     "url": "https://github.com/cablate"

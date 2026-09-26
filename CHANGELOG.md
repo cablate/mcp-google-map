@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.66
+
+- docs: clarify Codex Plugin installation, runtime loading, diagnostics, and MCP alternatives
+- docs: align English and Traditional Chinese onboarding
+
+
 ## 0.0.65
 
 - feat: split plugin into focused map skills (#98)

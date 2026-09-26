@@ -1,7 +1,7 @@
 {
   "name": "mcp-google-map",
-  "version": "0.0.65",
-  "description": "Use focused Skills for Google Maps place research, travel planning, and local SEO through a standalone CLI.",
+  "version": "0.0.66",
+  "description": "Use Google Maps for place research, travel planning, and local SEO through focused Skills and a standalone CLI—no MCP setup required.",
   "author": {
     "name": "CabLate",
     "url": "https://github.com/cablate"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Google Maps CLI",
-    "shortDescription": "Focused maps, travel planning, and local SEO workflows through a standalone CLI.",
-    "longDescription": "Three focused Skills guide an AI agent to use the @cablate/mcp-google-map CLI for general geospatial research, evidence-backed travel planning, and local SEO analysis. No MCP connection is required.",
+    "shortDescription": "Google Maps, travel planning, and local SEO without MCP setup.",
+    "longDescription": "Three focused Skills guide an AI agent to use the @cablate/mcp-google-map standalone CLI for place research, evidence-backed travel planning, and local SEO analysis. The plugin does not start or register an MCP server.",
     "developerName": "CabLate",
     "category": "Productivity",
     "capabilities": [

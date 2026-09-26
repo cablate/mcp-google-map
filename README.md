@@ -1,3 +1,13 @@
+# MCP Google Maps
+
+Give AI agents reliable Google Maps search, geocoding, routing, weather, air quality, and local SEO data. Use it as a Codex Plugin with standalone CLI calls, or connect the same 18 tools through MCP.
+
+<p align="center"><b>English</b> | <a href="./README.zh-TW.md">繁體中文</a></p>
+
+<p align="center">
+  <img src="./assets/banner.webp" alt="MCP Google Maps — AI-Powered Geospatial Tools" width="800">
+</p>
+
 <p align="center">
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/v/@cablate/mcp-google-map" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/dm/@cablate/mcp-google-map" alt="npm downloads"></a>
@@ -6,22 +16,45 @@
 </p>
 
 <p align="center">
-  <img src="./assets/banner.webp" alt="MCP Google Maps — AI-Powered Geospatial Tools" width="800">
-</p>
-
-<h3 align="center"><b>Give your AI agent the ability to understand the physical world —<br>geocode, route, search, and reason about locations.</b></h3>
-
-<p align="center">
-  <b>English</b> | <a href="./README.zh-TW.md">繁體中文</a>
-</p>
-
-<p align="center">
   <img src="./assets/demo-grid-en.png" alt="Travel planning demo — Kyoto 2-day, Tokyo outdoor, Japan 5-day, Bangkok budget" width="800">
 </p>
 
-- **18 tools** — 14 atomic + 4 composite (explore-area, plan-route, compare-places, local-rank-tracker)
-- **3 modes** — stdio, StreamableHTTP, standalone exec CLI
-- **3 Agent Skills** — focused workflows for general maps, travel planning, and local SEO ([`skills/`](./skills/))
+- **18 tools** — 14 atomic tools and 4 higher-level workflows
+- **Three ways to connect** — Codex Plugin, MCP over stdio, or Streamable HTTP
+- **Three focused Skills** — general maps, travel planning, and local SEO
+
+## Choose how to use it
+
+| If you want to… | Use | What runs |
+|---|---|---|
+| Let Codex answer map, travel, or local SEO questions without configuring MCP | **Codex Plugin** | The matching Skill loads on demand and calls the standalone CLI |
+| Add Google Maps tools to Claude Desktop, Cursor, VS Code, or another local MCP client | **MCP stdio** | The client starts one local MCP process |
+| Serve multiple or remote MCP sessions | **Streamable HTTP** | A self-hosted HTTP server at `/mcp` |
+
+All options require Node.js 18+ and a Google Maps Platform API key. Enable **Places API (New)** and **Routes API** in [Google Cloud Console](https://console.cloud.google.com) for place and route workflows. Google may charge for live API requests.
+
+## Fastest start: Codex Plugin
+
+```bash
+codex plugin marketplace add cablate/mcp-google-map --ref main
+codex plugin add mcp-google-map@cablate
+```
+
+Set `GOOGLE_MAPS_API_KEY` in the environment where Codex runs, then start a new conversation and ask a location question. Confirm local readiness without calling Google APIs:
+
+```bash
+npx -y @cablate/mcp-google-map doctor
+```
+
+A ready installation reports successful Node.js, package, and API-key checks; `live-api` is skipped. Use `doctor --live` only when you intend to make potentially billable test requests.
+
+The plugin does **not** start or register an MCP server. At runtime, Codex first sees the names and descriptions of three Skills and loads full instructions only when the request matches:
+
+- `google-maps` — place search, geocoding, routes, neighborhood, and environmental facts
+- `google-maps-travel-planning` — day trips and multi-day itineraries
+- `google-maps-local-seo` — business visibility and geographic rank analysis
+
+For a complete no-MCP walkthrough, see the [Agent Skill demo](./examples/agent-skill-demo.md).
 
 ### vs Google Grounding Lite
 
@@ -42,7 +75,7 @@
 | Self-hosted | Yes | Google-managed only |
 | Agent Skill | Yes | No |
 
-### Quick Start
+### CLI and server quick checks
 
 ```bash
 # stdio (Claude Desktop, Cursor, etc.)
@@ -89,24 +122,9 @@ All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` �
 
 ## Installation
 
-### Codex Plugin (3 Agent Skills, no MCP required)
+The [fastest-start section](#fastest-start-codex-plugin) covers the Codex Plugin. Use one of the following configurations when you specifically need MCP.
 
-Install the CabLate marketplace, then install the Skill-only plugin:
-
-```bash
-codex plugin marketplace add cablate/mcp-google-map --ref main
-codex plugin add mcp-google-map@cablate
-```
-
-Set `GOOGLE_MAPS_API_KEY` in the environment available to Codex, make sure Node.js 18+ and `npx` are installed, then start a new conversation. The plugin discovers three focused Skills and teaches the agent to run `npx -y @cablate/mcp-google-map exec ...` directly. It does not register or start an MCP server; the MCP setup below remains an independent option.
-
-At runtime, Codex sees the name and description of each Skill and loads the full instructions only when the request matches:
-
-- `google-maps` — place search, geocoding, routes, neighborhood and environmental facts
-- `google-maps-travel-planning` — day trips and multi-day itineraries
-- `google-maps-local-seo` — Google Business Profile visibility and geographic rank analysis
-
-### Method 1: stdio (Recommended for most clients)
+### MCP stdio (recommended for local clients)
 
 Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports stdio:
 
@@ -137,7 +155,7 @@ Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports std
 
 Omit or set to `*` for all 18 tools (default).
 
-### Method 2: HTTP Server
+### Streamable HTTP
 
 For multi-session deployments, per-request API key isolation, or remote access:
 
