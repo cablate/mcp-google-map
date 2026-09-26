@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.64
+
+- feat: package CLI skill as installable plugin (#97)
+
+
 ## 0.0.63
 
 - Preserve Places attributions and refresh trust guidance (#96)
