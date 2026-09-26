@@ -1,132 +1,101 @@
-# MCP Google Maps
+# Google Maps for AI agents
 
-Give AI agents reliable Google Maps search, geocoding, routing, weather, air quality, and local SEO data. Use it as a Codex Plugin with standalone CLI calls, or connect the same 18 tools through MCP.
+**Stop rebuilding place search, routing, and location workflows for every AI app.**
 
-<p align="center"><b>English</b> | <a href="./README.zh-TW.md">繁體中文</a></p>
+`@cablate/mcp-google-map` turns Google Maps Platform into 18 read-only agent tools and three focused Skills. An agent can find real places, verify routes, compare options, build practical itineraries, or audit local search visibility—through MCP or a standalone CLI.
 
-<p align="center">
-  <img src="./assets/banner.webp" alt="MCP Google Maps — AI-Powered Geospatial Tools" width="800">
-</p>
+You choose the integration model: Codex Plugin when you want Skills without MCP setup, stdio for desktop MCP clients, or Streamable HTTP for shared and remote deployments.
+
+<p align="center"><b>English</b> · <a href="./README.zh-TW.md">繁體中文</a></p>
+
+<p align="center"><img src="./assets/banner.webp" alt="Google Maps tools and workflows for AI agents" width="800"></p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/v/@cablate/mcp-google-map" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/dm/@cablate/mcp-google-map" alt="npm downloads"></a>
-  <a href="https://github.com/cablate/mcp-google-map/stargazers"><img src="https://img.shields.io/github/stars/cablate/mcp-google-map?style=social" alt="GitHub stars"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/cablate/mcp-google-map" alt="license"></a>
+  <a href="https://github.com/cablate/mcp-google-map/actions/workflows/ci.yml"><img src="https://github.com/cablate/mcp-google-map/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/cablate/mcp-google-map" alt="MIT license"></a>
 </p>
 
-<p align="center">
-  <img src="./assets/demo-grid-en.png" alt="Travel planning demo — Kyoto 2-day, Tokyo outdoor, Japan 5-day, Bangkok budget" width="800">
-</p>
+## Why use it?
 
-- **18 tools** — 14 atomic tools and 4 higher-level workflows
-- **Three ways to connect** — Codex Plugin, MCP over stdio, or Streamable HTTP
-- **Three focused Skills** — general maps, travel planning, and local SEO
+Giving an agent a raw Maps API is only the beginning. Useful answers often require several dependent calls: resolve a place, preserve its identity, search around it, check opening details, calculate travel time, and explain what was actually verified. This project packages that work into one consistent interface.
 
-## Choose how to use it
+- **Move from lookup to outcome.** Atomic tools handle geocoding, place details, directions, weather, air quality, and maps. Composite tools explore areas, compare candidates, optimize stops, and measure local rankings.
+- **Use the same capabilities with or without MCP.** The standalone `exec` CLI works with Agent Skills and automation; the MCP server exposes the same 18 tools over stdio or HTTP.
+- **Give agents workflow guidance, not just function names.** Three Skills cover general map research, evidence-backed travel planning, and local SEO. Codex loads their full instructions only when a request matches.
+- **Keep deployment and credentials under your control.** Run locally or self-host. API keys remain in your environment or request headers, with per-session isolation for HTTP deployments.
+- **Start narrow and grow later.** Register only the tools you need with `GOOGLE_MAPS_ENABLED_TOOLS`, or use the full catalog.
 
-| If you want to… | Use | What runs |
+<p align="center"><img src="./assets/demo-grid-en.png" alt="Examples of travel planning with checked places and routes" width="800"></p>
+
+## What can an agent do?
+
+| Outcome | How the project helps |
+|---|---|
+| Find and evaluate real places | Natural-language and nearby search, place details, ratings, hours, reviews, and distance comparison |
+| Build a trip that works geographically | Candidate discovery, along-route stops, travel-time checks, multi-stop optimization, weather, and static maps |
+| Research a neighborhood | Multi-category exploration plus targeted distance, elevation, timezone, weather, and air-quality checks |
+| Plan field work or deliveries | Route matrices and optimized stop ordering for up to 25 stops |
+| Audit local search visibility | Geographic grid ranking, competitor discovery, ARP, ATRP, and SoLV metrics |
+| Enrich location data | Single or batch geocoding, reverse geocoding, and structured JSON output |
+
+These are data and planning tools, not guarantees of safety, accessibility, opening status, or ranking outcomes. Applications displaying Places reviews, photos, or AI summaries must follow the [content attribution and storage guidance](./skills/_shared/content-attribution.md).
+
+## Choose your integration
+
+| Use | Best for | What runs |
 |---|---|---|
-| Let Codex answer map, travel, or local SEO questions without configuring MCP | **Codex Plugin** | The matching Skill loads on demand and calls the standalone CLI |
-| Add Google Maps tools to Claude Desktop, Cursor, VS Code, or another local MCP client | **MCP stdio** | The client starts one local MCP process |
-| Serve multiple or remote MCP sessions | **Streamable HTTP** | A self-hosted HTTP server at `/mcp` |
+| **Codex Plugin** | Asking Codex map, travel, or local SEO questions without MCP configuration | A matching Skill loads on demand and calls the standalone CLI |
+| **Standalone CLI** | Scripts, automation, and other Skill-compatible agents | One stateless command returns JSON |
+| **MCP stdio** | Claude Desktop, Cursor, VS Code, and other local MCP clients | The client starts a local MCP process |
+| **Streamable HTTP** | Multi-session, containerized, LAN, or remote access | A self-hosted server exposes `/mcp` |
 
-All options require Node.js 18+ and a Google Maps Platform API key. Enable **Places API (New)** and **Routes API** in [Google Cloud Console](https://console.cloud.google.com) for place and route workflows. Google may charge for live API requests.
+All options require Node.js 18+ and a Google Maps Platform API key. Live calls may be billable. Enable the APIs needed by your selected tools; common place and route workflows require **Places API (New)**, **Routes API**, and often **Geocoding API**.
 
-## Fastest start: Codex Plugin
+## Start with Codex—no MCP required
 
 ```bash
 codex plugin marketplace add cablate/mcp-google-map --ref main
 codex plugin add mcp-google-map@cablate
 ```
 
-Set `GOOGLE_MAPS_API_KEY` in the environment where Codex runs, then start a new conversation and ask a location question. Confirm local readiness without calling Google APIs:
+Set `GOOGLE_MAPS_API_KEY` in the environment where Codex runs, then start a new conversation. Verify the local setup without making a Google API request:
 
 ```bash
 npx -y @cablate/mcp-google-map doctor
 ```
 
-A ready installation reports successful Node.js, package, and API-key checks; `live-api` is skipped. Use `doctor --live` only when you intend to make potentially billable test requests.
+Success means the `node`, `package`, and `api-key` checks pass and `live-api` is skipped. Use `doctor --live` only when you intend to send potentially billable checks to Geocoding, Places, and Routes.
 
-The plugin does **not** start or register an MCP server. At runtime, Codex first sees the names and descriptions of three Skills and loads full instructions only when the request matches:
+Try asking:
 
-- `google-maps` — place search, geocoding, routes, neighborhood, and environmental facts
-- `google-maps-travel-planning` — day trips and multi-day itineraries
-- `google-maps-local-seo` — business visibility and geographic rank analysis
+> Plan a practical two-day Kyoto itinerary. Group nearby places, check travel times, and explain any opening-hour assumptions.
 
-For a complete no-MCP walkthrough, see the [Agent Skill demo](./examples/agent-skill-demo.md).
+Codex selects `google-maps` for general location research, `google-maps-travel-planning` for itineraries, or `google-maps-local-seo` for business visibility analysis. The plugin does not register or start an MCP server. See the [no-MCP walkthrough](./examples/agent-skill-demo.md) for a reproducible example.
 
-### vs Google Grounding Lite
+## Use the standalone CLI
 
-| | This project | [Grounding Lite](https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services) |
-|---|---|---|
-| Tools | **18** | 3 |
-| Geocoding | Yes | No |
-| Step-by-step directions | Yes | No |
-| Elevation | Yes | No |
-| Distance matrix | Yes | No |
-| Place details | Yes | No |
-| Timezone | Yes | No |
-| Weather | Yes | Yes |
-| Air quality | Yes | No |
-| Map images | Yes | No |
-| Composite tools (explore, plan, compare) | Yes | No |
-| Open source | MIT | No |
-| Self-hosted | Yes | Google-managed only |
-| Agent Skill | Yes | No |
-
-### CLI and server quick checks
+Every MCP tool also has a short CLI name:
 
 ```bash
-# stdio (Claude Desktop, Cursor, etc.)
-npx @cablate/mcp-google-map --stdio
-
-# exec CLI — no server needed
-npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
-
-# HTTP server
-npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
+npx -y @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
+npx -y @cablate/mcp-google-map exec search-places '{"query":"quiet cafes in Kyoto"}'
+npx -y @cablate/mcp-google-map exec directions '{"origin":"Tokyo Station","destination":"Tokyo Skytree","mode":"transit"}'
 ```
 
-## Special Thanks
+Each call is stateless. Successful calls return `{ "success": true, "data": ... }` on stdout; failures exit nonzero and write structured JSON to stderr.
 
-Special thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add support for `streamablehttp`.
+For bulk address enrichment:
 
-## Available Tools
+```bash
+npx @cablate/mcp-google-map batch-geocode -i addresses.txt -o results.json
+cat addresses.txt | npx @cablate/mcp-google-map batch-geocode -i -
+```
 
-| Tool | Description |
-|------|-------------|
-| `maps_search_nearby` | Find places near a location by type (restaurant, cafe, hotel, etc.). Supports filtering by radius, rating, and open status. |
-| `maps_search_places` | Free-text place search (e.g., "sushi restaurants in Tokyo"). Supports location bias, rating, open-now filters. |
-| `maps_place_details` | Get full details for a place by its place_id — reviews, phone, website, hours. Optional `maxPhotos` param returns photo URLs. |
-| `maps_geocode` | Convert an address or landmark name into GPS coordinates. |
-| `maps_reverse_geocode` | Convert GPS coordinates into a street address. |
-| `maps_distance_matrix` | Calculate travel distances and times between multiple origins and destinations. Driving mode supports `avoid_tolls` and `avoid_highways`. |
-| `maps_directions` | Get step-by-step navigation between two points with route details. Driving mode supports `avoid_tolls` and `avoid_highways`. |
-| `maps_elevation` | Get elevation (meters above sea level) for geographic coordinates. |
-| `maps_timezone` | Get timezone ID, name, UTC/DST offsets, and local time for coordinates. |
-| `maps_weather` | Get current weather conditions or forecast — temperature, humidity, wind, UV, precipitation. |
-| `maps_air_quality` | Get air quality index, pollutant concentrations, and health recommendations by demographic group. |
-| `maps_static_map` | Generate a map image with markers, paths, or routes — returned inline for the user to see directly. |
-| `maps_batch_geocode` | Geocode up to 50 addresses in one call — returns coordinates for each. |
-| `maps_search_along_route` | Search for places along a route between two points — ranked by minimal detour time. |
-| **Composite Tools** | |
-| `maps_explore_area` | Explore what's around a location — searches multiple place types and gets details in one call. |
-| `maps_plan_route` | Plan an optimized multi-stop route — uses Routes API waypoint optimization (up to 25 stops) for efficient ordering. Driving mode supports `avoid_tolls` and `avoid_highways`. |
-| `maps_compare_places` | Compare places side-by-side — searches, gets details, and optionally calculates distances. |
-| `maps_local_rank_tracker` | Track a business's local search ranking across a geographic grid — like LocalFalcon. Supports up to 3 keywords for batch scanning. Returns rank at each point, top-3 competitors, and metrics (ARP, ATRP, SoLV). |
+## Connect an MCP client
 
-All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` — MCP clients can auto-approve these without user confirmation.
-
-> **Prerequisite**: Enable **Places API (New)** and **Routes API** in [Google Cloud Console](https://console.cloud.google.com) before using place-related and routing tools.
-
-## Installation
-
-The [fastest-start section](#fastest-start-codex-plugin) covers the Codex Plugin. Use one of the following configurations when you specifically need MCP.
-
-### MCP stdio (recommended for local clients)
-
-Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports stdio:
+### stdio
 
 ```json
 {
@@ -134,301 +103,83 @@ Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports std
     "google-maps": {
       "command": "npx",
       "args": ["-y", "@cablate/mcp-google-map", "--stdio"],
-      "env": {
-        "GOOGLE_MAPS_API_KEY": "YOUR_API_KEY"
-      }
+      "env": { "GOOGLE_MAPS_API_KEY": "YOUR_API_KEY" }
     }
   }
 }
 ```
 
-**Reduce context usage** — If you only need a subset of tools, set `GOOGLE_MAPS_ENABLED_TOOLS` to limit which tools are registered:
-
-```json
-{
-  "env": {
-    "GOOGLE_MAPS_API_KEY": "YOUR_API_KEY",
-    "GOOGLE_MAPS_ENABLED_TOOLS": "maps_geocode,maps_directions,maps_search_places"
-  }
-}
-```
-
-Omit or set to `*` for all 18 tools (default).
+To reduce tool-list context, add a comma-separated allowlist such as `"GOOGLE_MAPS_ENABLED_TOOLS": "maps_geocode,maps_directions,maps_search_places"`. Omit it or use `*` to expose all tools.
 
 ### Streamable HTTP
 
-For multi-session deployments, per-request API key isolation, or remote access:
-
 ```bash
-npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
-
-# Bind to all interfaces for remote access (e.g. Docker, LAN)
-npx @cablate/mcp-google-map --host 0.0.0.0 --port 3000 --apikey "YOUR_API_KEY"
+npx @cablate/mcp-google-map --host 127.0.0.1 --port 3000 --apikey "YOUR_API_KEY"
 ```
-
-Then configure your MCP client:
 
 ```json
 {
   "mcpServers": {
     "google-maps": {
       "type": "http",
-      "url": "http://localhost:3000/mcp"
+      "url": "http://127.0.0.1:3000/mcp"
     }
   }
 }
 ```
 
-### Server Information
+Bind to `0.0.0.0` only when the server must accept external connections. For multi-tenant deployments, prefer the `X-Google-Maps-API-Key` request header so keys remain isolated by session.
 
-- **Transport**: stdio (`--stdio`) or Streamable HTTP (default)
-- **Tools**: 18 Google Maps tools (14 atomic + 4 composite) — filterable via `GOOGLE_MAPS_ENABLED_TOOLS`
+## Tool catalog
 
-### CLI Exec Mode (Agent Skill)
+| Group | Tools |
+|---|---|
+| Places and discovery | `maps_search_places`, `maps_search_nearby`, `maps_place_details`, `maps_explore_area`, `maps_compare_places`, `maps_search_along_route` |
+| Location and routing | `maps_geocode`, `maps_reverse_geocode`, `maps_directions`, `maps_distance_matrix`, `maps_plan_route`, `maps_batch_geocode` |
+| Context and visualization | `maps_elevation`, `maps_timezone`, `maps_weather`, `maps_air_quality`, `maps_static_map` |
+| Local SEO | `maps_local_rank_tracker` |
 
-Use tools directly without running the MCP server:
+All 18 tools declare `readOnlyHint: true` and `destructiveHint: false`. Exact parameters, response shapes, and workflow recipes live in the [tool reference](./skills/google-maps/references/tools-api.md).
 
-```bash
-npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
-npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
-```
+## API key and Google Cloud setup
 
-All 18 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `batch-geocode-tool`, `search-along-route`, `explore-area`, `plan-route`, `compare-places`, `local-rank-tracker`. See [`skills/`](./skills/) for the Skill definitions and full parameter docs.
+The key must belong to a Google Cloud project with billing enabled and restrictions compatible with the runtime. The [setup and diagnostics guide](./skills/_shared/setup-and-diagnostics.md) maps each capability to its required API and explains common failures.
 
-To use the **Agent Skill without MCP**:
+Credential priority is:
 
-1. Install the entire [`skills/`](./skills/) tree in your agent's Skills directory, following that client's instructions. Keep all three Skill folders and `_shared/` together so cross-Skill references continue to resolve. Installing the npm package alone does not register a Skill unless the package is installed through its plugin marketplace.
-2. Make Node.js 18+ and `npx` available to the agent, and set `GOOGLE_MAPS_API_KEY` in its environment. Prefer the environment variable to `--apikey`, which can expose a key in shell history or process listings.
-3. Ask the agent a location question. The Skill guides it to call the standalone CLI, for example `npx -y @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'`. No MCP server or MCP client configuration is needed.
+1. `X-Google-Maps-API-Key` HTTP request header
+2. `--apikey` command-line option
+3. `GOOGLE_MAPS_API_KEY` environment variable
 
-Run `npx -y @cablate/mcp-google-map doctor` for a non-billable local readiness check. After informing the user that test requests may incur Google Maps Platform charges, `doctor --live` can verify Geocoding, Places API (New), and Routes API independently.
+Prefer environment variables or request headers. Command-line secrets can appear in shell history and process listings.
 
-For a reproducible no-MCP walkthrough, see the [Agent Skill demo](./examples/agent-skill-demo.md). If your agent or app displays Places reviews, photos, or AI summaries, follow the [content attribution and storage guidance](./skills/_shared/content-attribution.md); the tool preserves source/disclosure metadata but does not render a compliant UI for you.
+## Trust and limits
 
-### Batch Geocode
-
-Geocode hundreds of addresses from a file:
-
-```bash
-npx @cablate/mcp-google-map batch-geocode -i addresses.txt -o results.json
-cat addresses.txt | npx @cablate/mcp-google-map batch-geocode -i -
-```
-
-Input: one address per line. Output: JSON with `{ total, succeeded, failed, results[] }`. Default concurrency: 20 parallel requests.
-
-
-
-### API Key Configuration
-
-API keys can be provided in three ways (priority order):
-
-1. **HTTP Headers** (Highest priority)
-
-   ```json
-   {
-     "mcp-google-map": {
-       "transport": "streamableHttp",
-       "url": "http://localhost:3000/mcp",
-       "headers": {
-         "X-Google-Maps-API-Key": "YOUR_API_KEY"
-       }
-     }
-   }
-   ```
-
-2. **Command Line**
-
-   ```bash
-   mcp-google-map --apikey YOUR_API_KEY
-   ```
-
-3. **Environment Variable** (.env file or command line)
-   ```env
-   GOOGLE_MAPS_API_KEY=your_api_key_here
-   MCP_SERVER_PORT=3000
-   MCP_SERVER_HOST=0.0.0.0
-   ```
+- Place and route facts come from the Google Maps Platform APIs enabled for your project; weather availability has regional limitations.
+- A successful API response does not prove accessibility, safety, legal suitability, or real-time availability.
+- The package preserves source and disclosure metadata where returned, but your interface remains responsible for compliant attribution and storage.
+- HTTP mode supports per-session API-key isolation and DNS rebinding protection.
+- This project is MIT licensed and self-hostable. See [SECURITY.md](./SECURITY.md) for vulnerability reporting and [Security Assessment Clarifications](./SECURITY_ASSESSMENT.md) for the review checklist.
 
 ## Development
 
-### Local Development
-
 ```bash
-# Clone the repository
 git clone https://github.com/cablate/mcp-google-map.git
 cd mcp-google-map
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your API key
-
-# Build the project
+npm ci
 npm run build
-
-# Start the server
-npm start
-
-# Or run in development mode
-npm run dev
-```
-
-### Testing
-
-```bash
-# Run smoke tests (no API key required for basic tests)
+npm run test:unit
 npm test
-
-# Run full E2E tests (requires GOOGLE_MAPS_API_KEY)
-npm run test:e2e
 ```
 
-### Project Structure
+Live E2E calls require `GOOGLE_MAPS_API_KEY` and may be billable: `npm run test:e2e`.
 
-```
-src/
-├── cli.ts                        # CLI entry point
-├── config.ts                     # Tool registration and server config
-├── index.ts                      # Package exports
-├── core/
-│   └── BaseMcpServer.ts          # MCP server with streamable HTTP transport
-├── services/
-│   ├── NewPlacesService.ts       # Google Places API (New) client
-│   ├── PlacesSearcher.ts         # Service facade layer
-│   ├── RoutesService.ts          # Google Routes API client (directions, distance matrix, waypoint optimization)
-│   └── toolclass.ts              # Google Maps API client (geocoding, timezone, elevation, static map)
-├── tools/
-│   └── maps/
-│       ├── searchNearby.ts       # maps_search_nearby tool
-│       ├── searchPlaces.ts       # maps_search_places tool
-│       ├── placeDetails.ts       # maps_place_details tool
-│       ├── geocode.ts            # maps_geocode tool
-│       ├── reverseGeocode.ts     # maps_reverse_geocode tool
-│       ├── distanceMatrix.ts     # maps_distance_matrix tool
-│       ├── directions.ts         # maps_directions tool
-│       ├── elevation.ts          # maps_elevation tool
-│       ├── timezone.ts           # maps_timezone tool
-│       ├── weather.ts            # maps_weather tool
-│       ├── airQuality.ts         # maps_air_quality tool
-│       ├── staticMap.ts          # maps_static_map tool
-│       ├── batchGeocode.ts       # maps_batch_geocode tool
-│       ├── searchAlongRoute.ts   # maps_search_along_route tool
-│       ├── exploreArea.ts        # maps_explore_area (composite)
-│       ├── planRoute.ts          # maps_plan_route (composite)
-│       ├── comparePlaces.ts      # maps_compare_places (composite)
-│       └── localRankTracker.ts   # maps_local_rank_tracker (composite)
-└── utils/
-    ├── apiKeyManager.ts          # API key management
-    └── requestContext.ts         # Per-request context (API key isolation)
-tests/
-└── smoke.test.ts                 # Smoke + E2E test suite
-skills/
-├── google-maps/                  # General place, route, and environment workflow
-│   ├── SKILL.md
-│   └── references/tools-api.md   # Tool parameters + generic recipes
-├── google-maps-travel-planning/  # Day-trip and itinerary workflow
-│   ├── SKILL.md
-│   └── references/travel-planning.md
-├── google-maps-local-seo/        # Business visibility and grid-rank workflow
-│   ├── SKILL.md
-│   └── references/local-seo.md
-└── _shared/                      # On-demand resources used by all three Skills
-    ├── setup-and-diagnostics.md
-    └── content-attribution.md
-.agents/
-├── plugins/marketplace.json      # CabLate marketplace catalog
-└── skills/project-docs/          # Maintainer-only development Skill
-.codex-plugin/plugin.json         # Codex compatibility manifest
-plugin.json                       # Portable Agent Plugin manifest
-```
+Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Release history is in [CHANGELOG.md](./CHANGELOG.md).
 
-## Tech Stack
+## Acknowledgements
 
-- **TypeScript** - Type-safe development
-- **Node.js** - Runtime environment
-- **@googlemaps/places** - Google Places API (New) for place search and details
-- **Google Routes API** - Directions, distance matrix, and waypoint optimization via REST
-- **@googlemaps/google-maps-services-js** - Geocoding, timezone, elevation
-- **@modelcontextprotocol/sdk** - MCP protocol implementation (v1.27+)
-- **Express.js** - HTTP server framework
-- **Zod** - Schema validation
-
-## Security
-
-- API keys are handled server-side
-- Per-session API key isolation for multi-tenant deployments
-- DNS rebinding protection available for production
-- Input validation using Zod schemas
-
-For enterprise security reviews, see [Security Assessment Clarifications](./SECURITY_ASSESSMENT.md) — a 23-item checklist covering licensing, data protection, credential management, tool contamination, and AI agent execution environment verification.
-
-To report a vulnerability, see [SECURITY.md](SECURITY.md).
-
-## Roadmap
-
-### Recent Additions
-
-| Tool / Feature | What it unlocks | Status |
-|------|----------------|--------|
-| `maps_static_map` | Map images with pins/routes — multimodal AI can "see" the map | **Done** |
-| `maps_air_quality` | AQI, pollutants — health-aware travel, outdoor planning | **Done** |
-| `maps_batch_geocode` | Geocode up to 50 addresses in one call — data enrichment | **Done** |
-| `maps_search_along_route` | Find places along a route ranked by detour time — trip planning | **Done** |
-| `maps_explore_area` | One-call neighborhood overview (composite) | **Done** |
-| `maps_plan_route` | Optimized multi-stop itinerary (composite) | **Done** |
-| `maps_compare_places` | Side-by-side place comparison (composite) | **Done** |
-| `maps_local_rank_tracker` | Geographic grid rank tracking — local SEO analysis (composite) | **Done** |
-| `GOOGLE_MAPS_ENABLED_TOOLS` | Filter tools to reduce context usage | **Done** |
-
-### Planned
-
-| Feature | What it unlocks | Status |
-|---------|----------------|--------|
-| `maps_place_photo` | Place photos for multimodal AI — "see" the restaurant ambiance | Planned |
-| Language parameter | Multi-language responses (ISO 639-1) across all tools | Planned |
-| MCP Prompt Templates | `/travel-planner`, `/neighborhood-scout` slash commands in Claude Desktop | Planned |
-| Geo-Reasoning Benchmark | 10-scenario test suite measuring LLM geospatial reasoning accuracy | Research |
-
-### Use Cases We're Building Toward
-
-These are the real-world scenarios driving our tool decisions:
-
-- **Travel planning** — "Plan a day trip in Tokyo" (geocode → search → directions → weather)
-- **Real estate analysis** — "Analyze this neighborhood: schools, commute, flood risk" (search-nearby × N + elevation + distance-matrix)
-- **Logistics optimization** — "Route these 12 deliveries efficiently from the warehouse" (plan-route)
-- **Field sales** — "Visit 6 clients in Chicago, minimize drive time, find lunch spots" (plan-route + search-nearby)
-- **Disaster response** — "Nearest open hospitals? Am I in a flood zone?" (search-nearby + elevation)
-- **Content creation** — "Top 5 neighborhoods in Austin with restaurant density and airport distance" (explore-area + distance-matrix)
-- **Accessibility** — "Wheelchair-accessible restaurants, avoid steep routes" (search-nearby + place-details + elevation)
-- **Local SEO** — "Audit my restaurant's ranking vs competitors within 1km" (search-places + compare-places + explore-area)
-
-## Changelog
-
-See [CHANGELOG.md](./CHANGELOG.md) for version history.
+Thanks to [@junyinnnn](https://github.com/junyinnnn) for helping add Streamable HTTP support.
 
 ## License
 
-MIT
-
-## Contributing
-
-Community participation and contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding guidelines, and the pull request process.
-
-- Submit Issues: Report bugs or provide suggestions
-- Create Pull Requests: Submit code improvements
-- Documentation: Help improve documentation
-
-## Contact
-
-- Email: [reahtuoo310109@gmail.com](mailto:reahtuoo310109@gmail.com)
-- GitHub: [CabLate](https://github.com/cablate/)
-
-## Star History
-
-<a href="https://glama.ai/mcp/servers/@cablate/mcp-google-map">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@cablate/mcp-google-map/badge" alt="Google Map Server MCP server" />
-</a>
-
-[![Star History Chart](https://star-history.dera.page/svg?repos=cablate/mcp-google-map&type=Date)](https://star-history.dera.page/#cablate/mcp-google-map&Date)
+[MIT](./LICENSE)
