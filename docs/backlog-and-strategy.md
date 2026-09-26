@@ -13,7 +13,7 @@ This is a current maintenance and product roadmap, not a release-status ledger. 
 
 - Keep Google Maps content display guidance aligned with the [Places API policies](https://developers.google.com/maps/documentation/places/web-service/policies), particularly attribution for reviews/photos, AI-summary disclosures, source links, and storage limits. The package is a data/tool layer; downstream applications still own their rendered UI, terms, and privacy notices.
 - Triage production dependency advisories by affected path and exploit preconditions, then update compatible versions and verify build, tests, and live API behavior. An audit count alone is not proof of an exploitable path.
-- Keep the packaged Agent Skill synchronized with its source using `python3 scripts/package-skill.py --check` in CI. Update its tool map and API reference whenever tools change.
+- Keep all packaged Agent Skills and shared references synchronized with source tools using `python3 scripts/validate-skills.py` in CI. Update the relevant workflow Skill and API reference whenever tools change.
 
 ## Deferred ideas
 

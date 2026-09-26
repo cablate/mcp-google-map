@@ -16,8 +16,8 @@
 | 3 | `src/cli.ts` | EXEC_TOOLS 列表 + switch case |
 | 4 | `tests/smoke.test.ts` | expectedTools 陣列 + tool count assertions |
 | 5 | `README.md` | tool 數量（header、vs Grounding Lite 表、Server Info、exec mode）+ Available Tools 表格 + Project Structure |
-| 6 | `skills/google-maps/SKILL.md` | Tool Map 表格 |
-| 7 | `skills/google-maps/references/tools-api.md` | 參數文件 + chaining patterns |
+| 6 | `skills/*/SKILL.md` | 對應使用者目標、工具選擇與 Skill 邊界 |
+| 7 | `skills/google-maps/references/tools-api.md` | 參數文件 + chaining patterns；專用流程同步更新其 Skill reference |
 | 8 | `server.json` | description（如有提到 tool 數量） |
 | 9 | `package.json` | description（如有提到 tool 數量） |
 

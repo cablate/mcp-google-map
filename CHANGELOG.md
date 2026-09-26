@@ -105,6 +105,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Split the Skill-only plugin into focused general maps, travel planning, and local SEO Skills with shared setup and attribution guidance.
+- Add a non-billable `doctor` readiness check and opt-in `doctor --live` checks for Geocoding, Places API (New), and Routes API.
+
 ## [0.0.48]
 
 - feat: batch keyword scanning for local rank tracker (#68)

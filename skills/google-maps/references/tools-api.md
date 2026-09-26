@@ -156,7 +156,7 @@ Response includes (when available from Google):
 | `reviews[].author_uri`, `author_photo_uri`, `google_maps_uri` | string | Author profile/avatar and individual review source |
 | `photos[].author_attributions`, `google_maps_uri` | object[], string | Photo credits and individual photo source, returned with `maxPhotos > 0` |
 
-Before showing reviews, photos, or AI summaries to end users, read [`content-attribution.md`](./content-attribution.md). The old legacy-review merge was removed because it could not supply a per-review Google Maps source link; reviews now come from Places API (New) only.
+Before showing reviews, photos, or AI summaries to end users, read [`content-attribution.md`](../../_shared/content-attribution.md). The old legacy-review merge was removed because it could not supply a per-review Google Maps source link; reviews now come from Places API (New) only.
 
 ---
 
@@ -494,7 +494,7 @@ Use these recipes when the user's question maps to a multi-step workflow. Think 
 
 This is the most common complex scenario. The goal is a time-ordered itinerary with routes between stops.
 
-> **Read `references/travel-planning.md` first** — it contains the full methodology, anti-patterns, and time budget guidelines.
+> This workflow belongs to the `google-maps-travel-planning` Skill. Read its `references/travel-planning.md` before planning an itinerary.
 
 **Steps:**
 1. `maps_search_places` — Search "top attractions in {city}" → geographically diverse **anchor points**

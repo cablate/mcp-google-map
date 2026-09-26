@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mcp-google-map",
   "version": "0.0.64",
-  "description": "Use Google Maps-backed place search, routing, geocoding, weather, air quality, and geographic analysis through a standalone CLI.",
+  "description": "Use focused Skills for Google Maps place research, travel planning, and local SEO through a standalone CLI.",
   "author": {
     "name": "CabLate",
     "url": "https://github.com/cablate"

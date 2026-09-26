@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 interface PluginManifest {
@@ -41,6 +41,22 @@ test("plugin package is Skill-only and versioned with the npm package", () => {
   assert.equal("mcpServers" in codexManifest, false);
   assert.ok(packageJson.files.includes("plugin.json"));
   assert.ok(packageJson.files.includes(".codex-plugin"));
+});
+
+test("plugin exposes three focused Skills with shared diagnostics", () => {
+  const skillNames = ["google-maps", "google-maps-travel-planning", "google-maps-local-seo"];
+
+  for (const skillName of skillNames) {
+    const skillUrl = new URL(`../skills/${skillName}/SKILL.md`, import.meta.url);
+    assert.equal(existsSync(skillUrl), true, `${skillName} entrypoint exists`);
+    const contents = readFileSync(skillUrl, "utf8");
+    assert.match(contents, new RegExp(`^name: ${skillName}$`, "m"));
+    assert.match(contents, /\.\.\/_shared\/setup-and-diagnostics\.md/);
+  }
+
+  assert.equal(existsSync(new URL("../skills/_shared/SKILL.md", import.meta.url)), false);
+  assert.equal(existsSync(new URL("../skills/_shared/setup-and-diagnostics.md", import.meta.url)), true);
+  assert.equal(existsSync(new URL("../skills/_shared/content-attribution.md", import.meta.url)), true);
 });
 
 test("CabLate marketplace installs the published npm plugin", () => {

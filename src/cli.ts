@@ -116,6 +116,21 @@ interface ExecStreams {
 
 type ExecToolRunner = (toolName: string, params: any, apiKey: string) => Promise<unknown>;
 
+export type DoctorCheck = {
+  name: string;
+  status: "pass" | "fail" | "skip";
+  detail: string;
+};
+
+export type DoctorReport = {
+  success: boolean;
+  version: string;
+  live: boolean;
+  checks: DoctorCheck[];
+};
+
+type DoctorToolRunner = (toolName: string, params: any, apiKey: string) => Promise<unknown>;
+
 function isExecFailureResponse(result: unknown): result is ExecFailureResponse {
   return (
     typeof result === "object" &&
@@ -297,6 +312,98 @@ export async function runExecCommand(
   }
 }
 
+/**
+ * Check whether the standalone CLI is ready for Skill-driven use. Local mode
+ * performs no Google API requests. Live mode makes three small requests so it
+ * can distinguish Geocoding, Places (New), and Routes API availability.
+ */
+export async function runDoctor(
+  packageVersion: string,
+  apiKey: string | undefined,
+  live = false,
+  runner: DoctorToolRunner = execTool
+): Promise<DoctorReport> {
+  const nodeMajor = Number.parseInt(process.versions.node.split(".")[0] ?? "0", 10);
+  const checks: DoctorCheck[] = [
+    {
+      name: "node",
+      status: nodeMajor >= 18 ? "pass" : "fail",
+      detail: `Node.js ${process.versions.node} detected; version 18 or newer is required.`,
+    },
+    {
+      name: "package",
+      status: packageVersion !== "0.0.0" ? "pass" : "fail",
+      detail:
+        packageVersion !== "0.0.0"
+          ? `@cablate/mcp-google-map ${packageVersion} is available.`
+          : "Could not read the installed package version.",
+    },
+    {
+      name: "api-key",
+      status: apiKey ? "pass" : "fail",
+      detail: apiKey
+        ? "GOOGLE_MAPS_API_KEY is configured (value hidden)."
+        : "GOOGLE_MAPS_API_KEY is not configured. Set it in the environment before making API calls.",
+    },
+  ];
+
+  if (!live) {
+    checks.push({
+      name: "live-api",
+      status: "skip",
+      detail: "Live API checks were not requested; no Google Maps API calls were made.",
+    });
+  } else if (!apiKey) {
+    checks.push({
+      name: "live-api",
+      status: "skip",
+      detail: "Live API checks require GOOGLE_MAPS_API_KEY.",
+    });
+  } else {
+    const liveChecks = [
+      { name: "geocoding-api", tool: "geocode", params: { address: "Tokyo Tower" } },
+      { name: "places-api-new", tool: "search-places", params: { query: "Tokyo Tower" } },
+      {
+        name: "routes-api",
+        tool: "directions",
+        params: { origin: "Tokyo Tower", destination: "Tokyo Station", mode: "walking" },
+      },
+    ];
+
+    for (const check of liveChecks) {
+      try {
+        const result = await runner(check.tool, check.params, apiKey);
+        if (isExecFailureResponse(result)) {
+          checks.push({
+            name: check.name,
+            status: "fail",
+            detail: getExecFailureMessage(check.tool, result),
+          });
+        } else {
+          checks.push({
+            name: check.name,
+            status: "pass",
+            detail: `${check.name} request succeeded.`,
+          });
+        }
+      } catch (error: unknown) {
+        checks.push({
+          name: check.name,
+          status: "fail",
+          detail: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  }
+
+  return {
+    success: checks.every((check) => check.status !== "fail"),
+    version: packageVersion,
+    live,
+    checks,
+  };
+}
+
 // --------------- Entry Point ---------------
 
 // Check if this script is being run directly
@@ -320,6 +427,32 @@ if (isRunDirectly || isMainModule) {
   }
 
   yargs(hideBin(process.argv))
+    .command(
+      "doctor",
+      "Check standalone CLI readiness without starting an MCP server",
+      (yargs) =>
+        yargs
+          .option("live", {
+            type: "boolean",
+            default: false,
+            description: "Make billable test requests to Geocoding, Places (New), and Routes APIs",
+          })
+          .option("apikey", {
+            alias: "k",
+            type: "string",
+            description: "Google Maps API key (prefer GOOGLE_MAPS_API_KEY to avoid shell history exposure)",
+            default: process.env.GOOGLE_MAPS_API_KEY,
+          })
+          .example([
+            ["$0 doctor", "Check local runtime and API key configuration without network calls"],
+            ["$0 doctor --live", "Also verify three Google Maps APIs with billable requests"],
+          ]),
+      async (argv) => {
+        const report = await runDoctor(packageVersion, argv.apikey as string | undefined, argv.live as boolean);
+        process.stdout.write(JSON.stringify(report, null, 2) + "\n");
+        process.exitCode = report.success ? 0 : 1;
+      }
+    )
     .command(
       "exec <tool> [params]",
       "Execute a tool directly and output JSON",

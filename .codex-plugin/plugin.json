@@ -1,7 +1,7 @@
 {
   "name": "mcp-google-map",
   "version": "0.0.64",
-  "description": "Use Google Maps-backed place search, routing, geocoding, weather, air quality, and geographic analysis through a standalone CLI.",
+  "description": "Use focused Skills for Google Maps place research, travel planning, and local SEO through a standalone CLI.",
   "author": {
     "name": "CabLate",
     "url": "https://github.com/cablate"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Google Maps CLI",
-    "shortDescription": "Geospatial research and planning through a standalone CLI.",
-    "longDescription": "Guide an AI agent to use the @cablate/mcp-google-map exec CLI for place discovery, routing, geocoding, travel planning, local SEO, weather, air quality, and other geographic workflows. No MCP connection is required.",
+    "shortDescription": "Focused maps, travel planning, and local SEO workflows through a standalone CLI.",
+    "longDescription": "Three focused Skills guide an AI agent to use the @cablate/mcp-google-map CLI for general geospatial research, evidence-backed travel planning, and local SEO analysis. No MCP connection is required.",
     "developerName": "CabLate",
     "category": "Productivity",
     "capabilities": [
@@ -30,8 +30,8 @@
     "websiteURL": "https://github.com/cablate/mcp-google-map",
     "defaultPrompt": [
       "Find and compare places for my trip.",
-      "Plan an efficient route between these stops.",
-      "Research what is near this location."
+      "Plan a practical multi-day itinerary with checked routes.",
+      "Analyze this business's local Google Maps visibility."
     ]
   }
 }

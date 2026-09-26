@@ -7,7 +7,7 @@ import { PlacesSearcher } from "../src/services/PlacesSearcher.js";
 // does not start an HTTP server as a side effect.
 const originalArgv1 = process.argv[1];
 process.argv[1] = "cli-exec-unit-test";
-const { EXEC_TOOLS, execTool, runExecCommand } = await import("../src/cli.js");
+const { EXEC_TOOLS, execTool, runExecCommand, runDoctor } = await import("../src/cli.js");
 process.argv[1] = originalArgv1;
 
 interface CapturedOutput {
@@ -119,6 +119,44 @@ test("exec mode exposes all 18 short tool names", () => {
       "local-rank-tracker",
     ]
   );
+});
+
+test("doctor performs local checks without calling Google APIs", async () => {
+  let calls = 0;
+  const report = await runDoctor("1.2.3", "configured-key", false, async () => {
+    calls++;
+    return { success: true };
+  });
+
+  assert.equal(report.success, true);
+  assert.equal(report.live, false);
+  assert.equal(calls, 0);
+  assert.equal(report.checks.find((check) => check.name === "api-key")?.status, "pass");
+  assert.equal(report.checks.find((check) => check.name === "live-api")?.status, "skip");
+});
+
+test("doctor fails safely when the API key is missing", async () => {
+  const report = await runDoctor("1.2.3", undefined, false);
+
+  assert.equal(report.success, false);
+  assert.equal(report.checks.find((check) => check.name === "api-key")?.status, "fail");
+  assert.equal(JSON.stringify(report).includes("configured-key"), false);
+});
+
+test("doctor live mode checks geocoding, places, and routes independently", async () => {
+  const calledTools: string[] = [];
+  const report = await runDoctor("1.2.3", "secret-key", true, async (toolName) => {
+    calledTools.push(toolName);
+    if (toolName === "search-places") return { success: false, error: "Places API (New) is disabled" };
+    return { success: true };
+  });
+
+  assert.deepEqual(calledTools, ["geocode", "search-places", "directions"]);
+  assert.equal(report.success, false);
+  assert.equal(report.checks.find((check) => check.name === "geocoding-api")?.status, "pass");
+  assert.equal(report.checks.find((check) => check.name === "places-api-new")?.status, "fail");
+  assert.equal(report.checks.find((check) => check.name === "routes-api")?.status, "pass");
+  assert.equal(JSON.stringify(report).includes("secret-key"), false);
 });
 
 test("execTool maps short and MCP geocode aliases to the same service", async () => {
