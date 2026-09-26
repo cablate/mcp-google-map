@@ -89,6 +89,17 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 
 ## 安裝
 
+### Codex Plugin（Agent Skill，不需要 MCP）
+
+先加入 CabLate marketplace，再安裝只包含 Skill 的 plugin：
+
+```bash
+codex plugin marketplace add cablate/mcp-google-map --ref main
+codex plugin add mcp-google-map@cablate
+```
+
+請在 Codex 可讀取的環境中設定 `GOOGLE_MAPS_API_KEY`，並確認已安裝 Node.js 18+ 與 `npx`，然後開啟新對話。Plugin 會教代理直接執行 `npx -y @cablate/mcp-google-map exec ...`；它不會註冊或啟動 MCP server。下方的 MCP 設定仍是另一種獨立使用方式。
+
 ### 方法一：stdio（大多數客戶端推薦）
 
 適用於 Claude Desktop、Cursor、VS Code 及任何支援 stdio 的 MCP 客戶端：
@@ -287,20 +298,18 @@ src/
 tests/
 └── smoke.test.ts                 # Smoke + E2E 測試套件
 skills/
-├── google-maps/                  # Agent Skill — 如何使用工具
+└── google-maps/                  # 公開 Agent Skill — 獨立 CLI 工作流程
 │   ├── SKILL.md                  # 工具對照表、場景食譜、呼叫方式
 │   ├── SKILL.skill               # 可匯入的 Skill 封裝檔
 │   └── references/
 │       ├── tools-api.md          # 工具參數 + 場景食譜
 │       ├── travel-planning.md    # 旅行規劃方法論
 │       └── local-seo.md          # Local SEO / Google 商家排名分析
-└── project-docs/                 # Project Skill — 如何開發/維護
-    ├── SKILL.md                  # 架構概覽 + 入門指南
-    └── references/
-        ├── architecture.md       # 系統設計、code map、9 檔案 checklist
-        ├── google-maps-api-guide.md  # API 端點、定價、注意事項
-        ├── geo-domain-knowledge.md   # GIS 基礎、日本場景
-        └── decisions.md          # 10 個 ADR（設計決策 + 理由）
+.agents/
+├── plugins/marketplace.json      # CabLate marketplace 目錄
+└── skills/project-docs/          # 僅供維護者使用的開發 Skill
+.codex-plugin/plugin.json         # Codex 相容 manifest
+plugin.json                       # 可攜式 Agent Plugin manifest
 ```
 
 ## 技術棧

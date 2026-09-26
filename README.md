@@ -89,6 +89,17 @@ All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` �
 
 ## Installation
 
+### Codex Plugin (Agent Skill, no MCP required)
+
+Install the CabLate marketplace, then install the Skill-only plugin:
+
+```bash
+codex plugin marketplace add cablate/mcp-google-map --ref main
+codex plugin add mcp-google-map@cablate
+```
+
+Set `GOOGLE_MAPS_API_KEY` in the environment available to Codex, make sure Node.js 18+ and `npx` are installed, then start a new conversation. The plugin teaches the agent to run `npx -y @cablate/mcp-google-map exec ...` directly. It does not register or start an MCP server; the MCP setup below remains an independent option.
+
 ### Method 1: stdio (Recommended for most clients)
 
 Works with Claude Desktop, Cursor, VS Code, and any MCP client that supports stdio:
@@ -290,20 +301,18 @@ src/
 tests/
 └── smoke.test.ts                 # Smoke + E2E test suite
 skills/
-├── google-maps/                  # Agent Skill — how to USE the tools
+└── google-maps/                  # Public Agent Skill — standalone CLI workflows
 │   ├── SKILL.md                  # Tool map, recipes, invocation
 │   ├── SKILL.skill               # Importable archive of this Skill
 │   └── references/
 │       ├── tools-api.md          # Tool parameters + scenario recipes
 │       ├── travel-planning.md    # Travel planning methodology
 │       └── local-seo.md          # Local SEO / Google Business Profile ranking analysis
-└── project-docs/                 # Project Skill — how to DEVELOP/MAINTAIN
-    ├── SKILL.md                  # Architecture overview + onboarding
-    └── references/
-        ├── architecture.md       # System design, code map, 9-file checklist
-        ├── google-maps-api-guide.md  # API endpoints, pricing, gotchas
-        ├── geo-domain-knowledge.md   # GIS fundamentals, Japan context
-        └── decisions.md          # 10 ADRs (design decisions + rationale)
+.agents/
+├── plugins/marketplace.json      # CabLate marketplace catalog
+└── skills/project-docs/          # Maintainer-only development Skill
+.codex-plugin/plugin.json         # Codex compatibility manifest
+plugin.json                       # Portable Agent Plugin manifest
 ```
 
 ## Tech Stack

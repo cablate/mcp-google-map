@@ -111,5 +111,3 @@ npx -y @cablate/mcp-google-map exec <tool> '<json_params>'
 | `references/travel-planning.md` | Travel planning methodology — 6-layer model, Search Along Route, anti-patterns | When planning multi-day trips — **read before Recipe 1** |
 | `references/local-seo.md` | Local SEO / Google Business Profile ranking analysis — competitor audit, keyword landscape, gap analysis | When analyzing business rankings, comparing competitors, or scouting locations |
 | `references/content-attribution.md` | Google Maps content attribution, source links, AI disclosure, and storage limits | Before presenting reviews, photos, or AI summaries from Places |
-
-> For **project development** knowledge (architecture, API guide, GIS domain, design decisions), see `skills/project-docs/SKILL.md`.

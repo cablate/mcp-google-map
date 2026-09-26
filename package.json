@@ -12,6 +12,8 @@
     "dist",
     "dist/**/*.map",
     "README.md",
+    "plugin.json",
+    ".codex-plugin",
     "skills",
     "examples"
   ],

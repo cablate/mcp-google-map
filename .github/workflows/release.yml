@@ -65,7 +65,11 @@ jobs:
           git pull --rebase
 
       - name: Bump version
-        run: npm version patch --no-git-tag-version
+        run: |
+          npm version patch --no-git-tag-version
+          VERSION=$(node -p "require('./package.json').version")
+          jq --arg v "$VERSION" '.version = $v' plugin.json > plugin.tmp && mv plugin.tmp plugin.json
+          jq --arg v "$VERSION" '.version = $v' .codex-plugin/plugin.json > plugin.tmp && mv plugin.tmp .codex-plugin/plugin.json
 
       - name: Update CHANGELOG
         run: |
@@ -161,7 +165,7 @@ jobs:
       - name: Commit version bump & tag
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          git add package.json package-lock.json CHANGELOG.md server.json
+          git add package.json package-lock.json CHANGELOG.md server.json plugin.json .codex-plugin/plugin.json
           git commit -m "chore: release v${VERSION}"
           git tag "v${VERSION}"
           git pull --rebase

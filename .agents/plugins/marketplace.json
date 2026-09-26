@@ -1,0 +1,22 @@
+{
+  "name": "cablate",
+  "interface": {
+    "displayName": "CabLate Plugins"
+  },
+  "plugins": [
+    {
+      "name": "mcp-google-map",
+      "source": {
+        "source": "npm",
+        "package": "@cablate/mcp-google-map",
+        "version": "latest",
+        "registry": "https://registry.npmjs.org"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
