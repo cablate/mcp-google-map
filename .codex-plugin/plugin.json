@@ -1,6 +1,6 @@
 {
   "name": "mcp-google-map",
-  "version": "0.0.67",
+  "version": "0.0.68",
   "description": "Use Google Maps for place research, travel planning, and local SEO through focused Skills and a standalone CLI—no MCP setup required.",
   "author": {
     "name": "CabLate",

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.68
+
+- docs: reposition project README (#100)
+
+
 ## 0.0.67
 
 - docs: clarify plugin setup and runtime (#99)
