@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.65
+
+- feat: split plugin into focused map skills (#98)
+
+
 ## 0.0.64
 
 - feat: package CLI skill as installable plugin (#97)
