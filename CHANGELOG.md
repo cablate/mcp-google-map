@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.67
+
+- docs: clarify plugin setup and runtime (#99)
+
+
 ## 0.0.66
 
 - docs: clarify Codex Plugin installation, runtime loading, diagnostics, and MCP alternatives
