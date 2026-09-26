@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.69
+
+- feat: package Claude Code plugin (#101)
+
+
 ## 0.0.68
 
 - docs: reposition project README (#100)
