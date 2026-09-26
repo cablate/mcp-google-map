@@ -1,3 +1,13 @@
+# MCP Google Maps
+
+讓 AI 代理可靠地取得 Google Maps 地點搜尋、地址解析、路線、天氣、空氣品質與 Local SEO 資料。你可以安裝 Codex Plugin，讓代理直接呼叫 CLI；也可以透過 MCP 使用同一組 18 個工具。
+
+<p align="center"><a href="./README.md">English</a> | <b>繁體中文</b></p>
+
+<p align="center">
+  <img src="./assets/banner.webp" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
+</p>
+
 <p align="center">
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/v/@cablate/mcp-google-map" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@cablate/mcp-google-map"><img src="https://img.shields.io/npm/dm/@cablate/mcp-google-map" alt="npm downloads"></a>
@@ -6,22 +16,45 @@
 </p>
 
 <p align="center">
-  <img src="./assets/banner.webp" alt="MCP Google Maps — AI 驅動的地理空間工具" width="800">
-</p>
-
-<h3 align="center"><b>讓你的 AI 代理理解真實世界 —<br>地理編碼、路線規劃、地點搜尋、空間推理。</b></h3>
-
-<p align="center">
-  <a href="./README.md">English</a> | <b>繁體中文</b>
-</p>
-
-<p align="center">
   <img src="./assets/demo-grid-zh.png" alt="旅行規劃展示 — 京都二日遊、東京戶外一日、日本五日、曼谷背包客" width="800">
 </p>
 
-- **18 個工具** — 14 個原子工具 + 4 個組合工具（explore-area、plan-route、compare-places、local-rank-tracker）
-- **3 種模式** — stdio、StreamableHTTP、獨立 exec CLI
-- **3 個 Agent Skills** — 分別處理一般地圖、旅行規劃與 Local SEO（[`skills/`](./skills/)）
+- **18 個工具** — 14 個原子工具與 4 個高階工作流程
+- **三種連接方式** — Codex Plugin、MCP stdio、Streamable HTTP
+- **三個用途明確的 Skills** — 一般地圖、旅行規劃、Local SEO
+
+## 選擇使用方式
+
+| 你的需求 | 建議方式 | 實際執行方式 |
+|---|---|---|
+| 讓 Codex 回答地圖、旅行或 Local SEO 問題，不想設定 MCP | **Codex Plugin** | 符合需求的 Skill 按需載入，並直接呼叫 CLI |
+| 在 Claude Desktop、Cursor、VS Code 或其他本機 MCP client 加入 Google Maps 工具 | **MCP stdio** | Client 啟動一個本機 MCP 程序 |
+| 提供多 session 或遠端 MCP 存取 | **Streamable HTTP** | 自架 HTTP server，端點為 `/mcp` |
+
+三種方式都需要 Node.js 18+ 與 Google Maps Platform API key。地點與路線工作流程還要先在 [Google Cloud Console](https://console.cloud.google.com) 啟用 **Places API (New)** 與 **Routes API**。實際 API 請求可能產生 Google 費用。
+
+## 最快開始：Codex Plugin
+
+```bash
+codex plugin marketplace add cablate/mcp-google-map --ref main
+codex plugin add mcp-google-map@cablate
+```
+
+在 Codex 的執行環境設定 `GOOGLE_MAPS_API_KEY`，重新開啟對話後直接提出地點問題。先用下列命令檢查本機環境，不會呼叫 Google API：
+
+```bash
+npx -y @cablate/mcp-google-map doctor
+```
+
+環境正確時，Node.js、套件與 API key 檢查會通過，`live-api` 會顯示略過。只有在你確定要送出可能計費的測試請求時，才使用 `doctor --live`。
+
+Plugin **不會**啟動或註冊 MCP server。Codex 執行時先看到三個 Skill 的名稱與描述，只有請求符合時才載入完整指令：
+
+- `google-maps` — 地點搜尋、地址解析、路線、區域與環境資訊
+- `google-maps-travel-planning` — 單日與多日旅行行程
+- `google-maps-local-seo` — 商家能見度與地理排名分析
+
+完整的非 MCP 操作步驟見 [Agent Skill 示範](./examples/agent-skill-demo.md)。
 
 ### vs Google Grounding Lite
 
@@ -42,7 +75,7 @@
 | 自架部署 | 有 | 僅 Google 託管 |
 | Agent Skill | 有 | 無 |
 
-### 快速開始
+### CLI 與 server 快速檢查
 
 ```bash
 # stdio（Claude Desktop、Cursor 等）
@@ -85,28 +118,13 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 
 所有工具標註 `readOnlyHint: true` 和 `destructiveHint: false` — MCP 客戶端可自動核准，無需使用者確認。
 
-> **前置條件**：使用地點相關工具前，請在 [Google Cloud Console](https://console.cloud.google.com) 啟用 **Places API (New)**。
+> **前置條件**：使用地點與路線相關工具前，請在 [Google Cloud Console](https://console.cloud.google.com) 啟用 **Places API (New)** 與 **Routes API**。
 
 ## 安裝
 
-### Codex Plugin（3 個 Agent Skills，不需要 MCP）
+[最快開始](#最快開始codex-plugin)已說明 Codex Plugin。只有在你確定需要 MCP 時，才選擇下列其中一種設定。
 
-先加入 CabLate marketplace，再安裝只包含 Skill 的 plugin：
-
-```bash
-codex plugin marketplace add cablate/mcp-google-map --ref main
-codex plugin add mcp-google-map@cablate
-```
-
-請在 Codex 可讀取的環境中設定 `GOOGLE_MAPS_API_KEY`，並確認已安裝 Node.js 18+ 與 `npx`，然後開啟新對話。Plugin 會探索三個用途明確的 Skills，並教代理直接執行 `npx -y @cablate/mcp-google-map exec ...`；它不會註冊或啟動 MCP server。下方的 MCP 設定仍是另一種獨立使用方式。
-
-執行階段會先看到每個 Skill 的名稱與描述，只有請求符合時才載入完整指令：
-
-- `google-maps` — 地點搜尋、地址解析、路線、區域與環境資訊
-- `google-maps-travel-planning` — 單日與多日旅行行程
-- `google-maps-local-seo` — Google 商家檔案能見度與地理排名分析
-
-### 方法一：stdio（大多數客戶端推薦）
+### MCP stdio（本機 client 推薦）
 
 適用於 Claude Desktop、Cursor、VS Code 及任何支援 stdio 的 MCP 客戶端：
 
@@ -137,7 +155,7 @@ codex plugin add mcp-google-map@cablate
 
 不設定或設為 `*` 即啟用全部 18 個工具（預設）。
 
-### 方法二：HTTP Server
+### Streamable HTTP
 
 適用於多 session 部署、per-request API key 隔離或遠端存取：
 

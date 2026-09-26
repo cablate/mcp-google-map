@@ -1,16 +1,29 @@
 # Agent Skill demo (no MCP server)
 
-This walkthrough demonstrates the two pieces separately: the plugin's Agent Skills tell an agent which geographic workflow and tool to use, and the package CLI performs the API call. It does not require an MCP client or server. Build and run the CLI from the same repository revision as the Skills so the instructions and executable stay aligned.
+This walkthrough verifies the no-MCP path end to end: the plugin's Agent Skills choose a geographic workflow, and the npm package CLI performs the API call. You do not need an MCP client or server.
 
 ## 1. Install the Skills
 
-Prefer installing the Codex plugin from the CabLate marketplace. For a manual installation, clone a chosen release tag and copy the whole `skills/` tree according to the client's instructions. Keep the three Skill folders and `_shared/` together. Installing npm alone does not register a Skill unless it is installed through the plugin marketplace.
+Install the Codex plugin from the CabLate marketplace:
 
-Check that your agent can discover `google-maps`, `google-maps-travel-planning`, and `google-maps-local-seo`, and can run shell commands. Provide a Google Maps Platform API key to the agent's environment as `GOOGLE_MAPS_API_KEY` through your normal secret-management method; never paste it into the prompt or commit it. Node.js 18+ and `npx` must be available.
+```bash
+codex plugin marketplace add cablate/mcp-google-map --ref main
+codex plugin add mcp-google-map@cablate
+```
+
+Start a new conversation after installation. For a manual installation in another Skill-compatible agent, clone a chosen release tag and copy the whole `skills/` tree according to that client's instructions. Keep the three Skill folders and `_shared/` together. Installing the npm package alone does not register a Skill.
+
+Check that your agent can discover `google-maps`, `google-maps-travel-planning`, and `google-maps-local-seo`, and can run shell commands. Provide a Google Maps Platform API key to the agent's environment as `GOOGLE_MAPS_API_KEY` through your normal secret-management method; never paste it into the prompt or commit it. Node.js 18+ and `npx` must be available. Enable Places API (New) and Routes API for workflows that use them.
 
 ## 2. Validate without an API call
 
-From the cloned repository, install and build the package, then run the local doctor:
+For a marketplace installation, run:
+
+```bash
+npx -y @cablate/mcp-google-map doctor
+```
+
+For a cloned repository, install and build the package, then run the same check against the checkout:
 
 ```bash
 npm ci
@@ -18,7 +31,7 @@ npm run build
 node dist/cli.js doctor
 ```
 
-The report should pass the Node.js, package, and API-key checks and skip `live-api`. It makes no Google API requests. To test Geocoding, Places (New), and Routes after disclosing that the calls may be billable, run `node dist/cli.js doctor --live`.
+Success means the Node.js, package, and API-key checks pass and `live-api` is skipped. This check makes no Google API requests. To test Geocoding, Places (New), and Routes, run the same command with `--live`; those calls may be billable.
 
 ## 3. Try one live request
 
