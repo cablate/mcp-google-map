@@ -3,6 +3,11 @@ node_modules/
 credentials.json
 .env
 .agents/*
+!.agents/plugins/
+!.agents/plugins/marketplace.json
+!.agents/skills/
+!.agents/skills/project-docs/
+!.agents/skills/project-docs/**
 .mcpregistry_*
 .mcp.json
 output/
