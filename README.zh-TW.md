@@ -21,7 +21,7 @@
 
 - **18 個工具** — 14 個原子工具 + 4 個組合工具（explore-area、plan-route、compare-places、local-rank-tracker）
 - **3 種模式** — stdio、StreamableHTTP、獨立 exec CLI
-- **Agent Skill** — 內建技能定義，教 AI 如何串接地理工具（[`skills/google-maps/`](./skills/google-maps/)）
+- **3 個 Agent Skills** — 分別處理一般地圖、旅行規劃與 Local SEO（[`skills/`](./skills/)）
 
 ### vs Google Grounding Lite
 
@@ -89,7 +89,7 @@ npx @cablate/mcp-google-map --port 3000 --apikey "YOUR_API_KEY"
 
 ## 安裝
 
-### Codex Plugin（Agent Skill，不需要 MCP）
+### Codex Plugin（3 個 Agent Skills，不需要 MCP）
 
 先加入 CabLate marketplace，再安裝只包含 Skill 的 plugin：
 
@@ -98,7 +98,13 @@ codex plugin marketplace add cablate/mcp-google-map --ref main
 codex plugin add mcp-google-map@cablate
 ```
 
-請在 Codex 可讀取的環境中設定 `GOOGLE_MAPS_API_KEY`，並確認已安裝 Node.js 18+ 與 `npx`，然後開啟新對話。Plugin 會教代理直接執行 `npx -y @cablate/mcp-google-map exec ...`；它不會註冊或啟動 MCP server。下方的 MCP 設定仍是另一種獨立使用方式。
+請在 Codex 可讀取的環境中設定 `GOOGLE_MAPS_API_KEY`，並確認已安裝 Node.js 18+ 與 `npx`，然後開啟新對話。Plugin 會探索三個用途明確的 Skills，並教代理直接執行 `npx -y @cablate/mcp-google-map exec ...`；它不會註冊或啟動 MCP server。下方的 MCP 設定仍是另一種獨立使用方式。
+
+執行階段會先看到每個 Skill 的名稱與描述，只有請求符合時才載入完整指令：
+
+- `google-maps` — 地點搜尋、地址解析、路線、區域與環境資訊
+- `google-maps-travel-planning` — 單日與多日旅行行程
+- `google-maps-local-seo` — Google 商家檔案能見度與地理排名分析
 
 ### 方法一：stdio（大多數客戶端推薦）
 
@@ -169,17 +175,17 @@ npx @cablate/mcp-google-map exec geocode '{"address":"台北101"}'
 npx @cablate/mcp-google-map exec search-places '{"query":"東京拉麵"}'
 ```
 
-全部 18 個工具可用：`geocode`、`reverse-geocode`、`search-nearby`、`search-places`、`place-details`、`directions`、`distance-matrix`、`elevation`、`timezone`、`weather`、`air-quality`、`static-map`、`batch-geocode-tool`、`search-along-route`、`explore-area`、`plan-route`、`compare-places`、`local-rank-tracker`。完整參數文件見 [`skills/google-maps/`](./skills/google-maps/)。
+全部 18 個工具可用：`geocode`、`reverse-geocode`、`search-nearby`、`search-places`、`place-details`、`directions`、`distance-matrix`、`elevation`、`timezone`、`weather`、`air-quality`、`static-map`、`batch-geocode-tool`、`search-along-route`、`explore-area`、`plan-route`、`compare-places`、`local-rank-tracker`。Skill 定義與完整參數文件見 [`skills/`](./skills/)。
 
 若要**不透過 MCP、只用 Agent Skill**：
 
-1. 依你的代理工具說明，將整個 [`skills/google-maps/`](./skills/google-maps/) 資料夾安裝到它的 Skills 目錄；`SKILL.md` 與 `references/` 必須放在一起。支援匯入 `.skill` 的工具也可使用隨附的 [`SKILL.skill`](./skills/google-maps/SKILL.skill)。只安裝 npm 套件不會自動把 Skill 註冊到代理工具。
+1. 依你的代理工具說明，將整個 [`skills/`](./skills/) 目錄樹安裝到它的 Skills 目錄；三個 Skill 資料夾與 `_shared/` 必須放在一起，跨 Skill 參考才會正常解析。除非透過 Plugin Marketplace 安裝，否則只安裝 npm 套件不會自動把 Skill 註冊到代理工具。
 2. 讓代理工具可使用 Node.js 18+、`npx`，並在其環境設定 `GOOGLE_MAPS_API_KEY`。建議使用環境變數；`--apikey` 可能讓金鑰出現在 shell 歷史或程序清單。
 3. 直接向代理工具提問地點問題。Skill 會引導它呼叫獨立 CLI，例如 `npx -y @cablate/mcp-google-map exec geocode '{"address":"台北101"}'`；不必啟動 MCP server 或設定 MCP client。
 
-呼叫可能計費的 API 前，可先用 `npx -y @cablate/mcp-google-map exec --help` 確認 CLI 可用。
+先執行 `npx -y @cablate/mcp-google-map doctor`，即可在不呼叫 Google API、不產生 API 費用的情況下檢查本機準備狀態。告知使用者測試請求可能產生 Google Maps Platform 費用後，可用 `doctor --live` 分別驗證 Geocoding、Places API (New) 與 Routes API。
 
-完整的非 MCP 操作步驟見 [Agent Skill 示範](./examples/agent-skill-demo.md)。若代理工具或應用程式會呈現 Places 評論、照片或 AI 摘要，請遵照[內容署名與保存指引](./skills/google-maps/references/content-attribution.md)；工具會保留來源及揭露欄位，但不會替你的介面完成署名呈現。
+完整的非 MCP 操作步驟見 [Agent Skill 示範](./examples/agent-skill-demo.md)。若代理工具或應用程式會呈現 Places 評論、照片或 AI 摘要，請遵照[內容署名與保存指引](./skills/_shared/content-attribution.md)；工具會保留來源及揭露欄位，但不會替你的介面完成署名呈現。
 
 ### 批次地理編碼
 
@@ -298,13 +304,18 @@ src/
 tests/
 └── smoke.test.ts                 # Smoke + E2E 測試套件
 skills/
-└── google-maps/                  # 公開 Agent Skill — 獨立 CLI 工作流程
-│   ├── SKILL.md                  # 工具對照表、場景食譜、呼叫方式
-│   ├── SKILL.skill               # 可匯入的 Skill 封裝檔
-│   └── references/
-│       ├── tools-api.md          # 工具參數 + 場景食譜
-│       ├── travel-planning.md    # 旅行規劃方法論
-│       └── local-seo.md          # Local SEO / Google 商家排名分析
+├── google-maps/                  # 一般地點、路線與環境資訊工作流程
+│   ├── SKILL.md
+│   └── references/tools-api.md   # 工具參數 + 一般場景食譜
+├── google-maps-travel-planning/  # 單日與多日行程工作流程
+│   ├── SKILL.md
+│   └── references/travel-planning.md
+├── google-maps-local-seo/        # 商家能見度與地理排名工作流程
+│   ├── SKILL.md
+│   └── references/local-seo.md
+└── _shared/                      # 三個 Skills 按需載入的共用資源
+    ├── setup-and-diagnostics.md
+    └── content-attribution.md
 .agents/
 ├── plugins/marketplace.json      # CabLate marketplace 目錄
 └── skills/project-docs/          # 僅供維護者使用的開發 Skill

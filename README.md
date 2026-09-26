@@ -21,7 +21,7 @@
 
 - **18 tools** — 14 atomic + 4 composite (explore-area, plan-route, compare-places, local-rank-tracker)
 - **3 modes** — stdio, StreamableHTTP, standalone exec CLI
-- **Agent Skill** — built-in skill definition teaches AI how to chain geo tools ([`skills/google-maps/`](./skills/google-maps/))
+- **3 Agent Skills** — focused workflows for general maps, travel planning, and local SEO ([`skills/`](./skills/))
 
 ### vs Google Grounding Lite
 
@@ -89,7 +89,7 @@ All tools are annotated with `readOnlyHint: true` and `destructiveHint: false` �
 
 ## Installation
 
-### Codex Plugin (Agent Skill, no MCP required)
+### Codex Plugin (3 Agent Skills, no MCP required)
 
 Install the CabLate marketplace, then install the Skill-only plugin:
 
@@ -98,7 +98,13 @@ codex plugin marketplace add cablate/mcp-google-map --ref main
 codex plugin add mcp-google-map@cablate
 ```
 
-Set `GOOGLE_MAPS_API_KEY` in the environment available to Codex, make sure Node.js 18+ and `npx` are installed, then start a new conversation. The plugin teaches the agent to run `npx -y @cablate/mcp-google-map exec ...` directly. It does not register or start an MCP server; the MCP setup below remains an independent option.
+Set `GOOGLE_MAPS_API_KEY` in the environment available to Codex, make sure Node.js 18+ and `npx` are installed, then start a new conversation. The plugin discovers three focused Skills and teaches the agent to run `npx -y @cablate/mcp-google-map exec ...` directly. It does not register or start an MCP server; the MCP setup below remains an independent option.
+
+At runtime, Codex sees the name and description of each Skill and loads the full instructions only when the request matches:
+
+- `google-maps` — place search, geocoding, routes, neighborhood and environmental facts
+- `google-maps-travel-planning` — day trips and multi-day itineraries
+- `google-maps-local-seo` — Google Business Profile visibility and geographic rank analysis
 
 ### Method 1: stdio (Recommended for most clients)
 
@@ -169,17 +175,17 @@ npx @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'
 npx @cablate/mcp-google-map exec search-places '{"query":"ramen in Tokyo"}'
 ```
 
-All 18 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `batch-geocode-tool`, `search-along-route`, `explore-area`, `plan-route`, `compare-places`, `local-rank-tracker`. See [`skills/google-maps/`](./skills/google-maps/) for the agent skill definition and full parameter docs.
+All 18 tools available: `geocode`, `reverse-geocode`, `search-nearby`, `search-places`, `place-details`, `directions`, `distance-matrix`, `elevation`, `timezone`, `weather`, `air-quality`, `static-map`, `batch-geocode-tool`, `search-along-route`, `explore-area`, `plan-route`, `compare-places`, `local-rank-tracker`. See [`skills/`](./skills/) for the Skill definitions and full parameter docs.
 
 To use the **Agent Skill without MCP**:
 
-1. Install the entire [`skills/google-maps/`](./skills/google-maps/) folder in your agent's Skills directory, following that client's instructions. Keep `SKILL.md` and `references/` together. Clients that support `.skill` imports can use the bundled [`SKILL.skill`](./skills/google-maps/SKILL.skill) archive instead. Installing the npm package alone does not register a Skill with an agent.
+1. Install the entire [`skills/`](./skills/) tree in your agent's Skills directory, following that client's instructions. Keep all three Skill folders and `_shared/` together so cross-Skill references continue to resolve. Installing the npm package alone does not register a Skill unless the package is installed through its plugin marketplace.
 2. Make Node.js 18+ and `npx` available to the agent, and set `GOOGLE_MAPS_API_KEY` in its environment. Prefer the environment variable to `--apikey`, which can expose a key in shell history or process listings.
 3. Ask the agent a location question. The Skill guides it to call the standalone CLI, for example `npx -y @cablate/mcp-google-map exec geocode '{"address":"Tokyo Tower"}'`. No MCP server or MCP client configuration is needed.
 
-You can verify the CLI is available with `npx -y @cablate/mcp-google-map exec --help` before making a billable API call.
+Run `npx -y @cablate/mcp-google-map doctor` for a non-billable local readiness check. After informing the user that test requests may incur Google Maps Platform charges, `doctor --live` can verify Geocoding, Places API (New), and Routes API independently.
 
-For a reproducible no-MCP walkthrough, see the [Agent Skill demo](./examples/agent-skill-demo.md). If your agent or app displays Places reviews, photos, or AI summaries, follow the [content attribution and storage guidance](./skills/google-maps/references/content-attribution.md); the tool preserves source/disclosure metadata but does not render a compliant UI for you.
+For a reproducible no-MCP walkthrough, see the [Agent Skill demo](./examples/agent-skill-demo.md). If your agent or app displays Places reviews, photos, or AI summaries, follow the [content attribution and storage guidance](./skills/_shared/content-attribution.md); the tool preserves source/disclosure metadata but does not render a compliant UI for you.
 
 ### Batch Geocode
 
@@ -301,13 +307,18 @@ src/
 tests/
 └── smoke.test.ts                 # Smoke + E2E test suite
 skills/
-└── google-maps/                  # Public Agent Skill — standalone CLI workflows
-│   ├── SKILL.md                  # Tool map, recipes, invocation
-│   ├── SKILL.skill               # Importable archive of this Skill
-│   └── references/
-│       ├── tools-api.md          # Tool parameters + scenario recipes
-│       ├── travel-planning.md    # Travel planning methodology
-│       └── local-seo.md          # Local SEO / Google Business Profile ranking analysis
+├── google-maps/                  # General place, route, and environment workflow
+│   ├── SKILL.md
+│   └── references/tools-api.md   # Tool parameters + generic recipes
+├── google-maps-travel-planning/  # Day-trip and itinerary workflow
+│   ├── SKILL.md
+│   └── references/travel-planning.md
+├── google-maps-local-seo/        # Business visibility and grid-rank workflow
+│   ├── SKILL.md
+│   └── references/local-seo.md
+└── _shared/                      # On-demand resources used by all three Skills
+    ├── setup-and-diagnostics.md
+    └── content-attribution.md
 .agents/
 ├── plugins/marketplace.json      # CabLate marketplace catalog
 └── skills/project-docs/          # Maintainer-only development Skill
