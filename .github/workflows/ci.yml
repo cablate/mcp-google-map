@@ -20,6 +20,25 @@ jobs:
       - run: npm run format:check
       - run: npm run test:unit
 
+      - name: Package Claude plugin
+        run: npm run package:claude-plugin
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate Claude plugin
+        run: |
+          npx -y @anthropic-ai/claude-code@2.1.283 plugin validate artifacts/claude-plugin/mcp-google-map --strict
+          npx -y @anthropic-ai/claude-code@2.1.283 plugin validate . --strict
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claude-plugin
+          path: |
+            artifacts/claude-plugin/*.zip
+            artifacts/claude-plugin/*.sha256
+
       - name: Smoke Test
         run: npm test
         env:

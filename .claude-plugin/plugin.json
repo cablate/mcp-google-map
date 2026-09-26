@@ -1,0 +1,11 @@
+{
+  "name": "mcp-google-map",
+  "displayName": "Google Maps CLI",
+  "version": "0.0.68",
+  "description": "Google Maps place research, travel planning, and local SEO through three focused Skills and a standalone CLI.",
+  "author": { "name": "CabLate", "url": "https://github.com/cablate" },
+  "homepage": "https://github.com/cablate/mcp-google-map",
+  "repository": "https://github.com/cablate/mcp-google-map",
+  "license": "MIT",
+  "keywords": ["google-maps", "places", "routing", "travel-planning", "local-seo"]
+}

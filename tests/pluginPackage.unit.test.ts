@@ -23,6 +23,15 @@ interface Marketplace {
   }>;
 }
 
+interface ClaudeMarketplace {
+  name: string;
+  owner: { name: string };
+  plugins: Array<{
+    name: string;
+    source: Record<string, string>;
+  }>;
+}
+
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), "utf8")) as T;
 }
@@ -31,16 +40,35 @@ test("plugin package is Skill-only and versioned with the npm package", () => {
   const packageJson = readJson<PackageManifest>("package.json");
   const portableManifest = readJson<PluginManifest>("plugin.json");
   const codexManifest = readJson<PluginManifest>(".codex-plugin/plugin.json");
+  const claudeManifest = readJson<PluginManifest>(".claude-plugin/plugin.json");
 
   assert.equal(portableManifest.name, "mcp-google-map");
   assert.equal(codexManifest.name, portableManifest.name);
+  assert.equal(claudeManifest.name, portableManifest.name);
   assert.equal(portableManifest.version, packageJson.version);
   assert.equal(codexManifest.version, packageJson.version);
+  assert.equal(claudeManifest.version, packageJson.version);
   assert.equal(codexManifest.skills, "./skills/");
   assert.equal("mcpServers" in portableManifest, false);
   assert.equal("mcpServers" in codexManifest, false);
   assert.ok(packageJson.files.includes("plugin.json"));
   assert.ok(packageJson.files.includes(".codex-plugin"));
+  assert.ok(packageJson.files.includes(".claude-plugin"));
+});
+
+test("Claude marketplace installs the published npm plugin", () => {
+  const marketplace = readJson<ClaudeMarketplace>(".claude-plugin/marketplace.json");
+  const [plugin] = marketplace.plugins;
+
+  assert.equal(marketplace.name, "cablate-maps");
+  assert.equal(marketplace.owner.name, "CabLate");
+  assert.equal(plugin.name, "mcp-google-map");
+  assert.deepEqual(plugin.source, {
+    source: "npm",
+    package: "@cablate/mcp-google-map",
+    version: "latest",
+    registry: "https://registry.npmjs.org",
+  });
 });
 
 test("plugin exposes three focused Skills with shared diagnostics", () => {

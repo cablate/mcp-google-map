@@ -4,7 +4,7 @@
 
 `@cablate/mcp-google-map` turns Google Maps Platform into 18 read-only agent tools and three focused Skills. An agent can find real places, verify routes, compare options, build practical itineraries, or audit local search visibility—through MCP or a standalone CLI.
 
-You choose the integration model: Codex Plugin when you want Skills without MCP setup, stdio for desktop MCP clients, or Streamable HTTP for shared and remote deployments.
+You choose the integration model: Codex or Claude Code Plugin when you want Skills without MCP setup, stdio for desktop MCP clients, or Streamable HTTP for shared and remote deployments.
 
 <p align="center"><b>English</b> · <a href="./README.zh-TW.md">繁體中文</a></p>
 
@@ -47,6 +47,7 @@ These are data and planning tools, not guarantees of safety, accessibility, open
 | Use | Best for | What runs |
 |---|---|---|
 | **Codex Plugin** | Asking Codex map, travel, or local SEO questions without MCP configuration | A matching Skill loads on demand and calls the standalone CLI |
+| **Claude Code Plugin** | Installing the same three Skills from a Claude marketplace | Skills are namespaced under `mcp-google-map` and call the standalone CLI |
 | **Standalone CLI** | Scripts, automation, and other Skill-compatible agents | One stateless command returns JSON |
 | **MCP stdio** | Claude Desktop, Cursor, VS Code, and other local MCP clients | The client starts a local MCP process |
 | **Streamable HTTP** | Multi-session, containerized, LAN, or remote access | A self-hosted server exposes `/mcp` |
@@ -73,6 +74,17 @@ Try asking:
 > Plan a practical two-day Kyoto itinerary. Group nearby places, check travel times, and explain any opening-hour assumptions.
 
 Codex selects `google-maps` for general location research, `google-maps-travel-planning` for itineraries, or `google-maps-local-seo` for business visibility analysis. The plugin does not register or start an MCP server. See the [no-MCP walkthrough](./examples/agent-skill-demo.md) for a reproducible example.
+
+## Install in Claude Code—no MCP required
+
+```bash
+claude plugin marketplace add cablate/mcp-google-map
+claude plugin install mcp-google-map@cablate-maps
+```
+
+Start a new Claude Code session, set `GOOGLE_MAPS_API_KEY` in its environment, and run the same `doctor` check shown above. Claude exposes the installed Skills with the plugin namespace, for example `/mcp-google-map:google-maps-travel-planning`.
+
+Each GitHub release also includes a versioned `mcp-google-map-claude-plugin-v*.zip` and SHA-256 checksum for direct distribution. The release workflow builds this archive from the same `skills/` source and validates it with Claude Code's official strict validator before publishing.
 
 ## Use the standalone CLI
 

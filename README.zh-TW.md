@@ -4,7 +4,7 @@
 
 `@cablate/mcp-google-map` 將 Google Maps Platform 整理成 18 個唯讀代理工具與三個用途明確的 Skills。代理可以搜尋真實地點、驗證路線、比較選項、建立可執行的旅行計畫，或分析在地搜尋能見度；既可透過 MCP，也可直接使用獨立 CLI。
 
-整合方式由你決定：不想設定 MCP 時安裝 Codex Plugin；桌面 MCP client 使用 stdio；共享或遠端部署則使用 Streamable HTTP。
+整合方式由你決定：不想設定 MCP 時安裝 Codex 或 Claude Code Plugin；桌面 MCP client 使用 stdio；共享或遠端部署則使用 Streamable HTTP。
 
 <p align="center"><a href="./README.md">English</a> · <b>繁體中文</b></p>
 
@@ -47,6 +47,7 @@
 | 使用方式 | 適合情境 | 實際執行內容 |
 |---|---|---|
 | **Codex Plugin** | 不設定 MCP，直接讓 Codex 回答地圖、旅行或 Local SEO 問題 | 符合請求的 Skill 按需載入並呼叫獨立 CLI |
+| **Claude Code Plugin** | 從 Claude marketplace 安裝相同的三個 Skills | Skills 以 `mcp-google-map` namespace 載入並呼叫獨立 CLI |
 | **獨立 CLI** | 腳本、自動化與其他支援 Skill 的代理 | 單次無狀態命令回傳 JSON |
 | **MCP stdio** | Claude Desktop、Cursor、VS Code 與其他本機 MCP clients | Client 啟動本機 MCP 程序 |
 | **Streamable HTTP** | 多 session、容器、區域網路或遠端存取 | 自架 server 暴露 `/mcp` |
@@ -73,6 +74,17 @@ npx -y @cablate/mcp-google-map doctor
 > 規劃一個實際可行的京都兩日行程。把鄰近地點排在一起、檢查交通時間，並說明營業時間有哪些假設。
 
 Codex 會依請求選擇一般地圖研究、旅行規劃或 Local SEO Skill。Plugin 不會註冊或啟動 MCP server。可參考[非 MCP 完整示範](./examples/agent-skill-demo.md)重現整個流程。
+
+## 安裝到 Claude Code，不需要 MCP
+
+```bash
+claude plugin marketplace add cablate/mcp-google-map
+claude plugin install mcp-google-map@cablate-maps
+```
+
+開啟新的 Claude Code session，在執行環境設定 `GOOGLE_MAPS_API_KEY`，再執行前述 `doctor` 檢查。Claude 會以 plugin namespace 顯示 Skills，例如 `/mcp-google-map:google-maps-travel-planning`。
+
+每個 GitHub release 也會附上版本化的 `mcp-google-map-claude-plugin-v*.zip` 與 SHA-256 checksum，供直接散布。Release workflow 從同一份 `skills/` 來源產生壓縮檔，並在發布前使用 Claude Code 官方 strict validator 驗證。
 
 ## 使用獨立 CLI
 
