@@ -12,7 +12,7 @@ npx -y @cablate/mcp-google-map doctor
 
 Interpret its JSON checks:
 
-- `node`: Node.js 18 or newer is required.
+- `node`: Node.js 22 or newer is required.
 - `package`: the npm package and CLI entrypoint were resolved.
 - `api-key`: `GOOGLE_MAPS_API_KEY` is visible to the agent process; the value stays hidden.
 - `live-api: skip`: expected during local-only diagnosis and not a failure.

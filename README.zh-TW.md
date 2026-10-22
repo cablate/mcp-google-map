@@ -52,7 +52,7 @@
 | **MCP stdio** | Claude Desktop、Cursor、VS Code 與其他本機 MCP clients | Client 啟動本機 MCP 程序 |
 | **Streamable HTTP** | 多 session、容器、區域網路或遠端存取 | 自架 server 暴露 `/mcp` |
 
-所有方式都需要 Node.js 18+ 與 Google Maps Platform API key，實際 API 呼叫可能產生費用。請啟用所選工具需要的 API；常見地點與路線流程會使用 **Places API (New)**、**Routes API**，通常也需要 **Geocoding API**。
+所有方式都需要 Node.js 22+ 與 Google Maps Platform API key，實際 API 呼叫可能產生費用。請啟用所選工具需要的 API；常見地點與路線流程會使用 **Places API (New)**、**Routes API**，通常也需要 **Geocoding API**。
 
 ## 從 Codex 開始，不需要 MCP
 
