@@ -65,6 +65,7 @@
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",
     "@googlemaps/places": "^2.1.0",
+    "@hono/node-server": "^1.19.15",
     "@modelcontextprotocol/sdk": "^1.32.0",
     "@types/yargs": "^17.0.33",
     "cross-env": "^7.0.3",
