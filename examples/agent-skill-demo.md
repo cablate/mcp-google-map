@@ -13,7 +13,7 @@ codex plugin add mcp-google-map@cablate
 
 Start a new conversation after installation. For a manual installation in another Skill-compatible agent, clone a chosen release tag and copy the whole `skills/` tree according to that client's instructions. Keep the three Skill folders and `_shared/` together. Installing the npm package alone does not register a Skill.
 
-Check that your agent can discover `google-maps`, `google-maps-travel-planning`, and `google-maps-local-seo`, and can run shell commands. Provide a Google Maps Platform API key to the agent's environment as `GOOGLE_MAPS_API_KEY` through your normal secret-management method; never paste it into the prompt or commit it. Node.js 18+ and `npx` must be available. Enable Places API (New) and Routes API for workflows that use them.
+Check that your agent can discover `google-maps`, `google-maps-travel-planning`, and `google-maps-local-seo`, and can run shell commands. Provide a Google Maps Platform API key to the agent's environment as `GOOGLE_MAPS_API_KEY` through your normal secret-management method; never paste it into the prompt or commit it. Node.js 22+ and `npx` must be available. Enable Places API (New) and Routes API for workflows that use them.
 
 ## 2. Validate without an API call
 

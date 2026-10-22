@@ -52,7 +52,7 @@ These are data and planning tools, not guarantees of safety, accessibility, open
 | **MCP stdio** | Claude Desktop, Cursor, VS Code, and other local MCP clients | The client starts a local MCP process |
 | **Streamable HTTP** | Multi-session, containerized, LAN, or remote access | A self-hosted server exposes `/mcp` |
 
-All options require Node.js 18+ and a Google Maps Platform API key. Live calls may be billable. Enable the APIs needed by your selected tools; common place and route workflows require **Places API (New)**, **Routes API**, and often **Geocoding API**.
+All options require Node.js 22+ and a Google Maps Platform API key. Live calls may be billable. Enable the APIs needed by your selected tools; common place and route workflows require **Places API (New)**, **Routes API**, and often **Geocoding API**.
 
 ## Start with Codex—no MCP required
 
